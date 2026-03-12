@@ -1,0 +1,52 @@
+{% extends 'music/base.html' %}
+{% block title %}{{ song.title }} — SoundFree.ro{% endblock %}
+{% block content %}
+<div style="padding:3rem 0;">
+  <div class="container">
+    <a href="{% url 'music:library' %}" style="color:var(--text2);text-decoration:none;font-size:0.9rem;">← Înapoi la bibliotecă</a>
+    <div style="display:flex;gap:2rem;margin-top:2rem;flex-wrap:wrap;align-items:flex-start;">
+      <div style="width:220px;height:220px;border-radius:16px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:5rem;flex-shrink:0;overflow:hidden;">
+        {% if song.cover_image %}<img src="{{ song.cover_image.url }}" style="width:100%;height:100%;object-fit:cover;">{% else %}🎵{% endif %}
+      </div>
+      <div>
+        <div style="color:var(--text3);font-size:0.8rem;margin-bottom:0.5rem;">MELODIE ROYALTY-FREE</div>
+        <h1 style="font-size:2.5rem;font-weight:800;margin-bottom:0.5rem;">{{ song.title }}</h1>
+        <div style="color:var(--text2);font-size:1.1rem;margin-bottom:1.25rem;">{{ song.artist }}</div>
+        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1.5rem;">
+          {% if song.genre %}<span class="badge" style="font-size:0.85rem;padding:4px 12px;">{{ song.genre.icon }} {{ song.genre.name }}</span>{% endif %}
+          {% if song.mood %}<span class="badge" style="font-size:0.85rem;padding:4px 12px;">{{ song.mood.name }}</span>{% endif %}
+          {% if song.bpm %}<span class="badge" style="font-size:0.85rem;padding:4px 12px;">{{ song.bpm }} BPM</span>{% endif %}
+          <span class="badge" style="font-size:0.85rem;padding:4px 12px;">{{ song.duration_display }}</span>
+        </div>
+        <div class="song-card" data-id="{{ song.id }}" style="display:inline-flex;align-items:center;gap:0.75rem;background:linear-gradient(135deg,var(--accent),var(--accent2));padding:0.875rem 1.75rem;border-radius:10px;cursor:pointer;border:none;">
+          <svg width="20" height="20" fill="#fff" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+          <span style="color:#fff;font-weight:600;">Redă melodia</span>
+        </div>
+        <div style="margin-top:1rem;font-size:0.82rem;color:var(--text3);">{{ song.plays_count }} redări</div>
+      </div>
+    </div>
+
+    {% if related %}
+    <div style="margin-top:3rem;">
+      <h2 style="font-size:1.3rem;font-weight:700;margin-bottom:1.25rem;">Melodii similare</h2>
+      <div class="grid-4">
+        {% for s in related %}
+        <a href="{% url 'music:song_detail' s.pk %}" style="text-decoration:none;">
+          <div class="song-card" data-id="{{ s.id }}">
+            <div class="cover">
+              {% if s.cover_image %}<img src="{{ s.cover_image.url }}" alt="{{ s.title }}">{% else %}🎵{% endif %}
+              <div class="play-overlay"><svg fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
+            </div>
+            <div class="info">
+              <div class="s-title">{{ s.title }}</div>
+              <div class="s-artist">{{ s.artist }}</div>
+            </div>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

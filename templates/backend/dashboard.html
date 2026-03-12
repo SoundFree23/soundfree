@@ -1,0 +1,102 @@
+{% extends 'backend/base_backend.html' %}
+{% block title %}Dashboard — Backend SoundFree{% endblock %}
+{% block page_title %}📊 Dashboard{% endblock %}
+{% block active_dash %}active{% endblock %}
+
+{% block content %}
+
+<!-- STATS -->
+<div class="stats-grid">
+  <div class="stat-card c-purple">
+    <div class="s-label">Total Melodii</div>
+    <div class="s-val">{{ total_songs }}</div>
+    <div class="s-sub">în bibliotecă</div>
+  </div>
+  <div class="stat-card c-green">
+    <div class="s-label">Melodii Active</div>
+    <div class="s-val">{{ active_songs }}</div>
+    <div class="s-sub">vizibile pe site</div>
+  </div>
+  <div class="stat-card c-yellow">
+    <div class="s-label">Recomandate</div>
+    <div class="s-val">{{ featured_songs }}</div>
+    <div class="s-sub">pe homepage</div>
+  </div>
+  <div class="stat-card c-cyan">
+    <div class="s-label">Total Redări</div>
+    <div class="s-val">{{ total_plays }}</div>
+    <div class="s-sub">de când s-a lansat</div>
+  </div>
+</div>
+
+<!-- ACTIUNI RAPIDE -->
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-bottom:2rem;">
+  <a href="{% url 'music:backend_upload' %}" class="btn btn-primary" style="justify-content:center;padding:1rem;">
+    ⬆️ &nbsp; Upload Melodie Nouă
+  </a>
+  <a href="{% url 'music:backend_songs' %}" class="btn btn-outline" style="justify-content:center;padding:1rem;">
+    🎵 &nbsp; Gestionează Melodii
+  </a>
+  <a href="{% url 'music:backend_genres' %}" class="btn btn-outline" style="justify-content:center;padding:1rem;">
+    🎼 &nbsp; Genuri Muzicale
+  </a>
+  <a href="{% url 'music:library' %}" target="_blank" class="btn btn-outline" style="justify-content:center;padding:1rem;">
+    🌐 &nbsp; Vezi Biblioteca
+  </a>
+</div>
+
+<!-- MELODII RECENTE -->
+<div class="table-card">
+  <div class="table-header">
+    <h2>🕐 Ultimele melodii adăugate</h2>
+    <a href="{% url 'music:backend_songs' %}" class="btn btn-outline btn-sm">Vezi toate →</a>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Melodie</th>
+        <th>Gen</th>
+        <th>BPM</th>
+        <th>Status</th>
+        <th>Redări</th>
+        <th>Acțiuni</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for song in recent_songs %}
+      <tr>
+        <td>
+          <div style="display:flex;align-items:center;gap:0.75rem;">
+            <div class="cover-thumb">
+              {% if song.cover_image %}<img src="{{ song.cover_image.url }}" alt="">{% else %}🎵{% endif %}
+            </div>
+            <div>
+              <div class="td-title">{{ song.title }}</div>
+              <div class="td-sub">{{ song.artist }}</div>
+            </div>
+          </div>
+        </td>
+        <td>{% if song.genre %}<span class="badge-genre">{{ song.genre.icon }} {{ song.genre.name }}</span>{% else %}—{% endif %}</td>
+        <td style="color:var(--text2);">{% if song.bpm %}{{ song.bpm }}{% else %}—{% endif %}</td>
+        <td>
+          {% if song.is_active %}<span class="badge-active">Activă</span>{% else %}<span class="badge-inactive">Inactivă</span>{% endif %}
+          {% if song.is_featured %}<span class="badge-featured">⭐ Featured</span>{% endif %}
+        </td>
+        <td style="color:var(--text2);">{{ song.plays_count }}</td>
+        <td>
+          <div style="display:flex;gap:0.4rem;">
+            <a href="{% url 'music:backend_edit_song' song.pk %}" class="btn btn-outline btn-sm">✏️</a>
+            <a href="{% url 'music:backend_toggle_song' song.pk %}" class="btn btn-sm {% if song.is_active %}btn-danger{% else %}btn-success{% endif %}">
+              {% if song.is_active %}⏸{% else %}▶{% endif %}
+            </a>
+          </div>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text3);">Nicio melodie încărcată încă. <a href="{% url 'music:backend_upload' %}" style="color:var(--accent2);">Adaugă prima melodie →</a></td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

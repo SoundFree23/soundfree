@@ -1,0 +1,333 @@
+{% extends 'music/base.html' %}
+
+{% block title %}{{ t.pricing_title }} — SoundFree.ro{% endblock %}
+
+{% block extra_css %}
+<style>
+  .pricing-header { text-align: center; padding: 4rem 0 2rem; background: var(--bg2); border-bottom: 1px solid var(--border); }
+  .pricing-header h1 { font-size: 2.5rem; font-weight: 800; margin-bottom: 0.75rem; }
+  .pricing-header p { color: var(--text2); font-size: 1.05rem; max-width: 500px; margin: 0 auto; }
+  .toggle-row { display: flex; align-items: center; justify-content: center; gap: 1rem; margin-top: 2rem; }
+  .toggle-label { font-size: 0.9rem; color: var(--text2); }
+  .toggle-switch { position: relative; width: 52px; height: 28px; background: var(--border); border-radius: 14px; cursor: pointer; transition: background 0.2s; }
+  .toggle-switch.on { background: var(--accent); }
+  .toggle-switch::after { content: ''; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; transition: left 0.2s; }
+  .toggle-switch.on::after { left: 27px; }
+  .save-badge { background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.3); color: #22c55e; font-size: 0.75rem; font-weight: 600; padding: 2px 8px; border-radius: 20px; }
+
+  /* Configurator */
+  .config-section { background: var(--bg2); padding: 2rem 0 2.5rem; border-bottom: 1px solid var(--border); }
+  .config-label { font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text3); margin-bottom: 0.75rem; }
+  .config-row { margin-bottom: 1.5rem; }
+  .config-pills { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .config-pill { padding: 0.5rem 1rem; border-radius: 10px; border: 1px solid var(--border); background: var(--card); color: var(--text2); font-size: 0.85rem; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+  .config-pill:hover { border-color: var(--accent); color: var(--text); }
+  .config-pill.active { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; border-color: transparent; font-weight: 600; }
+
+  .plans-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; padding: 3rem 0 4rem; }
+  .plan-card { background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 2rem; position: relative; transition: all 0.3s; }
+  .plan-card:hover { transform: translateY(-4px); box-shadow: 0 16px 50px rgba(0,0,0,0.3); }
+  .plan-card.popular { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), 0 20px 60px rgba(124,58,237,0.2); }
+  .popular-badge { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; font-size: 0.75rem; font-weight: 700; padding: 4px 16px; border-radius: 20px; white-space: nowrap; }
+  .plan-name { font-size: 1rem; font-weight: 600; color: var(--text2); margin-bottom: 0.5rem; }
+  .plan-price { display: flex; align-items: flex-end; gap: 0.25rem; margin: 1rem 0; }
+  .price-amount { font-size: 3rem; font-weight: 800; line-height: 1; background: linear-gradient(135deg, var(--accent2), var(--accent3)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; transition: all 0.3s; }
+  .price-period { color: var(--text3); font-size: 0.9rem; margin-bottom: 0.4rem; }
+  .price-annual { font-size: 0.8rem; color: var(--text3); margin-bottom: 1.25rem; min-height: 1.2em; }
+  .plan-desc { color: var(--text2); font-size: 0.85rem; line-height: 1.6; margin-bottom: 1.5rem; }
+  .plan-features { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; margin-bottom: 2rem; }
+  .plan-features li { display: flex; align-items: flex-start; gap: 0.6rem; font-size: 0.875rem; color: var(--text2); }
+  .plan-features li .check { color: #22c55e; flex-shrink: 0; }
+  .plan-features li .x { color: var(--text3); flex-shrink: 0; }
+  .plan-btn { display: block; text-align: center; width: 100%; padding: 0.875rem; border-radius: 10px; font-size: 0.95rem; font-weight: 600; text-decoration: none; transition: all 0.2s; border: none; cursor: pointer; font-family: inherit; }
+  .plan-btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; }
+  .plan-btn-primary:hover { opacity: 0.9; }
+  .plan-btn-outline { background: transparent; color: var(--text); border: 1px solid var(--border); }
+  .plan-btn-outline:hover { border-color: var(--accent); color: var(--accent2); }
+  .compare-section { background: var(--bg2); border-top: 1px solid var(--border); padding: 4rem 0; }
+  .compare-table { width: 100%; border-collapse: collapse; margin-top: 2rem; }
+  .compare-table th { padding: 1rem; text-align: center; font-weight: 600; font-size: 0.9rem; border-bottom: 2px solid var(--border); }
+  .compare-table th:first-child { text-align: left; }
+  .compare-table td { padding: 0.875rem 1rem; border-bottom: 1px solid rgba(42,42,69,0.5); font-size: 0.875rem; text-align: center; }
+  .compare-table td:first-child { text-align: left; color: var(--text2); }
+  .compare-table .green { color: #22c55e; font-weight: 600; }
+  .compare-table .red { color: #ef4444; }
+  .compare-table .muted { color: var(--text3); }
+  .compare-table .highlight { background: rgba(124,58,237,0.06); }
+  .header-soundfree { background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .faq-list { display: flex; flex-direction: column; gap: 0.75rem; max-width: 700px; margin: 0 auto; }
+  .faq-item { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .faq-q { padding: 1.1rem 1.25rem; font-size: 0.95rem; font-weight: 600; cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none; }
+  .faq-q::after { content: '+'; font-size: 1.3rem; color: var(--accent2); }
+  .faq-q.open::after { content: '−'; }
+  .faq-a { display: none; padding: 0 1.25rem 1.1rem; color: var(--text2); font-size: 0.875rem; line-height: 1.7; border-top: 1px solid var(--border); }
+  .faq-a.open { display: block; }
+
+  @media (max-width: 600px) {
+    .config-pills { gap: 0.4rem; }
+    .config-pill { font-size: 0.78rem; padding: 0.4rem 0.75rem; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="pricing-header">
+  <div class="container">
+    <h1>{{ t.pricing_title }}</h1>
+    <p>{{ t.pricing_desc }}</p>
+    <div class="toggle-row">
+      <span class="toggle-label">{{ t.billing_monthly }}</span>
+      <div class="toggle-switch on" id="billing-toggle"></div>
+      <span class="toggle-label">{{ t.billing_annual }}</span>
+      <span class="save-badge">{{ t.save_badge }}</span>
+    </div>
+  </div>
+</div>
+
+<div class="config-section">
+  <div class="container">
+    <div class="config-row">
+      <div class="config-label">{{ t.config_business }}</div>
+      <div class="config-pills" id="biz-pills">
+        <div class="config-pill active" data-biz="cafenea">{{ t.biz_cafenea }}</div>
+        <div class="config-pill" data-biz="restaurant">{{ t.biz_restaurant }}</div>
+        <div class="config-pill" data-biz="bar">{{ t.biz_bar }}</div>
+        <div class="config-pill" data-biz="club">{{ t.biz_club }}</div>
+        <div class="config-pill" data-biz="hotel">{{ t.biz_hotel }}</div>
+        <div class="config-pill" data-biz="salon">{{ t.biz_salon }}</div>
+        <div class="config-pill" data-biz="retail">{{ t.biz_retail }}</div>
+        <div class="config-pill" data-biz="birou">{{ t.biz_birou }}</div>
+        <div class="config-pill" data-biz="cabinet">{{ t.biz_cabinet }}</div>
+        <div class="config-pill" data-biz="gym">{{ t.biz_gym }}</div>
+      </div>
+    </div>
+    <div class="config-row" style="margin-bottom:0;">
+      <div class="config-label">{{ t.config_size }}</div>
+      <div class="config-pills" id="size-pills">
+        <div class="config-pill" data-size="0">{{ t.config_size_1 }}</div>
+        <div class="config-pill active" data-size="1">{{ t.config_size_2 }}</div>
+        <div class="config-pill" data-size="2">{{ t.config_size_3 }}</div>
+        <div class="config-pill" data-size="3">{{ t.config_size_4 }}</div>
+        <div class="config-pill" data-size="4">{{ t.config_size_5 }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="plans-grid">
+
+    <div class="plan-card">
+      <div class="plan-name">{{ t.plan_starter_name }}</div>
+      <div class="plan-price">
+        <div class="price-amount" id="price-starter">59</div>
+        <div class="price-period">&nbsp;{{ t.per_month }}</div>
+      </div>
+      <div class="price-annual" id="annual-note-1"></div>
+      <div class="plan-desc">{{ t.plan_starter_desc }}</div>
+      <ul class="plan-features">
+        <li><span class="check">✓</span> {{ t.feature_1loc }}</li>
+        <li><span class="check">✓</span> {{ t.feature_library }}</li>
+        <li><span class="check">✓</span> {{ t.feature_player }}</li>
+        <li><span class="check">✓</span> {{ t.feature_cert }}</li>
+        <li><span class="check">✓</span> {{ t.feature_update_m }}</li>
+        <li><span class="x">✗</span> <span style="color:var(--text3)">{{ t.feature_no_dl }}</span></li>
+        <li><span class="x">✗</span> <span style="color:var(--text3)">{{ t.feature_no_support }}</span></li>
+      </ul>
+      <button class="plan-btn plan-btn-outline">{{ t.try_free }}</button>
+    </div>
+
+    <div class="plan-card popular">
+      <div class="popular-badge">{{ t.popular_badge }}</div>
+      <div class="plan-name">{{ t.plan_business_name }}</div>
+      <div class="plan-price">
+        <div class="price-amount" id="price-business">119</div>
+        <div class="price-period">&nbsp;{{ t.per_month }}</div>
+      </div>
+      <div class="price-annual" id="annual-note-2"></div>
+      <div class="plan-desc">{{ t.plan_business_desc }}</div>
+      <ul class="plan-features">
+        <li><span class="check">✓</span> {{ t.feature_5loc }}</li>
+        <li><span class="check">✓</span> {{ t.feature_library }}</li>
+        <li><span class="check">✓</span> {{ t.feature_player_dl }}</li>
+        <li><span class="check">✓</span> {{ t.feature_cert }}</li>
+        <li><span class="check">✓</span> {{ t.feature_update_w }}</li>
+        <li><span class="check">✓</span> {{ t.feature_playlist }}</li>
+        <li><span class="check">✓</span> {{ t.feature_support_email }}</li>
+      </ul>
+      <button class="plan-btn plan-btn-primary">{{ t.try_free }}</button>
+    </div>
+
+    <div class="plan-card">
+      <div class="plan-name">{{ t.plan_enterprise_name }}</div>
+      <div class="plan-price">
+        <div class="price-amount" id="price-enterprise">249</div>
+        <div class="price-period">&nbsp;{{ t.per_month }}</div>
+      </div>
+      <div class="price-annual" id="annual-note-3"></div>
+      <div class="plan-desc">{{ t.plan_enterprise_desc }}</div>
+      <ul class="plan-features">
+        <li><span class="check">✓</span> {{ t.feature_unloc }}</li>
+        <li><span class="check">✓</span> {{ t.feature_exclusive }}</li>
+        <li><span class="check">✓</span> {{ t.feature_player_dl }}</li>
+        <li><span class="check">✓</span> {{ t.feature_cert_loc }}</li>
+        <li><span class="check">✓</span> {{ t.feature_brand }}</li>
+        <li><span class="check">✓</span> {{ t.feature_api }}</li>
+        <li><span class="check">✓</span> {{ t.feature_support_phone }}</li>
+      </ul>
+      <button class="plan-btn plan-btn-outline">{{ t.contact_us }}</button>
+    </div>
+
+  </div>
+</div>
+
+<div class="compare-section">
+  <div class="container">
+    <div style="text-align:center;">
+      <h2 class="section-title">{{ t.compare_title }}</h2>
+      <p class="section-sub">{{ t.compare_sub }}</p>
+    </div>
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>—</th>
+          <th class="header-soundfree">SoundFree.ro</th>
+          <th>UCMR-ADA</th>
+          <th>CREDIDAM</th>
+          <th>UPFR</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>{{ t.compare_cost }}</td><td class="highlight green" id="compare-sf-cost">708 lei/an</td><td class="red">~900 lei/an</td><td class="red">~350 lei/an</td><td class="red">~350 lei/an</td></tr>
+        <tr><td>{{ t.compare_contracts }}</td><td class="highlight green">1</td><td class="muted">+1</td><td class="muted">+1</td><td class="muted">+1</td></tr>
+        <tr><td>{{ t.compare_penalty }}</td><td class="highlight green">{{ t.penalty_no }}</td><td class="red">{{ t.penalty_yes }}</td><td class="red">{{ t.penalty_yes }}</td><td class="red">{{ t.penalty_yes }}</td></tr>
+        <tr><td>{{ t.compare_activation }}</td><td class="highlight green">{{ t.instant }}</td><td class="muted">{{ t.days }}</td><td class="muted">{{ t.days }}</td><td class="muted">{{ t.days }}</td></tr>
+        <tr><td>{{ t.compare_updates }}</td><td class="highlight green">✓</td><td class="muted">—</td><td class="muted">—</td><td class="muted">—</td></tr>
+        <tr><td>{{ t.compare_cert }}</td><td class="highlight green">✓</td><td class="muted">{{ t.by_post }}</td><td class="muted">{{ t.by_post }}</td><td class="muted">{{ t.by_post }}</td></tr>
+        <tr style="font-weight:700;border-top:2px solid var(--border);">
+          <td>{{ t.compare_total }}</td>
+          <td class="highlight green" style="font-size:1.1rem;" id="compare-sf-total">708 lei</td>
+          <td colspan="3" class="red" style="text-align:center;font-size:1.1rem;">~1.600 lei</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title" style="text-align:center;margin-bottom:2rem;">{{ t.faq_title }}</h2>
+    <div class="faq-list">
+      <div class="faq-item"><div class="faq-q">{{ t.faq_q1 }}</div><div class="faq-a">{{ t.faq_a1 }}</div></div>
+      <div class="faq-item"><div class="faq-q">{{ t.faq_q2 }}</div><div class="faq-a">{{ t.faq_a2 }}</div></div>
+      <div class="faq-item"><div class="faq-q">{{ t.faq_q3 }}</div><div class="faq-a">{{ t.faq_a3 }}</div></div>
+      <div class="faq-item"><div class="faq-q">{{ t.faq_q4 }}</div><div class="faq-a">{{ t.faq_a4 }}</div></div>
+      <div class="faq-item"><div class="faq-q">{{ t.faq_q5 }}</div><div class="faq-a">{{ t.faq_a5 }}</div></div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // --- Pricing configuration (aligned with Dreammusic Romania) ---
+  // Dreammusic ref: Cafenea ≤100m² = 750 RON/an (~63/lună), 101-250m² = 850, 251+ = 1000
+  const basePrices = { starter: 59, business: 119, enterprise: 249 };
+
+  const bizMultipliers = {
+    cafenea: 1.0, restaurant: 1.15, bar: 1.3, club: 1.6,
+    hotel: 1.4, salon: 1.0, retail: 1.0, birou: 0.85,
+    cabinet: 0.85, gym: 1.15
+  };
+
+  const sizeMultipliers = [0.85, 1.0, 1.15, 1.35, 1.5];
+
+  let currentBiz = 'cafenea';
+  let currentSize = 1;
+  let isAnnual = true;
+
+  const priceEls = {
+    starter: document.getElementById('price-starter'),
+    business: document.getElementById('price-business'),
+    enterprise: document.getElementById('price-enterprise')
+  };
+
+  function calcPrice(base) {
+    let price = base * bizMultipliers[currentBiz] * sizeMultipliers[currentSize];
+    if (isAnnual) price = Math.round(price * 0.8);
+    else price = Math.round(price);
+    return price;
+  }
+
+  function updatePrices() {
+    const prices = {
+      starter: calcPrice(basePrices.starter),
+      business: calcPrice(basePrices.business),
+      enterprise: calcPrice(basePrices.enterprise)
+    };
+
+    Object.keys(prices).forEach(plan => {
+      priceEls[plan].textContent = prices[plan];
+    });
+
+    // Annual notes
+    ['starter', 'business', 'enterprise'].forEach((plan, i) => {
+      const note = document.getElementById('annual-note-' + (i + 1));
+      if (isAnnual) {
+        note.textContent = (prices[plan] * 12) + ' lei/an';
+        note.style.color = '#22c55e';
+      } else {
+        note.textContent = '';
+      }
+    });
+
+    // Update comparison table
+    const annualStarter = isAnnual ? prices.starter * 12 : prices.starter * 12;
+    const sfCost = document.getElementById('compare-sf-cost');
+    const sfTotal = document.getElementById('compare-sf-total');
+    if (sfCost) sfCost.textContent = annualStarter + ' lei/an';
+    if (sfTotal) sfTotal.textContent = annualStarter + ' lei';
+  }
+
+  // --- Toggle billing ---
+  const toggle = document.getElementById('billing-toggle');
+  toggle.addEventListener('click', () => {
+    isAnnual = !isAnnual;
+    toggle.classList.toggle('on', isAnnual);
+    updatePrices();
+  });
+
+  // --- Business pills ---
+  document.querySelectorAll('#biz-pills .config-pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      document.querySelector('#biz-pills .config-pill.active')?.classList.remove('active');
+      pill.classList.add('active');
+      currentBiz = pill.dataset.biz;
+      updatePrices();
+    });
+  });
+
+  // --- Size pills ---
+  document.querySelectorAll('#size-pills .config-pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      document.querySelector('#size-pills .config-pill.active')?.classList.remove('active');
+      pill.classList.add('active');
+      currentSize = parseInt(pill.dataset.size);
+      updatePrices();
+    });
+  });
+
+  // --- FAQ ---
+  document.querySelectorAll('.faq-q').forEach(q => {
+    q.addEventListener('click', () => {
+      q.classList.toggle('open');
+      q.nextElementSibling.classList.toggle('open');
+    });
+  });
+
+  // Initial calc
+  updatePrices();
+</script>
+{% endblock %}

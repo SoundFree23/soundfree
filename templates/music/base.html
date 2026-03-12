@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}SoundFree.ro — Muzică Royalty-Free pentru Afaceri{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #080810;
+      --bg2: #0f0f1a;
+      --bg3: #16162a;
+      --card: #1a1a2e;
+      --border: #2a2a45;
+      --accent: #7c3aed;
+      --accent2: #a855f7;
+      --accent3: #06b6d4;
+      --text: #e2e8f0;
+      --text2: #94a3b8;
+      --text3: #64748b;
+      --player-h: 88px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding-bottom: var(--player-h);
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 2rem;
+      height: 64px;
+      background: rgba(8,8,16,0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo {
+      font-size: 1.3rem; font-weight: 800; color: var(--text);
+      text-decoration: none; letter-spacing: -0.5px;
+    }
+    .nav-logo span { color: var(--accent2); }
+    .nav-links { display: flex; gap: 0.25rem; }
+    .nav-links a {
+      color: var(--text2); text-decoration: none;
+      padding: 0.45rem 1rem; border-radius: 8px;
+      font-size: 0.9rem; font-weight: 500;
+      transition: all 0.2s;
+    }
+    .nav-links a:hover, .nav-links a.active {
+      color: var(--text); background: var(--bg3);
+    }
+    .nav-cta {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff !important;
+      padding: 0.5rem 1.25rem !important;
+      border-radius: 8px !important;
+      font-weight: 600 !important;
+    }
+    .nav-cta:hover { opacity: 0.9; transform: translateY(-1px); }
+    .lang-switcher { display: flex; gap: 2px; background: var(--bg3); border-radius: 8px; padding: 2px; border: 1px solid var(--border); }
+    .lang-btn { color: var(--text2); text-decoration: none; padding: 0.3rem 0.65rem; border-radius: 6px; font-size: 0.78rem; font-weight: 600; transition: all 0.2s; }
+    .lang-btn:hover { color: var(--text); background: var(--bg2); }
+    .lang-btn.lang-active { background: var(--accent); color: #fff !important; }
+
+    /* ── MAIN ── */
+    main { padding-top: 64px; }
+
+    /* ── PLAYER PERSISTENT ── */
+    #global-player {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
+      height: var(--player-h);
+      background: rgba(10,10,20,0.97);
+      backdrop-filter: blur(20px);
+      border-top: 1px solid var(--border);
+      display: flex; align-items: center;
+      padding: 0 1.5rem; gap: 1.5rem;
+    }
+    .player-cover {
+      width: 52px; height: 52px; border-radius: 8px;
+      background: var(--bg3);
+      object-fit: cover; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem;
+    }
+    .player-info { flex: 0 0 180px; min-width: 0; }
+    .player-info .p-title {
+      font-size: 0.9rem; font-weight: 600;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      color: var(--text);
+    }
+    .player-info .p-artist {
+      font-size: 0.78rem; color: var(--text2); margin-top: 2px;
+    }
+    .player-controls {
+      display: flex; align-items: center; gap: 0.75rem;
+      flex: 1; flex-direction: column; justify-content: center;
+    }
+    .ctrl-btns { display: flex; align-items: center; gap: 0.5rem; }
+    .ctrl-btn {
+      background: none; border: none; color: var(--text2);
+      cursor: pointer; padding: 6px; border-radius: 50%;
+      transition: all 0.2s; display: flex; align-items: center;
+    }
+    .ctrl-btn:hover { color: var(--text); background: var(--bg3); }
+    .ctrl-btn.play-btn {
+      width: 44px; height: 44px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff;
+    }
+    .ctrl-btn.play-btn:hover { transform: scale(1.05); opacity: 0.9; }
+    .progress-area { display: flex; align-items: center; gap: 0.75rem; width: 100%; max-width: 500px; }
+    .time-label { font-size: 0.72rem; color: var(--text3); min-width: 36px; }
+    .progress-bar {
+      flex: 1; height: 4px; background: var(--border); border-radius: 2px;
+      cursor: pointer; position: relative; overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%; width: 0%;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      border-radius: 2px; transition: width 0.1s linear;
+      pointer-events: none;
+    }
+    .player-vol { display: flex; align-items: center; gap: 0.5rem; flex: 0 0 120px; }
+    .vol-icon { color: var(--text2); font-size: 1rem; cursor: pointer; }
+    .vol-slider {
+      -webkit-appearance: none; width: 80px; height: 4px;
+      background: var(--border); border-radius: 2px; outline: none;
+    }
+    .vol-slider::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 12px; height: 12px;
+      border-radius: 50%; background: var(--accent2); cursor: pointer;
+    }
+
+    /* ── CARDS ── */
+    .song-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 14px; overflow: hidden;
+      transition: all 0.25s; cursor: pointer;
+    }
+    .song-card:hover { transform: translateY(-4px); border-color: var(--accent); box-shadow: 0 12px 40px rgba(124,58,237,0.15); }
+    .song-card .cover {
+      width: 100%; aspect-ratio: 1;
+      background: linear-gradient(135deg, var(--bg3), var(--bg2));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 3rem; position: relative; overflow: hidden;
+    }
+    .song-card .cover img { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; }
+    .song-card .cover .play-overlay {
+      position: absolute; inset: 0;
+      background: rgba(0,0,0,0.5);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; transition: 0.2s;
+    }
+    .song-card:hover .play-overlay { opacity: 1; }
+    .play-overlay svg { width: 48px; height: 48px; color: #fff; }
+    .song-card .info { padding: 0.875rem; }
+    .song-card .info .s-title { font-size: 0.9rem; font-weight: 600; margin-bottom: 2px; }
+    .song-card .info .s-artist { font-size: 0.78rem; color: var(--text2); }
+    .song-card .info .s-meta { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
+    .badge {
+      font-size: 0.7rem; padding: 2px 8px; border-radius: 20px;
+      background: var(--bg3); color: var(--text2); border: 1px solid var(--border);
+    }
+
+    /* ── BUTTONS ── */
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff; border: none; padding: 0.75rem 1.75rem;
+      border-radius: 10px; font-size: 1rem; font-weight: 600;
+      cursor: pointer; text-decoration: none; transition: all 0.2s;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(124,58,237,0.4); }
+    .btn-outline {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: transparent; color: var(--text);
+      border: 1px solid var(--border); padding: 0.75rem 1.75rem;
+      border-radius: 10px; font-size: 1rem; font-weight: 500;
+      cursor: pointer; text-decoration: none; transition: all 0.2s;
+    }
+    .btn-outline:hover { border-color: var(--accent); color: var(--accent2); }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 3rem 2rem 2rem;
+      text-align: center; color: var(--text3); font-size: 0.85rem;
+    }
+    footer a { color: var(--text2); text-decoration: none; }
+    footer a:hover { color: var(--accent2); }
+
+    /* ── UTILS ── */
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; }
+    .section { padding: 5rem 0; }
+    .section-title { font-size: 2rem; font-weight: 800; margin-bottom: 0.5rem; }
+    .section-sub { color: var(--text2); font-size: 1rem; margin-bottom: 2.5rem; }
+    .grid-4 { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1.25rem; }
+    .grid-3 { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.25rem; }
+
+    @media (max-width: 640px) {
+      .player-vol { display: none; }
+      .player-info { flex: 0 0 120px; }
+      nav { padding: 0 1rem; }
+      .nav-links a:not(.nav-cta) { display: none; }
+    }
+  </style>
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="{% url 'music:home' %}" class="nav-logo">Sound<span>Free</span>.ro</a>
+  <div class="nav-links">
+    <a href="{% url 'music:home' %}">{{ t.nav_home }}</a>
+    <a href="{% url 'music:library' %}">{{ t.nav_library }}</a>
+    <a href="{% url 'music:pricing' %}">{{ t.nav_pricing }}</a>
+
+    <!-- LANGUAGE SWITCHER -->
+    <div class="lang-switcher">
+      <a href="{% url 'music:set_language' 'ro' %}" class="lang-btn {% if current_lang == 'ro' %}lang-active{% endif %}">🇷🇴 RO</a>
+      <a href="{% url 'music:set_language' 'en' %}" class="lang-btn {% if current_lang == 'en' %}lang-active{% endif %}">🇬🇧 EN</a>
+    </div>
+
+    <a href="{% url 'music:pricing' %}" class="nav-cta">{{ t.nav_cta }}</a>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main>
+  {% block content %}{% endblock %}
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <p>{{ t.footer_copy }}</p>
+  <p style="margin-top:0.5rem;">
+    <a href="#">{{ t.footer_terms }}</a> · <a href="#">{{ t.footer_privacy }}</a> · <a href="#">{{ t.footer_contact }}</a>
+  </p>
+</footer>
+
+<!-- PLAYER PERSISTENT -->
+<div id="global-player">
+  <div class="player-cover" id="player-cover">🎵</div>
+  <div class="player-info">
+    <div class="p-title" id="player-title">{{ t.player_select }}</div>
+    <div class="p-artist" id="player-artist">SoundFree.ro</div>
+  </div>
+  <div class="player-controls">
+    <div class="ctrl-btns">
+      <button class="ctrl-btn" id="btn-prev" title="Anterior">
+        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
+      </button>
+      <button class="ctrl-btn play-btn" id="btn-play" title="Play/Pause">
+        <svg id="icon-play" width="22" height="22" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        <svg id="icon-pause" width="22" height="22" fill="currentColor" viewBox="0 0 24 24" style="display:none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+      </button>
+      <button class="ctrl-btn" id="btn-next" title="Următor">
+        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zm2-8.14L11.03 12 8 14.14V9.86zM16 6h2v12h-2z"/></svg>
+      </button>
+    </div>
+    <div class="progress-area">
+      <span class="time-label" id="time-cur">0:00</span>
+      <div class="progress-bar" id="progress-bar">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+      <span class="time-label" id="time-dur">0:00</span>
+    </div>
+  </div>
+  <div class="player-vol">
+    <span class="vol-icon">🔊</span>
+    <input type="range" class="vol-slider" id="vol-slider" min="0" max="1" step="0.01" value="0.8">
+  </div>
+</div>
+
+<audio id="audio-el" preload="none"></audio>
+
+<script>
+const audio = document.getElementById('audio-el');
+const btnPlay = document.getElementById('btn-play');
+const iconPlay = document.getElementById('icon-play');
+const iconPause = document.getElementById('icon-pause');
+const progressFill = document.getElementById('progress-fill');
+const progressBar = document.getElementById('progress-bar');
+const timeCur = document.getElementById('time-cur');
+const timeDur = document.getElementById('time-dur');
+const volSlider = document.getElementById('vol-slider');
+const playerTitle = document.getElementById('player-title');
+const playerArtist = document.getElementById('player-artist');
+const playerCover = document.getElementById('player-cover');
+
+let playlist = [];
+let currentIdx = 0;
+let isPlaying = false;
+
+function fmtTime(s) {
+  s = Math.floor(s || 0);
+  return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+}
+
+function loadSong(idx) {
+  if (!playlist.length) return;
+  const s = playlist[idx];
+  audio.src = s.audio;
+  playerTitle.textContent = s.title;
+  playerArtist.textContent = s.artist;
+  if (s.cover) {
+    playerCover.innerHTML = `<img src="${s.cover}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">`;
+  } else {
+    playerCover.textContent = '🎵';
+  }
+}
+
+function playSong(idx) {
+  currentIdx = idx;
+  loadSong(idx);
+  audio.play();
+  isPlaying = true;
+  updatePlayBtn();
+  // highlight card activ
+  document.querySelectorAll('.song-card').forEach((c, i) => {
+    c.style.borderColor = i === idx ? 'var(--accent)' : '';
+  });
+}
+
+function updatePlayBtn() {
+  iconPlay.style.display = isPlaying ? 'none' : '';
+  iconPause.style.display = isPlaying ? '' : 'none';
+}
+
+btnPlay.addEventListener('click', () => {
+  if (!playlist.length) return;
+  if (audio.src === '' || audio.src === window.location.href) { playSong(0); return; }
+  if (isPlaying) { audio.pause(); isPlaying = false; }
+  else { audio.play(); isPlaying = true; }
+  updatePlayBtn();
+});
+
+document.getElementById('btn-next').addEventListener('click', () => {
+  if (!playlist.length) return;
+  playSong((currentIdx + 1) % playlist.length);
+});
+
+document.getElementById('btn-prev').addEventListener('click', () => {
+  if (!playlist.length) return;
+  playSong((currentIdx - 1 + playlist.length) % playlist.length);
+});
+
+audio.addEventListener('timeupdate', () => {
+  if (!audio.duration) return;
+  const pct = (audio.currentTime / audio.duration) * 100;
+  progressFill.style.width = pct + '%';
+  timeCur.textContent = fmtTime(audio.currentTime);
+  timeDur.textContent = fmtTime(audio.duration);
+});
+
+audio.addEventListener('ended', () => {
+  playSong((currentIdx + 1) % playlist.length);
+});
+
+progressBar.addEventListener('click', (e) => {
+  const rect = progressBar.getBoundingClientRect();
+  const pct = (e.clientX - rect.left) / rect.width;
+  audio.currentTime = pct * audio.duration;
+});
+
+volSlider.addEventListener('input', () => { audio.volume = volSlider.value; });
+audio.volume = 0.8;
+
+// Incarca playlist din API
+fetch('/api/songs/')
+  .then(r => r.json())
+  .then(data => {
+    playlist = data.songs;
+    // Ataseaza click pe carduri
+    document.querySelectorAll('.song-card[data-id]').forEach(card => {
+      card.addEventListener('click', () => {
+        const id = parseInt(card.dataset.id);
+        const idx = playlist.findIndex(s => s.id === id);
+        if (idx >= 0) playSong(idx);
+      });
+    });
+  });
+</script>
+
+{% block extra_js %}{% endblock %}
+</body>
+</html>

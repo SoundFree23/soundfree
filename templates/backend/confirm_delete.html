@@ -1,0 +1,22 @@
+{% extends 'backend/base_backend.html' %}
+{% block title %}Șterge Melodie — Backend{% endblock %}
+{% block page_title %}🗑️ Confirmare Ștergere{% endblock %}
+
+{% block content %}
+<div style="max-width:500px;margin:0 auto;">
+  <div class="form-card" style="text-align:center;">
+    <div style="font-size:4rem;margin-bottom:1rem;">⚠️</div>
+    <h2 style="font-size:1.3rem;margin-bottom:0.5rem;">Ești sigur că vrei să ștergi?</h2>
+    <p style="color:var(--text2);margin-bottom:1.5rem;">
+      Melodia <strong style="color:var(--text);">„{{ song.title }}"</strong> de <strong style="color:var(--text);">{{ song.artist }}</strong> va fi ștearsă definitiv. Această acțiune nu poate fi anulată.
+    </p>
+    <div style="display:flex;gap:1rem;justify-content:center;">
+      <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">🗑️ Da, șterge definitiv</button>
+      </form>
+      <a href="{% url 'music:backend_songs' %}" class="btn btn-outline">Anulează</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

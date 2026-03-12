@@ -1,0 +1,123 @@
+{% extends 'backend/base_backend.html' %}
+{% block title %}{% if editing %}Editează{% else %}Upload{% endif %} Melodie — Backend{% endblock %}
+{% block page_title %}{% if editing %}✏️ Editează Melodia{% else %}⬆️ Upload Melodie Nouă{% endif %}{% endblock %}
+{% block active_upload %}{% if not editing %}active{% endif %}{% endblock %}
+{% block active_songs %}{% if editing %}active{% endif %}{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+  <div>
+    <h1>{% if editing %}Editează: {{ song.title }}{% else %}Upload Melodie Nouă{% endif %}</h1>
+    <p style="color:var(--text3);font-size:0.85rem;margin-top:0.25rem;">
+      {% if editing %}Modifică informațiile melodiei{% else %}Adaugă o melodie royalty-free în bibliotecă{% endif %}
+    </p>
+  </div>
+  <a href="{% url 'music:backend_songs' %}" class="btn btn-outline">← Înapoi la melodii</a>
+</div>
+
+<form method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+  <div class="form-card">
+
+    <div class="form-grid">
+
+      <!-- Titlu -->
+      <div class="form-group">
+        <label class="form-label">{{ form.title.label }}</label>
+        {{ form.title }}
+        {% if form.title.errors %}<div style="color:var(--danger);font-size:0.75rem;">{{ form.title.errors.0 }}</div>{% endif %}
+      </div>
+
+      <!-- Artist -->
+      <div class="form-group">
+        <label class="form-label">{{ form.artist.label }}</label>
+        {{ form.artist }}
+        {% if form.artist.errors %}<div style="color:var(--danger);font-size:0.75rem;">{{ form.artist.errors.0 }}</div>{% endif %}
+      </div>
+
+      <!-- Gen -->
+      <div class="form-group">
+        <label class="form-label">{{ form.genre.label }}</label>
+        {{ form.genre }}
+      </div>
+
+      <!-- Mood -->
+      <div class="form-group">
+        <label class="form-label">{{ form.mood.label }}</label>
+        {{ form.mood }}
+      </div>
+
+      <!-- BPM -->
+      <div class="form-group">
+        <label class="form-label">{{ form.bpm.label }}</label>
+        {{ form.bpm }}
+        <div class="form-help">Tempo-ul melodiei (pulsuri pe minut)</div>
+      </div>
+
+      <!-- Durata -->
+      <div class="form-group">
+        <label class="form-label">{{ form.duration.label }}</label>
+        {{ form.duration }}
+        <div class="form-help">ex: 180 = 3 minute</div>
+      </div>
+
+      <!-- Fișier audio -->
+      <div class="form-group full">
+        <label class="form-label">{{ form.audio_file.label }}</label>
+        {{ form.audio_file }}
+        {% if editing and song.audio_file %}
+        <div style="margin-top:0.5rem;font-size:0.78rem;color:var(--text3);">
+          📎 Fișier curent: <a href="{{ song.audio_file.url }}" target="_blank" style="color:var(--accent2);">{{ song.audio_file.name }}</a>
+          <span style="margin-left:0.5rem;">(lasă gol pentru a păstra fișierul actual)</span>
+        </div>
+        {% endif %}
+        <div class="form-help">Formate acceptate: MP3, WAV, FLAC, OGG</div>
+      </div>
+
+      <!-- Copertă -->
+      <div class="form-group full">
+        <label class="form-label">{{ form.cover_image.label }}</label>
+        {% if editing and song.cover_image %}
+        <div style="display:flex;align-items:center;gap:1rem;margin-bottom:0.75rem;">
+          <img src="{{ song.cover_image.url }}" style="width:64px;height:64px;border-radius:8px;object-fit:cover;">
+          <span style="font-size:0.78rem;color:var(--text3);">Copertă curentă (încarcă alta pentru a o înlocui)</span>
+        </div>
+        {% endif %}
+        {{ form.cover_image }}
+        <div class="form-help">Formate acceptate: JPG, PNG, WEBP · Recomandat: 500×500px</div>
+      </div>
+
+      <!-- Checkboxuri -->
+      <div class="form-group">
+        <label class="form-label">Vizibilitate</label>
+        <div class="form-check-row" style="margin-top:0.5rem;">
+          {{ form.is_active }}
+          <label class="form-label" style="margin:0;cursor:pointer;">{{ form.is_active.label }}</label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Promovare</label>
+        <div class="form-check-row" style="margin-top:0.5rem;">
+          {{ form.is_featured }}
+          <label class="form-label" style="margin:0;cursor:pointer;">{{ form.is_featured.label }}</label>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">
+        {% if editing %}💾 Salvează modificările{% else %}⬆️ Încarcă melodia{% endif %}
+      </button>
+      <a href="{% url 'music:backend_songs' %}" class="btn btn-outline">Anulează</a>
+      {% if editing %}
+      <a href="{% url 'music:backend_delete_song' song.pk %}" class="btn btn-danger" style="margin-left:auto;">🗑️ Șterge melodia</a>
+      {% endif %}
+    </div>
+
+  </div>
+</form>
+
+{% endblock %}

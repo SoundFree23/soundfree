@@ -1,0 +1,87 @@
+{% extends 'backend/base_backend.html' %}
+{% block title %}Melodii — Backend SoundFree{% endblock %}
+{% block page_title %}🎵 Gestionare Melodii{% endblock %}
+{% block active_songs %}active{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+  <div>
+    <h1>Toate Melodiile</h1>
+    <p style="color:var(--text3);font-size:0.85rem;margin-top:0.25rem;">{{ songs|length }} melodii în total</p>
+  </div>
+  <div style="display:flex;gap:0.75rem;align-items:center;">
+    <form method="get" class="search-box">
+      <input type="text" name="search" value="{{ search }}" placeholder="Caută titlu / artist...">
+      <button type="submit">🔍</button>
+    </form>
+    <a href="{% url 'music:backend_upload' %}" class="btn btn-primary">⬆️ Upload nou</a>
+  </div>
+</div>
+
+<div class="table-card">
+  <table>
+    <thead>
+      <tr>
+        <th width="52"></th>
+        <th>Melodie</th>
+        <th>Gen</th>
+        <th>Mood</th>
+        <th>BPM</th>
+        <th>Durată</th>
+        <th>Status</th>
+        <th>Redări</th>
+        <th>Acțiuni</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for song in songs %}
+      <tr>
+        <td>
+          <div class="cover-thumb">
+            {% if song.cover_image %}<img src="{{ song.cover_image.url }}" alt="">{% else %}🎵{% endif %}
+          </div>
+        </td>
+        <td>
+          <div class="td-title">{{ song.title }}</div>
+          <div class="td-sub">{{ song.artist }}</div>
+        </td>
+        <td>{% if song.genre %}<span class="badge-genre">{{ song.genre.icon }} {{ song.genre.name }}</span>{% else %}<span style="color:var(--text3);">—</span>{% endif %}</td>
+        <td>{% if song.mood %}<span style="font-size:0.78rem;color:{{ song.mood.color }};">{{ song.mood.name }}</span>{% else %}<span style="color:var(--text3);">—</span>{% endif %}</td>
+        <td style="color:var(--text2);font-size:0.85rem;">{% if song.bpm %}{{ song.bpm }}{% else %}—{% endif %}</td>
+        <td style="color:var(--text2);font-size:0.85rem;">{{ song.duration_display }}</td>
+        <td>
+          <div style="display:flex;flex-direction:column;gap:3px;">
+            {% if song.is_active %}<span class="badge-active">Activă</span>{% else %}<span class="badge-inactive">Inactivă</span>{% endif %}
+            {% if song.is_featured %}<span class="badge-featured">⭐ Featured</span>{% endif %}
+          </div>
+        </td>
+        <td style="color:var(--text3);font-size:0.85rem;">{{ song.plays_count }}</td>
+        <td>
+          <div style="display:flex;gap:0.35rem;flex-wrap:wrap;">
+            <a href="{% url 'music:backend_edit_song' song.pk %}" class="btn btn-outline btn-sm" title="Editează">✏️ Edit</a>
+            <a href="{% url 'music:backend_toggle_song' song.pk %}" class="btn btn-sm {% if song.is_active %}btn-danger{% else %}btn-success{% endif %}" title="Activează / Dezactivează">
+              {% if song.is_active %}⏸{% else %}▶{% endif %}
+            </a>
+            <a href="{% url 'music:backend_delete_song' song.pk %}" class="btn btn-danger btn-sm" title="Șterge">🗑️</a>
+          </div>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="9" style="text-align:center;padding:3rem;color:var(--text3);">
+          <div style="font-size:2.5rem;margin-bottom:0.75rem;">🎵</div>
+          <div>Nicio melodie găsită.</div>
+          {% if search %}
+          <a href="{% url 'music:backend_songs' %}" style="color:var(--accent2);font-size:0.85rem;display:inline-block;margin-top:0.5rem;">Resetează căutarea</a>
+          {% else %}
+          <a href="{% url 'music:backend_upload' %}" style="color:var(--accent2);font-size:0.85rem;display:inline-block;margin-top:0.5rem;">Adaugă prima melodie →</a>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}
