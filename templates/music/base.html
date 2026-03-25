@@ -638,8 +638,16 @@ function attachCardListeners() {
 }
 
 // ── Fullscreen player ──
-function openFullscreen() { fsPlayer.classList.add('open'); document.body.style.overflow = 'hidden'; }
-function closeFullscreen() { fsPlayer.classList.remove('open'); document.body.style.overflow = ''; }
+function openFullscreen() {
+  fsPlayer.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  // Push a state so Android Back button can close the player
+  history.pushState({ playerOpen: true }, '');
+}
+function closeFullscreen() {
+  fsPlayer.classList.remove('open');
+  document.body.style.overflow = '';
+}
 
 miniInfoArea.addEventListener('click', (e) => { e.stopPropagation(); if (hasSong) openFullscreen(); });
 miniCover.addEventListener('click', (e) => { e.stopPropagation(); if (hasSong) openFullscreen(); });
@@ -728,6 +736,11 @@ document.addEventListener('click', (e) => {
 });
 
 window.addEventListener('popstate', (e) => {
+  // If fullscreen player is open, Android Back closes it instead of navigating
+  if (fsPlayer.classList.contains('open')) {
+    closeFullscreen();
+    return;
+  }
   navigateTo(e.state && e.state.url ? e.state.url : window.location.pathname);
 });
 history.replaceState({ url: window.location.pathname }, '', window.location.pathname);
