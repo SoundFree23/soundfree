@@ -6,11 +6,19 @@
 
 <!-- SEARCH -->
 <div style="padding:1rem;">
-  <form method="get" action="{% url 'music:browse' %}" style="display:flex;gap:0.5rem;">
+  <form method="get" action="{% url 'music:browse' %}" id="browse-search-form" style="display:flex;gap:0.5rem;">
     <input type="text" name="search" value="{{ search }}" placeholder="{{ t.lib_search_placeholder }}"
       style="flex:1;background:var(--bg3);border:none;color:var(--text);padding:0.65rem 1rem;border-radius:8px;font-size:0.9rem;outline:none;font-family:inherit;">
     {% if search %}<a href="{% url 'music:browse' %}" style="color:var(--text2);text-decoration:none;padding:0.65rem;font-size:0.85rem;display:flex;align-items:center;">✕</a>{% endif %}
   </form>
+<script>
+document.getElementById('browse-search-form').addEventListener('submit', function(e) {
+  e.preventDefault();
+  const q = this.querySelector('input[name="search"]').value.trim();
+  const url = q ? '{% url "music:browse" %}?search=' + encodeURIComponent(q) : '{% url "music:browse" %}';
+  navigateTo(url);
+});
+</script>
 </div>
 
 <!-- FILTER CHIPS -->

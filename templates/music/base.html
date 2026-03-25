@@ -859,12 +859,7 @@ function navigateTo(url) {
         newScript.textContent = oldScript.textContent;
         oldScript.parentNode.replaceChild(newScript, oldScript);
       });
-      attachCardListeners();
-      updateAllHearts();
-      updateFavCount();
-      initFavoritesPage();
-      initLibraryPage();
-      initPlaylistDetailPage();
+      initAllPageFeatures();
       window.scrollTo(0, 0);
     })
     .catch(() => { window.location.href = url; });
@@ -1354,8 +1349,28 @@ function initPlaylistDetailPage() {
   }
 }
 
-// Init hearts on page load
-document.addEventListener('DOMContentLoaded', () => { updateAllHearts(); updateFavCount(); initFavoritesPage(); initLibraryPage(); initPlaylistDetailPage(); });
+// ── Genre card colors ──
+const gcColors = ['#1db954','#e13300','#8400e7','#1e3264','#e8115b','#148a08','#e91429','#509bf5','#f59b23','#ba5d07','#27856a','#af2896','#0d73ec','#608108','#8d67ab','#a56752','#477d95','#b49bc8'];
+function colorizeGenreCards() {
+  document.querySelectorAll('.genre-card[data-gc]').forEach(el => {
+    const i = parseInt(el.dataset.gc) % gcColors.length;
+    el.style.background = 'linear-gradient(135deg, ' + gcColors[i] + ', ' + gcColors[i] + '99)';
+  });
+}
+
+// ── Init all page features ──
+function initAllPageFeatures() {
+  attachCardListeners();
+  updateAllHearts();
+  updateFavCount();
+  initFavoritesPage();
+  initLibraryPage();
+  initPlaylistDetailPage();
+  colorizeGenreCards();
+}
+
+// Init on page load
+document.addEventListener('DOMContentLoaded', initAllPageFeatures);
 </script>
 
 {% block extra_js %}{% endblock %}
