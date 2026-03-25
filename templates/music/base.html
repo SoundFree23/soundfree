@@ -910,8 +910,9 @@ fetch('/api/songs/')
   .then(r => r.json())
   .then(data => { playlist = data.songs; attachCardListeners(); updateAllHearts(); });
 
-// ── Favorites (localStorage) ──
-const FAV_KEY = 'soundfree_favorites';
+// ── Favorites (localStorage) - per user ──
+const CURRENT_USER = '{{ user.username|default:"guest" }}';
+const FAV_KEY = 'soundfree_favorites_' + CURRENT_USER;
 function getFavorites() {
   try { return JSON.parse(localStorage.getItem(FAV_KEY)) || []; } catch(e) { return []; }
 }
@@ -1049,8 +1050,8 @@ function initFavoritesPage() {
   };
 }
 
-// ── Custom Playlists (localStorage) ──
-const PL_KEY = 'soundfree_playlists';
+// ── Custom Playlists (localStorage) - per user ──
+const PL_KEY = 'soundfree_playlists_' + CURRENT_USER;
 function getPlaylists() {
   try { return JSON.parse(localStorage.getItem(PL_KEY)) || []; } catch(e) { return []; }
 }
