@@ -1,0 +1,97 @@
+{% extends 'backend/base_backend.html' %}
+{% block title %}Playlisturi {{ target_user.username }} — Backend SoundFree{% endblock %}
+{% block page_title %}🎵 Playlisturi: {{ target_user.username }}{% endblock %}
+{% block active_users %}active{% endblock %}
+
+{% block content %}
+
+<div style="margin-bottom:1.5rem;">
+  <a href="{% url 'music:backend_users' %}" style="color:var(--accent2);text-decoration:none;font-size:0.85rem;">← Înapoi la Utilizatori</a>
+</div>
+
+<!-- Creaza playlist nou -->
+<div style="display:grid;grid-template-columns:1fr 2fr;gap:1.5rem;align-items:start;">
+  <div>
+    <div class="page-header" style="margin-bottom:1rem;">
+      <h1>Creează playlist nou</h1>
+    </div>
+    <form method="post">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="create_playlist">
+      <div class="form-card">
+        <div class="form-group" style="margin-bottom:1rem;">
+          <label class="form-label">Nume playlist</label>
+          <input type="text" name="name" class="form-input" placeholder="ex: Muzică Ambientală" required>
+        </div>
+        <button type="submit" class="btn btn-primary">✅ Creează playlist</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Playlisturi existente -->
+  <div>
+    <div class="page-header" style="margin-bottom:1rem;">
+      <h1>Playlisturi existente ({{ playlists|length }})</h1>
+    </div>
+
+    {% for pl in playlists %}
+    <div class="form-card" style="margin-bottom:1.5rem;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+        <h3 style="font-size:1rem;font-weight:700;">🎵 {{ pl.name }} <span style="color:var(--text3);font-weight:400;font-size:0.85rem;">({{ pl.songs.count }} melodii)</span></h3>
+        <form method="post" style="display:inline;" onsubmit="return confirm('Ștergi playlistul {{ pl.name }}?');">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="delete_playlist">
+          <input type="hidden" name="playlist_id" value="{{ pl.id }}">
+          <button type="submit" class="btn btn-danger" style="font-size:0.75rem;padding:0.3rem 0.6rem;">Șterge</button>
+        </form>
+      </div>
+
+      <!-- Melodii in playlist -->
+      {% if pl.songs.all %}
+      <div style="margin-bottom:1rem;">
+        {% for song in pl.songs.all %}
+        <div style="display:flex;align-items:center;gap:0.75rem;padding:0.4rem 0.5rem;border-radius:6px;margin-bottom:2px;" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='none'">
+          <div style="width:36px;height:36px;border-radius:4px;background:var(--bg3);overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;">
+            {% if song.cover_image %}<img src="{{ song.cover_image.url }}" style="width:100%;height:100%;object-fit:cover;">{% else %}🎵{% endif %}
+          </div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:0.85rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ song.title }}</div>
+            <div style="font-size:0.75rem;color:var(--text3);">{{ song.artist }}</div>
+          </div>
+          <form method="post" style="flex-shrink:0;">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="remove_song">
+            <input type="hidden" name="playlist_id" value="{{ pl.id }}">
+            <input type="hidden" name="song_id" value="{{ song.id }}">
+            <button type="submit" style="background:none;border:none;color:var(--text3);cursor:pointer;padding:4px;" title="Elimină">✕</button>
+          </form>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p style="color:var(--text3);font-size:0.85rem;margin-bottom:1rem;">Nicio melodie adăugată.</p>
+      {% endif %}
+
+      <!-- Adauga melodie -->
+      <form method="post" style="display:flex;gap:0.5rem;align-items:center;">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="add_song">
+        <input type="hidden" name="playlist_id" value="{{ pl.id }}">
+        <select name="song_id" class="form-input" style="flex:1;">
+          <option value="">— Alege melodie —</option>
+          {% for song in all_songs %}
+          <option value="{{ song.id }}">{{ song.title }} — {{ song.artist }}</option>
+          {% endfor %}
+        </select>
+        <button type="submit" class="btn btn-primary" style="white-space:nowrap;">+ Adaugă</button>
+      </form>
+    </div>
+    {% empty %}
+    <div class="form-card" style="text-align:center;padding:3rem;color:var(--text3);">
+      <p>Niciun playlist creat pentru {{ target_user.username }}.</p>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+{% endblock %}

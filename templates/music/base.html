@@ -1109,11 +1109,51 @@ function initLibraryPage() {
   const nameInput = document.getElementById('new-playlist-name');
   const saveBtn = document.getElementById('save-playlist-btn');
   const cancelBtn = document.getElementById('cancel-playlist-btn');
+  const serverPlList = document.getElementById('server-playlist-list');
   if (!plList) return; // Not on library page
 
   // Update fav count on library page
   const libFavCount = document.getElementById('lib-fav-count');
   if (libFavCount) libFavCount.textContent = getFavorites().length;
+
+  // Load server-side playlists (created by admin)
+  if (serverPlList && isAuthenticated) {
+    fetch('/api/user-playlists/')
+      .then(r => r.json())
+      .then(data => {
+        if (!data.playlists || !data.playlists.length) {
+          serverPlList.innerHTML = '';
+          return;
+        }
+        let html = '';
+        data.playlists.forEach((pl, i) => {
+          html += '<div class="playlist-card" data-server-plid="' + pl.id + '">' +
+            '<div class="playlist-cover" style="background:' + getPlColor(i) + ';">' +
+            '<svg viewBox="0 0 24 24" fill="currentColor" style="color:#fff;"><path d="M9 18V5l12-2v13M9 18c0 1.66-1.34 3-3 3s-3-1.34-3-3 1.34-3 3-3 3 1.34 3 3zm12-2c0 1.66-1.34 3-3 3s-3-1.34-3-3 1.34-3 3-3 3 1.34 3 3z"/></svg>' +
+            '</div>' +
+            '<div class="playlist-info">' +
+            '<div class="playlist-name">' + pl.name + '</div>' +
+            '<div class="playlist-meta">' + pl.count + ' melodii · De la admin</div>' +
+            '</div>' +
+            '</div>';
+        });
+        serverPlList.innerHTML = html;
+        // Store server playlists data for playback
+        window._serverPlaylists = data.playlists;
+        // Click handler for server playlists
+        serverPlList.querySelectorAll('[data-server-plid]').forEach(card => {
+          card.addEventListener('click', () => {
+            const plId = parseInt(card.dataset.serverPlid);
+            const pl = window._serverPlaylists.find(p => p.id === plId);
+            if (pl && pl.songs.length) {
+              playlist.length = 0;
+              pl.songs.forEach(s => playlist.push(s));
+              playSong(0);
+            }
+          });
+        });
+      });
+  }
 
   function renderPlaylists() {
     const pls = getPlaylists();

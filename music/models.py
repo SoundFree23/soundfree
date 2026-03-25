@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 
 class Genre(models.Model):
@@ -61,6 +62,7 @@ class Playlist(models.Model):
     songs = models.ManyToManyField(Song, blank=True, verbose_name="Melodii")
     cover_image = models.ImageField(upload_to='playlists/', null=True, blank=True)
     is_public = models.BooleanField(default=True, verbose_name="Public")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, verbose_name="Utilizator", related_name='playlists')
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -68,4 +70,6 @@ class Playlist(models.Model):
         verbose_name_plural = "Playlist-uri"
 
     def __str__(self):
+        if self.user:
+            return f"{self.name} ({self.user.username})"
         return self.name

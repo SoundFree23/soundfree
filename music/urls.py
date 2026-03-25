@@ -27,6 +27,8 @@ urlpatterns = [
     path('backend/song/<int:pk>/toggle/', views.backend_toggle_song, name='backend_toggle_song'),
     path('backend/genres/', views.backend_genres, name='backend_genres'),
     path('backend/users/', views.backend_users, name='backend_users'),
+    path('backend/users/<int:user_id>/playlists/', views.backend_user_playlists, name='backend_user_playlists'),
+    path('api/user-playlists/', views.api_user_playlists, name='api_user_playlists'),
     path('backend/login/', auth_views.LoginView.as_view(template_name='backend/login.html'), name='backend_login'),
     path('backend/logout/', auth_views.LogoutView.as_view(next_page='/backend/login/'), name='backend_logout'),
 ]

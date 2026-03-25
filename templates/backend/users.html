@@ -68,7 +68,8 @@
             </td>
             <td style="color:var(--text3);font-size:0.8rem;">{{ u.date_joined|date:"d.m.Y" }}</td>
             <td>
-              <div style="display:flex;gap:0.5rem;">
+              <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+                <a href="{% url 'music:backend_user_playlists' u.id %}" class="btn btn-primary" style="font-size:0.75rem;padding:0.3rem 0.6rem;text-decoration:none;">🎵 Playlisturi</a>
                 <form method="post" style="display:inline;">
                   {% csrf_token %}
                   <input type="hidden" name="action" value="toggle">

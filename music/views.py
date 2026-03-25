@@ -267,3 +267,70 @@ def backend_users(request):
             return redirect('music:backend_users')
     users = User.objects.filter(is_staff=False).order_by('-date_joined')
     return render(request, 'backend/users.html', {'users': users, 'user_error': error})
+
+
+@login_required(login_url='/backend/login/')
+@user_passes_test(is_staff, login_url='/backend/login/')
+def backend_user_playlists(request, user_id):
+    target_user = get_object_or_404(User, id=user_id, is_staff=False)
+    all_songs = Song.objects.filter(is_active=True).order_by('title')
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        if action == 'create_playlist':
+            name = request.POST.get('name', '').strip()
+            if name:
+                Playlist.objects.create(name=name, user=target_user)
+                messages.success(request, f'✅ Playlist "{name}" creat!')
+                return redirect('music:backend_user_playlists', user_id=user_id)
+        elif action == 'delete_playlist':
+            pl_id = request.POST.get('playlist_id')
+            Playlist.objects.filter(id=pl_id, user=target_user).delete()
+            return redirect('music:backend_user_playlists', user_id=user_id)
+        elif action == 'add_song':
+            pl_id = request.POST.get('playlist_id')
+            song_id = request.POST.get('song_id')
+            pl = Playlist.objects.filter(id=pl_id, user=target_user).first()
+            if pl and song_id:
+                pl.songs.add(song_id)
+            return redirect('music:backend_user_playlists', user_id=user_id)
+        elif action == 'remove_song':
+            pl_id = request.POST.get('playlist_id')
+            song_id = request.POST.get('song_id')
+            pl = Playlist.objects.filter(id=pl_id, user=target_user).first()
+            if pl and song_id:
+                pl.songs.remove(song_id)
+            return redirect('music:backend_user_playlists', user_id=user_id)
+
+    playlists = Playlist.objects.filter(user=target_user).prefetch_related('songs')
+    return render(request, 'backend/user_playlists.html', {
+        'target_user': target_user,
+        'playlists': playlists,
+        'all_songs': all_songs,
+    })
+
+
+def api_user_playlists(request):
+    """API: returns server-side playlists for the logged-in user"""
+    if not request.user.is_authenticated:
+        return JsonResponse({'playlists': []})
+    playlists = Playlist.objects.filter(user=request.user).prefetch_related('songs')
+    data = []
+    for pl in playlists:
+        songs = []
+        for s in pl.songs.all():
+            songs.append({
+                'id': s.id,
+                'title': s.title,
+                'artist': s.artist,
+                'audio': s.audio_file.url if s.audio_file else '',
+                'cover': s.cover_image.url if s.cover_image else '',
+                'duration': s.duration,
+            })
+        data.append({
+            'id': pl.id,
+            'name': pl.name,
+            'songs': songs,
+            'count': len(songs),
+        })
+    return JsonResponse({'playlists': data})
