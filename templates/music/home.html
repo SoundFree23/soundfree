@@ -32,7 +32,7 @@
 <div style="padding:0 1rem;">
   <div class="genre-grid">
     {% for genre in genres %}
-    <a href="{% url 'music:library' %}?genre={{ genre.slug }}" class="genre-card" data-gc="{{ forloop.counter0 }}">
+    <a href="{% url 'music:browse' %}?genre={{ genre.slug }}" class="genre-card" data-gc="{{ forloop.counter0 }}">
       <div class="gc-name">{{ genre.name }}</div>
       <div class="gc-icon">{{ genre.icon }}</div>
     </a>
@@ -46,7 +46,7 @@
 <div class="sh">
   <div class="sh-row">
     <div class="sh-title">{{ t.home_featured_title }}</div>
-    <a href="{% url 'music:library' %}" class="sh-link">{{ t.home_all_songs }}</a>
+    <a href="{% url 'music:browse' %}" class="sh-link">{{ t.home_all_songs }}</a>
   </div>
 </div>
 <div class="h-scroll">
@@ -67,7 +67,7 @@
 <div class="sh">
   <div class="sh-row">
     <div class="sh-title">{{ t.home_recent_title }}</div>
-    <a href="{% url 'music:library' %}" class="sh-link">{{ t.home_all_songs }}</a>
+    <a href="{% url 'music:browse' %}" class="sh-link">{{ t.home_all_songs }}</a>
   </div>
 </div>
 <div style="padding:0 0.5rem;">
