@@ -9,6 +9,19 @@
   <h1 style="font-size:1.5rem;font-weight:800;" id="greeting">{{ t.greeting_afternoon }}</h1>
 </div>
 
+<!-- FAVORITES CARD -->
+<div style="padding:0 1rem 0.25rem;">
+  <a href="{% url 'music:favorites' %}" class="fav-card" id="fav-card">
+    <div class="fav-card-icon">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+    </div>
+    <div class="fav-card-info">
+      <div class="fav-card-title">{{ t.fav_title }}</div>
+      <div class="fav-card-count"><span id="fav-count">0</span> {{ t.fav_subtitle }}</div>
+    </div>
+  </a>
+</div>
+
 <!-- GENRE GRID -->
 {% if genres %}
 <div class="sh">
@@ -67,7 +80,10 @@
       <div class="row-title">{{ song.title }}</div>
       <div class="row-artist">{{ song.artist }}</div>
     </div>
-    {% if song.genre %}<span class="row-meta">{{ song.genre.icon }}</span>{% endif %}
+    <button class="fav-btn" data-id="{{ song.id }}">
+      <svg class="heart-empty" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      <svg class="heart-full" viewBox="0 0 24 24" fill="#1db954" stroke="#1db954" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+    </button>
   </div>
   {% endfor %}
 </div>
@@ -82,6 +98,15 @@ document.querySelectorAll('.genre-card[data-gc]').forEach(el => {
   const i = parseInt(el.dataset.gc) % gcColors.length;
   el.style.background = 'linear-gradient(135deg, ' + gcColors[i] + ', ' + gcColors[i] + '99)';
 });
+
+// Update fav count on homepage
+(function() {
+  try {
+    const favs = JSON.parse(localStorage.getItem('soundfree_favorites')) || [];
+    const el = document.getElementById('fav-count');
+    if (el) el.textContent = favs.length;
+  } catch(e) {}
+})();
 
 // Dynamic greeting based on time of day
 (function() {

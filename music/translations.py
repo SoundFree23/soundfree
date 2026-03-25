@@ -192,6 +192,14 @@ TRANSLATIONS = {
         'home_featured_title': 'Recomandate pentru tine',
         'home_recent_title': 'Adăugate recent',
         'home_all_songs': 'Vezi toate',
+
+        # FAVORITES
+        'fav_title': 'Melodii Îndrăgite',
+        'fav_subtitle': 'melodii salvate',
+        'fav_empty_title': 'Nicio melodie salvată',
+        'fav_empty_desc': 'Apasă pe inimă pentru a salva melodiile preferate.',
+        'fav_play_all': 'Redă Toate',
+        'fav_go_library': 'Descoperă melodii',
     },
 
     'en': {
@@ -387,5 +395,13 @@ TRANSLATIONS = {
         'home_featured_title': 'Recommended for you',
         'home_recent_title': 'Recently added',
         'home_all_songs': 'See all',
+
+        # FAVORITES
+        'fav_title': 'Liked Songs',
+        'fav_subtitle': 'saved songs',
+        'fav_empty_title': 'No saved songs',
+        'fav_empty_desc': 'Tap the heart to save your favorite songs.',
+        'fav_play_all': 'Play All',
+        'fav_go_library': 'Discover songs',
     },
 }

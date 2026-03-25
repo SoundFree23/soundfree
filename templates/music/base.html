@@ -386,6 +386,42 @@
     footer a { color: var(--text2); text-decoration: none; }
     footer a:hover { color: var(--accent); }
 
+    /* ── FAVORITE BUTTON ── */
+    .fav-btn {
+      background: none; border: none; cursor: pointer;
+      padding: 6px; display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; transition: transform 0.2s;
+    }
+    .fav-btn:active { transform: scale(1.3); }
+    .fav-btn svg { width: 22px; height: 22px; }
+    .fav-btn .heart-empty { color: var(--text3); }
+    .fav-btn .heart-full { color: #1db954; display: none; }
+    .fav-btn.is-fav .heart-empty { display: none; }
+    .fav-btn.is-fav .heart-full { display: block; }
+    .fs-fav-btn { margin-left: 0.5rem; }
+    .fs-fav-btn svg { width: 26px; height: 26px; }
+
+    /* ── FAVORITES CARD (homepage) ── */
+    .fav-card {
+      display: flex; align-items: center; gap: 1rem;
+      background: linear-gradient(135deg, #450af5, #c4efd9);
+      border-radius: 8px; padding: 0.75rem 1rem;
+      cursor: pointer; text-decoration: none;
+      transition: transform 0.2s, opacity 0.2s;
+      margin-bottom: 0.5rem;
+    }
+    .fav-card:hover { transform: scale(1.01); opacity: 0.95; }
+    .fav-card-icon {
+      width: 56px; height: 56px; border-radius: 6px;
+      background: linear-gradient(135deg, #7b2ff7, #c471f5);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .fav-card-icon svg { width: 28px; height: 28px; color: #fff; }
+    .fav-card-info { flex: 1; }
+    .fav-card-title { font-size: 1rem; font-weight: 700; color: #fff; }
+    .fav-card-count { font-size: 0.78rem; color: rgba(255,255,255,0.8); margin-top: 2px; }
+
     /* ── UTILS ── */
     .container { max-width: 1200px; margin: 0 auto; padding: 0 1rem; }
     .section { padding: 3rem 0; }
@@ -499,9 +535,15 @@
     <div class="fs-cover" id="fs-cover">🎵</div>
   </div>
   <div class="fs-controls">
-    <div class="fs-song-info">
-      <div class="fs-title" id="fs-title">{{ t.player_select }}</div>
-      <div class="fs-artist" id="fs-artist">SoundFree.ro</div>
+    <div class="fs-song-info" style="display:flex;align-items:flex-start;justify-content:space-between;">
+      <div style="flex:1;min-width:0;">
+        <div class="fs-title" id="fs-title">{{ t.player_select }}</div>
+        <div class="fs-artist" id="fs-artist">SoundFree.ro</div>
+      </div>
+      <button class="fav-btn fs-fav-btn" id="fs-fav-btn" data-id="">
+        <svg class="heart-empty" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        <svg class="heart-full" viewBox="0 0 24 24" fill="#1db954" stroke="#1db954" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      </button>
     </div>
     <div class="fs-progress">
       <div class="fs-progress-bar" id="fs-progress-bar">
@@ -747,7 +789,64 @@ history.replaceState({ url: window.location.pathname }, '', window.location.path
 
 fetch('/api/songs/')
   .then(r => r.json())
-  .then(data => { playlist = data.songs; attachCardListeners(); });
+  .then(data => { playlist = data.songs; attachCardListeners(); updateAllHearts(); });
+
+// ── Favorites (localStorage) ──
+const FAV_KEY = 'soundfree_favorites';
+function getFavorites() {
+  try { return JSON.parse(localStorage.getItem(FAV_KEY)) || []; } catch(e) { return []; }
+}
+function setFavorites(favs) { localStorage.setItem(FAV_KEY, JSON.stringify(favs)); }
+function isFavorite(id) { return getFavorites().includes(id); }
+
+function toggleFavorite(id) {
+  let favs = getFavorites();
+  if (favs.includes(id)) {
+    favs = favs.filter(f => f !== id);
+  } else {
+    favs.push(id);
+  }
+  setFavorites(favs);
+  updateAllHearts();
+  updateFavCount();
+}
+
+function updateAllHearts() {
+  const favs = getFavorites();
+  document.querySelectorAll('.fav-btn[data-id]').forEach(btn => {
+    const id = parseInt(btn.dataset.id);
+    btn.classList.toggle('is-fav', favs.includes(id));
+  });
+}
+
+function updateFavCount() {
+  const countEl = document.getElementById('fav-count');
+  if (countEl) countEl.textContent = getFavorites().length;
+}
+
+// Heart click handler (delegated)
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('.fav-btn[data-id]');
+  if (!btn) return;
+  e.stopPropagation();
+  e.preventDefault();
+  const id = parseInt(btn.dataset.id);
+  if (id) toggleFavorite(id);
+});
+
+// Fullscreen player heart sync
+const fsFavBtn = document.getElementById('fs-fav-btn');
+const origLoadSong = loadSong;
+loadSong = function(idx) {
+  origLoadSong(idx);
+  if (playlist[idx]) {
+    fsFavBtn.dataset.id = playlist[idx].id;
+    fsFavBtn.classList.toggle('is-fav', isFavorite(playlist[idx].id));
+  }
+};
+
+// Init hearts on page load
+document.addEventListener('DOMContentLoaded', () => { updateAllHearts(); updateFavCount(); });
 </script>
 
 {% block extra_js %}{% endblock %}

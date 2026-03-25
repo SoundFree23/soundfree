@@ -59,6 +59,10 @@ def library(request):
     return render(request, 'music/library.html', context)
 
 
+def favorites(request):
+    return render(request, 'music/favorites.html')
+
+
 def pricing(request):
     return render(request, 'music/pricing.html')
 
