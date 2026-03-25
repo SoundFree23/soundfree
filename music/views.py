@@ -7,6 +7,7 @@ from django.contrib import messages
 from django.db.models import Sum
 from .models import Song, Genre, Mood, Playlist
 from .forms import SongUploadForm, GenreForm
+from .cover_generator import auto_generate_cover
 
 
 def is_staff(user):
@@ -166,7 +167,17 @@ def backend_upload(request):
         form = SongUploadForm(request.POST, request.FILES)
         if form.is_valid():
             song = form.save()
-            messages.success(request, f'✅ Melodia „{song.title}" a fost încărcată cu succes!')
+            # Auto-generate cover if none was uploaded
+            if not song.cover_image:
+                try:
+                    if auto_generate_cover(song):
+                        messages.success(request, f'✅ Melodia „{song.title}" a fost încărcată cu succes! Copertă generată automat.')
+                    else:
+                        messages.success(request, f'✅ Melodia „{song.title}" a fost încărcată, dar coperta nu a putut fi generată.')
+                except Exception:
+                    messages.success(request, f'✅ Melodia „{song.title}" a fost încărcată cu succes!')
+            else:
+                messages.success(request, f'✅ Melodia „{song.title}" a fost încărcată cu succes!')
             return redirect('music:backend_songs')
         else:
             messages.error(request, '❌ Eroare la încărcare. Verifică câmpurile obligatorii.')
