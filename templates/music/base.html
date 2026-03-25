@@ -698,6 +698,8 @@ let playlist = [];
 let currentIdx = 0;
 let isPlaying = false;
 let hasSong = false;
+let guestSongsPlayed = 0;
+const GUEST_SONG_LIMIT = 3;
 
 function fmtTime(s) {
   s = Math.floor(s || 0);
@@ -729,6 +731,11 @@ function loadSong(idx) {
 }
 
 function playSong(idx) {
+  // Guest limit: after 3 full songs, show login popup
+  if (!isAuthenticated && guestSongsPlayed >= GUEST_SONG_LIMIT) {
+    showLoginPopup('preview');
+    return;
+  }
   currentIdx = idx;
   loadSong(idx);
   audio.play();
@@ -797,15 +804,6 @@ document.getElementById('fs-btn-prev').addEventListener('click', () => { if (pla
 
 audio.addEventListener('timeupdate', () => {
   if (!audio.duration) return;
-  // 30-second limit for non-authenticated users
-  if (!isAuthenticated && audio.currentTime >= 30) {
-    audio.pause();
-    audio.currentTime = 0;
-    isPlaying = false;
-    updatePlayBtn();
-    showLoginPopup('preview');
-    return;
-  }
   const pct = (audio.currentTime / audio.duration) * 100;
   miniProgressFill.style.width = pct + '%';
   fsProgressFill.style.width = pct + '%';
@@ -813,7 +811,10 @@ audio.addEventListener('timeupdate', () => {
   fsTimeDur.textContent = fmtTime(audio.duration);
 });
 
-audio.addEventListener('ended', () => { playSong((currentIdx + 1) % playlist.length); });
+audio.addEventListener('ended', () => {
+  if (!isAuthenticated) guestSongsPlayed++;
+  playSong((currentIdx + 1) % playlist.length);
+});
 
 function seekFromEvent(e) {
   if (!audio.duration || isNaN(audio.duration)) return;
