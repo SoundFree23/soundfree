@@ -636,7 +636,7 @@ function colorizeGenreCards() {
     <div style="font-size:3rem;margin-bottom:1rem;">🔒</div>
     <h3 id="login-popup-title" style="font-size:1.1rem;font-weight:700;margin-bottom:0.5rem;">{{ t.login_required }}</h3>
     <p id="login-popup-desc" style="color:var(--text2);font-size:0.85rem;margin-bottom:1.5rem;">{{ t.login_required_desc }}</p>
-    <a href="{% url 'music:user_login' %}" class="btn-primary" style="display:inline-flex;width:100%;justify-content:center;margin-bottom:0.75rem;">{{ t.login_to_continue }}</a>
+    <a href="{% url 'music:user_login' %}" class="btn-primary" data-no-spa="true" style="display:inline-flex;width:100%;justify-content:center;margin-bottom:0.75rem;">{{ t.login_to_continue }}</a>
     <button id="login-popup-close" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:0.85rem;font-family:inherit;">Anulează</button>
   </div>
 </div>
@@ -883,8 +883,9 @@ document.addEventListener('click', (e) => {
   const href = link.getAttribute('href');
   if (!href || href.startsWith('#') || href.startsWith('javascript:') ||
       href.startsWith('http') || href.startsWith('//') ||
-      link.hasAttribute('download') || link.getAttribute('target') === '_blank') return;
-  if (href.includes('/lang/')) return;
+      link.hasAttribute('download') || link.getAttribute('target') === '_blank' ||
+      link.hasAttribute('data-no-spa')) return;
+  if (href.includes('/lang/') || href.includes('/login') || href.includes('/logout')) return;
   // Block favorites/library/playlist for non-authenticated users
   if (!isAuthenticated && (href.includes('/favorites') || href.includes('/library') || href.includes('/playlist/'))) {
     e.preventDefault();
