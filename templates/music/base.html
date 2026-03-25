@@ -498,6 +498,15 @@
       <a href="{% url 'music:set_language' 'ro' %}" class="lang-btn {% if current_lang == 'ro' %}lang-active{% endif %}">RO</a>
       <a href="{% url 'music:set_language' 'en' %}" class="lang-btn {% if current_lang == 'en' %}lang-active{% endif %}">EN</a>
     </div>
+    {% if user.is_authenticated %}
+    <a href="{% url 'music:user_logout' %}" style="color:var(--text2);text-decoration:none;font-size:0.75rem;padding:0.3rem 0.65rem;border-radius:18px;background:var(--bg3);">
+      {{ user.username }}
+    </a>
+    {% else %}
+    <a href="{% url 'music:user_login' %}" style="color:#fff;text-decoration:none;font-size:0.75rem;font-weight:600;padding:0.3rem 0.65rem;border-radius:18px;background:var(--accent);">
+      {{ t.login_btn }}
+    </a>
+    {% endif %}
   </div>
 </div>
 
@@ -600,9 +609,39 @@
   </div>
 </div>
 
+<!-- LOGIN REQUIRED POPUP -->
+<div id="login-popup" style="display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.8);backdrop-filter:blur(6px);align-items:center;justify-content:center;">
+  <div style="background:var(--bg2);border-radius:16px;padding:2rem 1.5rem;width:90%;max-width:340px;margin:auto;text-align:center;">
+    <div style="font-size:3rem;margin-bottom:1rem;">🔒</div>
+    <h3 id="login-popup-title" style="font-size:1.1rem;font-weight:700;margin-bottom:0.5rem;">{{ t.login_required }}</h3>
+    <p id="login-popup-desc" style="color:var(--text2);font-size:0.85rem;margin-bottom:1.5rem;">{{ t.login_required_desc }}</p>
+    <a href="{% url 'music:user_login' %}" class="btn-primary" style="display:inline-flex;width:100%;justify-content:center;margin-bottom:0.75rem;">{{ t.login_to_continue }}</a>
+    <button id="login-popup-close" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:0.85rem;font-family:inherit;">Anulează</button>
+  </div>
+</div>
+
 <audio id="audio-el" preload="metadata"></audio>
 
 <script>
+const isAuthenticated = {{ user.is_authenticated|yesno:"true,false" }};
+
+// Login popup
+const loginPopup = document.getElementById('login-popup');
+const loginPopupTitle = document.getElementById('login-popup-title');
+const loginPopupDesc = document.getElementById('login-popup-desc');
+document.getElementById('login-popup-close').addEventListener('click', () => { loginPopup.style.display = 'none'; });
+loginPopup.addEventListener('click', (e) => { if (e.target === loginPopup) loginPopup.style.display = 'none'; });
+
+function showLoginPopup(type) {
+  if (type === 'preview') {
+    loginPopupTitle.textContent = '{{ t.preview_ended }}';
+    loginPopupDesc.textContent = '{{ t.preview_ended_desc }}';
+  } else {
+    loginPopupTitle.textContent = '{{ t.login_required }}';
+    loginPopupDesc.textContent = '{{ t.login_required_desc }}';
+  }
+  loginPopup.style.display = 'flex';
+}
 const audio = document.getElementById('audio-el');
 const miniPlayer = document.getElementById('mini-player');
 const miniCover = document.getElementById('mini-cover');
@@ -729,6 +768,15 @@ document.getElementById('fs-btn-prev').addEventListener('click', () => { if (pla
 
 audio.addEventListener('timeupdate', () => {
   if (!audio.duration) return;
+  // 30-second limit for non-authenticated users
+  if (!isAuthenticated && audio.currentTime >= 30) {
+    audio.pause();
+    audio.currentTime = 0;
+    isPlaying = false;
+    updatePlayBtn();
+    showLoginPopup('preview');
+    return;
+  }
   const pct = (audio.currentTime / audio.duration) * 100;
   miniProgressFill.style.width = pct + '%';
   fsProgressFill.style.width = pct + '%';
@@ -812,6 +860,12 @@ document.addEventListener('click', (e) => {
       href.startsWith('http') || href.startsWith('//') ||
       link.hasAttribute('download') || link.getAttribute('target') === '_blank') return;
   if (href.includes('/lang/')) return;
+  // Block favorites/library/playlist for non-authenticated users
+  if (!isAuthenticated && (href.includes('/favorites') || href.includes('/library') || href.includes('/playlist/'))) {
+    e.preventDefault();
+    showLoginPopup('access');
+    return;
+  }
   e.preventDefault();
   navigateTo(href);
 });
@@ -869,6 +923,7 @@ document.addEventListener('click', (e) => {
   if (!btn) return;
   e.stopPropagation();
   e.preventDefault();
+  if (!isAuthenticated) { showLoginPopup('access'); return; }
   const id = parseInt(btn.dataset.id);
   if (id) toggleFavorite(id);
 });

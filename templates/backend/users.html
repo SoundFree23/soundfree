@@ -1,0 +1,101 @@
+{% extends 'backend/base_backend.html' %}
+{% block title %}Utilizatori — Backend SoundFree{% endblock %}
+{% block page_title %}👥 Utilizatori{% endblock %}
+{% block active_users %}active{% endblock %}
+
+{% block content %}
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;align-items:start;">
+
+  <!-- Creaza utilizator -->
+  <div>
+    <div class="page-header" style="margin-bottom:1rem;">
+      <h1>Creează Utilizator Nou</h1>
+    </div>
+    {% if user_error == 'exists' %}
+    <div style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:0.75rem 1rem;margin-bottom:1rem;color:#ef5350;font-size:0.85rem;">
+      Acest username există deja.
+    </div>
+    {% endif %}
+    <form method="post">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="create">
+      <div class="form-card">
+        <div class="form-group" style="margin-bottom:1rem;">
+          <label class="form-label">Username</label>
+          <input type="text" name="username" class="form-input" placeholder="ex: cafenea_centru" required>
+        </div>
+        <div class="form-group" style="margin-bottom:1rem;">
+          <label class="form-label">Parolă</label>
+          <input type="password" name="password" class="form-input" placeholder="Parolă sigură" required>
+        </div>
+        <div class="form-group" style="margin-bottom:1.5rem;">
+          <label class="form-label">Email (opțional)</label>
+          <input type="email" name="email" class="form-input" placeholder="email@exemplu.ro">
+        </div>
+        <button type="submit" class="btn btn-primary">✅ Creează utilizator</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Lista utilizatori -->
+  <div>
+    <div class="page-header" style="margin-bottom:1rem;">
+      <h1>Utilizatori existenți ({{ users|length }})</h1>
+    </div>
+    <div class="table-card">
+      <table>
+        <thead>
+          <tr>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Status</th>
+            <th>Data</th>
+            <th>Acțiuni</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for u in users %}
+          <tr>
+            <td style="font-weight:600;">{{ u.username }}</td>
+            <td style="color:var(--text2);">{{ u.email|default:"-" }}</td>
+            <td>
+              {% if u.is_active %}
+              <span style="color:var(--success);font-size:0.8rem;font-weight:600;">Activ</span>
+              {% else %}
+              <span style="color:var(--danger);font-size:0.8rem;font-weight:600;">Inactiv</span>
+              {% endif %}
+            </td>
+            <td style="color:var(--text3);font-size:0.8rem;">{{ u.date_joined|date:"d.m.Y" }}</td>
+            <td>
+              <div style="display:flex;gap:0.5rem;">
+                <form method="post" style="display:inline;">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="toggle">
+                  <input type="hidden" name="user_id" value="{{ u.id }}">
+                  <button type="submit" class="btn btn-outline" style="font-size:0.75rem;padding:0.3rem 0.6rem;">
+                    {% if u.is_active %}Dezactivează{% else %}Activează{% endif %}
+                  </button>
+                </form>
+                <form method="post" style="display:inline;" onsubmit="return confirm('Ștergi utilizatorul {{ u.username }}?');">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="delete">
+                  <input type="hidden" name="user_id" value="{{ u.id }}">
+                  <button type="submit" class="btn btn-danger" style="font-size:0.75rem;padding:0.3rem 0.6rem;">Șterge</button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="5" style="text-align:center;color:var(--text3);padding:2rem;">Niciun utilizator creat.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}

@@ -215,6 +215,31 @@ TRANSLATIONS = {
         'lib_add_to_playlist': 'Adaugă în playlist',
         'lib_remove_from_playlist': 'Scoate din playlist',
         'lib_browse_songs': 'Caută melodii',
+
+        # AUTH
+        'login_title': 'Intră în cont',
+        'login_username': 'Nume utilizator',
+        'login_password': 'Parola',
+        'login_btn': 'Conectează-te',
+        'login_error': 'Nume de utilizator sau parolă incorectă.',
+        'logout_btn': 'Deconectează-te',
+        'login_required': 'Conectează-te pentru acces complet',
+        'login_required_desc': 'Loghează-te pentru a asculta melodii întregi și a-ți salva favoritele.',
+        'login_to_continue': 'Intră în cont',
+        'preview_ended': 'Preview terminat',
+        'preview_ended_desc': 'Loghează-te pentru a asculta melodia completă.',
+
+        # BACKEND USERS
+        'backend_users': 'Utilizatori',
+        'backend_create_user': 'Creează utilizator',
+        'backend_username': 'Username',
+        'backend_email': 'Email (opțional)',
+        'backend_password': 'Parolă',
+        'backend_user_created': 'Utilizator creat cu succes!',
+        'backend_user_exists': 'Acest username există deja.',
+        'backend_delete_user': 'Șterge',
+        'backend_active': 'Activ',
+        'backend_inactive': 'Inactiv',
     },
 
     'en': {
@@ -433,5 +458,30 @@ TRANSLATIONS = {
         'lib_add_to_playlist': 'Add to playlist',
         'lib_remove_from_playlist': 'Remove from playlist',
         'lib_browse_songs': 'Browse songs',
+
+        # AUTH
+        'login_title': 'Sign in',
+        'login_username': 'Username',
+        'login_password': 'Password',
+        'login_btn': 'Sign in',
+        'login_error': 'Invalid username or password.',
+        'logout_btn': 'Sign out',
+        'login_required': 'Sign in for full access',
+        'login_required_desc': 'Log in to listen to full tracks and save your favorites.',
+        'login_to_continue': 'Sign in',
+        'preview_ended': 'Preview ended',
+        'preview_ended_desc': 'Sign in to listen to the full track.',
+
+        # BACKEND USERS
+        'backend_users': 'Users',
+        'backend_create_user': 'Create user',
+        'backend_username': 'Username',
+        'backend_email': 'Email (optional)',
+        'backend_password': 'Password',
+        'backend_user_created': 'User created successfully!',
+        'backend_user_exists': 'This username already exists.',
+        'backend_delete_user': 'Delete',
+        'backend_active': 'Active',
+        'backend_inactive': 'Inactive',
     },
 }

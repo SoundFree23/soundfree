@@ -186,6 +186,9 @@
     <a href="{% url 'music:backend_genres' %}" class="sidebar-link {% block active_genres %}{% endblock %}">
       <span class="icon">🎼</span> Genuri
     </a>
+    <a href="{% url 'music:backend_users' %}" class="sidebar-link {% block active_users %}{% endblock %}">
+      <span class="icon">👥</span> Utilizatori
+    </a>
 
     <div class="nav-section">Site</div>
     <a href="{% url 'music:home' %}" class="sidebar-link" target="_blank">

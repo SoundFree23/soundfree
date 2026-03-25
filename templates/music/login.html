@@ -1,0 +1,45 @@
+{% extends 'music/base.html' %}
+
+{% block title %}{{ t.login_title }} — SoundFree.ro{% endblock %}
+
+{% block content %}
+
+<div style="display:flex;align-items:center;justify-content:center;min-height:70vh;padding:2rem 1rem;">
+  <div style="width:100%;max-width:360px;">
+    <div style="text-align:center;margin-bottom:2rem;">
+      <h1 style="font-size:1.8rem;font-weight:800;margin-bottom:0.5rem;">{{ t.login_title }}</h1>
+      <p style="color:var(--text2);font-size:0.9rem;">SoundFree.ro</p>
+    </div>
+
+    {% if login_error %}
+    <div style="background:rgba(229,57,53,0.15);border:1px solid rgba(229,57,53,0.3);border-radius:8px;padding:0.75rem 1rem;margin-bottom:1rem;color:#ef5350;font-size:0.85rem;">
+      {{ t.login_error }}
+    </div>
+    {% endif %}
+
+    <form method="post" action="{% url 'music:user_login' %}{% if request.GET.next %}?next={{ request.GET.next }}{% endif %}">
+      {% csrf_token %}
+      <div style="margin-bottom:1rem;">
+        <label style="display:block;font-size:0.8rem;color:var(--text2);margin-bottom:0.35rem;font-weight:600;">{{ t.login_username }}</label>
+        <input type="text" name="username" required autofocus
+          style="width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:0.75rem 1rem;border-radius:8px;font-size:1rem;outline:none;font-family:inherit;box-sizing:border-box;"
+          placeholder="{{ t.login_username }}">
+      </div>
+      <div style="margin-bottom:1.5rem;">
+        <label style="display:block;font-size:0.8rem;color:var(--text2);margin-bottom:0.35rem;font-weight:600;">{{ t.login_password }}</label>
+        <input type="password" name="password" required
+          style="width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:0.75rem 1rem;border-radius:8px;font-size:1rem;outline:none;font-family:inherit;box-sizing:border-box;"
+          placeholder="{{ t.login_password }}">
+      </div>
+      <button type="submit" class="btn-primary" style="width:100%;justify-content:center;font-size:1rem;padding:0.85rem;">
+        {{ t.login_btn }}
+      </button>
+    </form>
+
+    <div style="text-align:center;margin-top:1.5rem;">
+      <a href="{% url 'music:home' %}" style="color:var(--text2);text-decoration:none;font-size:0.85rem;">← {{ t.nav_home }}</a>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

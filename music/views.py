@@ -1,6 +1,8 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.models import User
 from django.contrib import messages
 from django.db.models import Sum
 from .models import Song, Genre, Mood, Playlist
@@ -18,6 +20,26 @@ def set_language(request, lang):
     return redirect(referer)
 
 
+def user_login(request):
+    error = None
+    if request.method == 'POST':
+        username = request.POST.get('username', '').strip()
+        password = request.POST.get('password', '')
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            next_url = request.GET.get('next', '/')
+            return redirect(next_url)
+        else:
+            error = True
+    return render(request, 'music/login.html', {'login_error': error})
+
+
+def user_logout(request):
+    logout(request)
+    return redirect('/')
+
+
 def home(request):
     featured_songs = Song.objects.filter(is_active=True, is_featured=True)[:8]
     recent_songs = Song.objects.filter(is_active=True).order_by('-id')[:8]
@@ -32,6 +54,7 @@ def home(request):
     return render(request, 'music/home.html', context)
 
 
+@login_required(login_url='/login/')
 def library(request):
     return render(request, 'music/library.html')
 
@@ -63,10 +86,12 @@ def browse(request):
     return render(request, 'music/browse.html', context)
 
 
+@login_required(login_url='/login/')
 def favorites(request):
     return render(request, 'music/favorites.html')
 
 
+@login_required(login_url='/login/')
 def playlist_detail(request, pl_id):
     return render(request, 'music/playlist_detail.html', {'pl_id': pl_id})
 
@@ -199,3 +224,35 @@ def backend_genres(request):
         form = GenreForm()
     genres = Genre.objects.all()
     return render(request, 'backend/genres.html', {'form': form, 'genres': genres})
+
+
+@login_required(login_url='/backend/login/')
+@user_passes_test(is_staff, login_url='/backend/login/')
+def backend_users(request):
+    error = None
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        if action == 'create':
+            username = request.POST.get('username', '').strip()
+            password = request.POST.get('password', '')
+            email = request.POST.get('email', '').strip()
+            if username and password:
+                if User.objects.filter(username=username).exists():
+                    error = 'exists'
+                else:
+                    User.objects.create_user(username=username, password=password, email=email, is_staff=False)
+                    messages.success(request, '✅ Utilizator creat!')
+                    return redirect('music:backend_users')
+        elif action == 'delete':
+            user_id = request.POST.get('user_id')
+            User.objects.filter(id=user_id, is_staff=False).delete()
+            return redirect('music:backend_users')
+        elif action == 'toggle':
+            user_id = request.POST.get('user_id')
+            u = User.objects.filter(id=user_id, is_staff=False).first()
+            if u:
+                u.is_active = not u.is_active
+                u.save()
+            return redirect('music:backend_users')
+    users = User.objects.filter(is_staff=False).order_by('-date_joined')
+    return render(request, 'backend/users.html', {'users': users, 'user_error': error})

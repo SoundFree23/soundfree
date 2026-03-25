@@ -14,6 +14,8 @@ urlpatterns = [
     path('pricing/', views.pricing, name='pricing'),
     path('song/<int:pk>/', views.song_detail, name='song_detail'),
     path('api/songs/', views.api_songs, name='api_songs'),
+    path('login/', views.user_login, name='user_login'),
+    path('logout/', views.user_logout, name='user_logout'),
     path('lang/<str:lang>/', views.set_language, name='set_language'),
 
     # Backend admin
@@ -24,6 +26,7 @@ urlpatterns = [
     path('backend/song/<int:pk>/delete/', views.backend_delete_song, name='backend_delete_song'),
     path('backend/song/<int:pk>/toggle/', views.backend_toggle_song, name='backend_toggle_song'),
     path('backend/genres/', views.backend_genres, name='backend_genres'),
+    path('backend/users/', views.backend_users, name='backend_users'),
     path('backend/login/', auth_views.LoginView.as_view(template_name='backend/login.html'), name='backend_login'),
     path('backend/logout/', auth_views.LogoutView.as_view(next_page='/backend/login/'), name='backend_logout'),
 ]
