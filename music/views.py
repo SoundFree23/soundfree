@@ -75,8 +75,9 @@ def song_detail(request, pk):
 
 
 def api_songs(request):
-    songs = Song.objects.filter(is_active=True).values(
-        'id', 'title', 'artist', 'audio_file', 'cover_image', 'duration'
+    songs = Song.objects.filter(is_active=True).select_related('genre').values(
+        'id', 'title', 'artist', 'audio_file', 'cover_image', 'duration',
+        'genre__slug', 'genre__name'
     )
     songs_list = []
     for s in songs:
@@ -87,6 +88,8 @@ def api_songs(request):
             'audio': request.build_absolute_uri(f"/media/{s['audio_file']}") if s['audio_file'] else '',
             'cover': request.build_absolute_uri(f"/media/{s['cover_image']}") if s['cover_image'] else '',
             'duration': s['duration'],
+            'genre': s['genre__slug'] or '',
+            'genre_name': s['genre__name'] or '',
         })
     return JsonResponse({'songs': songs_list})
 

@@ -893,18 +893,30 @@ function initFavoritesPage() {
     attachCardListeners();
   }
 
-  // Play all: favorites first, then rest
+  // Play all: favorites first, then similar genre songs, shuffled
   if (favPlayAll) {
     favPlayAll.onclick = function() {
       const favIds = getFavorites();
       const favSongs = playlist.filter(s => favIds.includes(s.id));
-      const otherSongs = playlist.filter(s => !favIds.includes(s.id));
-      if (favSongs.length) {
-        playlist.length = 0;
-        favSongs.forEach(s => playlist.push(s));
-        otherSongs.forEach(s => playlist.push(s));
-        playSong(0);
+      if (!favSongs.length) return;
+
+      // Get genres from favorite songs
+      const favGenres = [...new Set(favSongs.map(s => s.genre).filter(g => g))];
+
+      // Find other songs matching the same genres (not already in favorites)
+      let similarSongs = playlist.filter(s => !favIds.includes(s.id) && favGenres.includes(s.genre));
+
+      // Shuffle the similar songs for variety
+      for (let i = similarSongs.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [similarSongs[i], similarSongs[j]] = [similarSongs[j], similarSongs[i]];
       }
+
+      // Reorder: favorites first, then similar genre songs
+      playlist.length = 0;
+      favSongs.forEach(s => playlist.push(s));
+      similarSongs.forEach(s => playlist.push(s));
+      playSong(0);
     };
   }
 
