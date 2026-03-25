@@ -90,21 +90,17 @@
     attachCardListeners();
   }
 
-  // Play all favorites
+  // Play all favorites first, then continue with rest
   favPlayAll.addEventListener('click', () => {
     const favIds = getFavorites();
     const favSongs = playlist.filter(s => favIds.includes(s.id));
+    const otherSongs = playlist.filter(s => !favIds.includes(s.id));
     if (favSongs.length) {
-      // Replace playlist with favorites and play first
-      const origPlaylist = [...playlist];
+      // Reorder playlist: favorites first, then the rest
       playlist.length = 0;
       favSongs.forEach(s => playlist.push(s));
+      otherSongs.forEach(s => playlist.push(s));
       playSong(0);
-      // Restore full playlist after starting
-      setTimeout(() => {
-        playlist.length = 0;
-        origPlaylist.forEach(s => playlist.push(s));
-      }, 500);
     }
   });
 
