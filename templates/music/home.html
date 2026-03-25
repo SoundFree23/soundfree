@@ -92,12 +92,8 @@
 <div style="height:2rem;"></div>
 
 <script>
-// Genre card colors
-const gcColors = ['#1db954','#e13300','#8400e7','#1e3264','#e8115b','#148a08','#e91429','#509bf5','#f59b23','#ba5d07','#27856a','#af2896','#0d73ec','#608108','#8d67ab','#a56752','#477d95','#b49bc8'];
-document.querySelectorAll('.genre-card[data-gc]').forEach(el => {
-  const i = parseInt(el.dataset.gc) % gcColors.length;
-  el.style.background = 'linear-gradient(135deg, ' + gcColors[i] + ', ' + gcColors[i] + '99)';
-});
+// Colorize genre cards immediately
+if (typeof colorizeGenreCards === 'function') colorizeGenreCards();
 
 // Update fav count on homepage
 (function() {
