@@ -200,6 +200,21 @@ TRANSLATIONS = {
         'fav_empty_desc': 'Apasă pe inimă pentru a salva melodiile preferate.',
         'fav_play_all': 'Redă Toate',
         'fav_go_library': 'Descoperă melodii',
+
+        # LIBRARY (YOUR LIBRARY)
+        'lib_your_library': 'Biblioteca ta',
+        'lib_playlists': 'Playlist-uri',
+        'lib_create_playlist': 'Creează playlist',
+        'lib_playlist_name': 'Numele playlist-ului',
+        'lib_playlist_created': 'Playlist creat!',
+        'lib_add_songs': 'Adaugă melodii',
+        'lib_no_playlists': 'Niciun playlist creat',
+        'lib_no_playlists_desc': 'Creează-ți primul playlist și adaugă melodiile preferate.',
+        'lib_delete_playlist': 'Șterge playlist',
+        'lib_songs_count': 'melodii',
+        'lib_add_to_playlist': 'Adaugă în playlist',
+        'lib_remove_from_playlist': 'Scoate din playlist',
+        'lib_browse_songs': 'Caută melodii',
     },
 
     'en': {
@@ -403,5 +418,20 @@ TRANSLATIONS = {
         'fav_empty_desc': 'Tap the heart to save your favorite songs.',
         'fav_play_all': 'Play All',
         'fav_go_library': 'Discover songs',
+
+        # LIBRARY (YOUR LIBRARY)
+        'lib_your_library': 'Your Library',
+        'lib_playlists': 'Playlists',
+        'lib_create_playlist': 'Create playlist',
+        'lib_playlist_name': 'Playlist name',
+        'lib_playlist_created': 'Playlist created!',
+        'lib_add_songs': 'Add songs',
+        'lib_no_playlists': 'No playlists yet',
+        'lib_no_playlists_desc': 'Create your first playlist and add your favorite songs.',
+        'lib_delete_playlist': 'Delete playlist',
+        'lib_songs_count': 'songs',
+        'lib_add_to_playlist': 'Add to playlist',
+        'lib_remove_from_playlist': 'Remove from playlist',
+        'lib_browse_songs': 'Browse songs',
     },
 }

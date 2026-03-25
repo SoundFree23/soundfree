@@ -422,6 +422,33 @@
     .fav-card-title { font-size: 1rem; font-weight: 700; color: #fff; }
     .fav-card-count { font-size: 0.78rem; color: rgba(255,255,255,0.8); margin-top: 2px; }
 
+    /* ── PLAYLIST CARD ── */
+    .playlist-card {
+      display: flex; align-items: center; gap: 0.75rem;
+      padding: 0.6rem 0; cursor: pointer;
+      text-decoration: none; transition: background 0.15s;
+      border-radius: 6px;
+    }
+    .playlist-card:hover { background: var(--card-hover); }
+    .playlist-cover {
+      width: 56px; height: 56px; border-radius: 6px;
+      flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem; overflow: hidden;
+    }
+    .playlist-cover svg { width: 24px; height: 24px; color: var(--text2); }
+    .playlist-info { flex: 1; min-width: 0; }
+    .playlist-name {
+      font-size: 0.9rem; font-weight: 600; color: var(--text);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .playlist-meta { font-size: 0.75rem; color: var(--text3); margin-top: 2px; }
+    .playlist-del-btn {
+      background: none; border: none; color: var(--text3); cursor: pointer;
+      padding: 8px; border-radius: 50%; display: flex; align-items: center;
+      transition: color 0.2s;
+    }
+    .playlist-del-btn:hover { color: #e55; }
+
     /* ── UTILS ── */
     .container { max-width: 1200px; margin: 0 auto; padding: 0 1rem; }
     .section { padding: 3rem 0; }
@@ -462,6 +489,7 @@
   <a href="{% url 'music:home' %}" class="nav-logo">Sound<span>Free</span></a>
   <div class="desktop-nav">
     <a href="{% url 'music:home' %}">{{ t.nav_home }}</a>
+    <a href="{% url 'music:browse' %}">{{ t.tab_search }}</a>
     <a href="{% url 'music:library' %}">{{ t.nav_library }}</a>
     <a href="{% url 'music:pricing' %}">{{ t.nav_pricing }}</a>
   </div>
@@ -508,7 +536,7 @@
     <svg fill="currentColor" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
     <span>{{ t.tab_home }}</span>
   </a>
-  <a href="{% url 'music:library' %}" class="tab-item" data-tab="search">
+  <a href="{% url 'music:browse' %}" class="tab-item" data-tab="search">
     <svg fill="currentColor" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
     <span>{{ t.tab_search }}</span>
   </a>
@@ -769,6 +797,8 @@ function navigateTo(url) {
       updateAllHearts();
       updateFavCount();
       initFavoritesPage();
+      initLibraryPage();
+      initPlaylistDetailPage();
       window.scrollTo(0, 0);
     })
     .catch(() => { window.location.href = url; });
@@ -938,8 +968,321 @@ function initFavoritesPage() {
   };
 }
 
+// ── Custom Playlists (localStorage) ──
+const PL_KEY = 'soundfree_playlists';
+function getPlaylists() {
+  try { return JSON.parse(localStorage.getItem(PL_KEY)) || []; } catch(e) { return []; }
+}
+function savePlaylists(pls) { localStorage.setItem(PL_KEY, JSON.stringify(pls)); }
+
+function createPlaylist(name) {
+  const pls = getPlaylists();
+  const id = 'pl_' + Date.now();
+  pls.push({ id: id, name: name, songs: [], created: Date.now() });
+  savePlaylists(pls);
+  return id;
+}
+
+function deletePlaylist(plId) {
+  let pls = getPlaylists();
+  pls = pls.filter(p => p.id !== plId);
+  savePlaylists(pls);
+}
+
+function addToPlaylist(plId, songId) {
+  const pls = getPlaylists();
+  const pl = pls.find(p => p.id === plId);
+  if (pl && !pl.songs.includes(songId)) {
+    pl.songs.push(songId);
+    savePlaylists(pls);
+  }
+}
+
+function removeFromPlaylist(plId, songId) {
+  const pls = getPlaylists();
+  const pl = pls.find(p => p.id === plId);
+  if (pl) {
+    pl.songs = pl.songs.filter(s => s !== songId);
+    savePlaylists(pls);
+  }
+}
+
+// Playlist colors (gradient pairs)
+const plColors = [
+  ['#1db954','#191414'], ['#e13300','#1a1a2e'], ['#8400e7','#1a1a2e'],
+  ['#1e3264','#121212'], ['#e8115b','#1a1a2e'], ['#509bf5','#191414'],
+  ['#f59b23','#1a1a2e'], ['#af2896','#191414'], ['#148a08','#1a1a2e'],
+];
+
+function getPlColor(idx) {
+  const c = plColors[idx % plColors.length];
+  return 'linear-gradient(135deg, ' + c[0] + ', ' + c[1] + ')';
+}
+
+function initLibraryPage() {
+  const plList = document.getElementById('playlist-list');
+  const plEmpty = document.getElementById('playlist-empty');
+  const createBtn = document.getElementById('create-playlist-btn');
+  const modal = document.getElementById('create-playlist-modal');
+  const nameInput = document.getElementById('new-playlist-name');
+  const saveBtn = document.getElementById('save-playlist-btn');
+  const cancelBtn = document.getElementById('cancel-playlist-btn');
+  if (!plList) return; // Not on library page
+
+  // Update fav count on library page
+  const libFavCount = document.getElementById('lib-fav-count');
+  if (libFavCount) libFavCount.textContent = getFavorites().length;
+
+  function renderPlaylists() {
+    const pls = getPlaylists();
+    if (!pls.length) {
+      plList.innerHTML = '';
+      if (plEmpty) plEmpty.style.display = '';
+      return;
+    }
+    if (plEmpty) plEmpty.style.display = 'none';
+
+    let html = '';
+    pls.forEach((pl, i) => {
+      html += '<div class="playlist-card" data-plid="' + pl.id + '">' +
+        '<div class="playlist-cover" style="background:' + getPlColor(i) + ';">' +
+        '<svg viewBox="0 0 24 24" fill="currentColor" style="color:#fff;"><path d="M9 18V5l12-2v13M9 18c0 1.66-1.34 3-3 3s-3-1.34-3-3 1.34-3 3-3 3 1.34 3 3zm12-2c0 1.66-1.34 3-3 3s-3-1.34-3-3 1.34-3 3-3 3 1.34 3 3z"/></svg>' +
+        '</div>' +
+        '<div class="playlist-info">' +
+        '<div class="playlist-name">' + pl.name + '</div>' +
+        '<div class="playlist-meta">' + pl.songs.length + ' melodii</div>' +
+        '</div>' +
+        '<button class="playlist-del-btn" data-del-pl="' + pl.id + '">' +
+        '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14z"/></svg>' +
+        '</button>' +
+        '</div>';
+    });
+    plList.innerHTML = html;
+  }
+
+  // Create modal
+  if (createBtn) {
+    createBtn.onclick = function() {
+      modal.style.display = 'flex';
+      nameInput.value = '';
+      setTimeout(() => nameInput.focus(), 100);
+    };
+  }
+  if (cancelBtn) {
+    cancelBtn.onclick = function() { modal.style.display = 'none'; };
+  }
+  if (saveBtn) {
+    saveBtn.onclick = function() {
+      const name = nameInput.value.trim();
+      if (!name) return;
+      createPlaylist(name);
+      modal.style.display = 'none';
+      renderPlaylists();
+    };
+  }
+  if (nameInput) {
+    nameInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { saveBtn.click(); }
+    });
+  }
+  // Close modal on background click
+  if (modal) {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) modal.style.display = 'none';
+    });
+  }
+
+  // Delete playlist
+  plList.addEventListener('click', (e) => {
+    const delBtn = e.target.closest('[data-del-pl]');
+    if (delBtn) {
+      e.stopPropagation();
+      const plId = delBtn.dataset.delPl;
+      if (confirm('Șterge playlist-ul?')) {
+        deletePlaylist(plId);
+        renderPlaylists();
+      }
+      return;
+    }
+    // Click on playlist card → navigate to playlist page
+    const card = e.target.closest('.playlist-card[data-plid]');
+    if (card) {
+      const plId = card.dataset.plid;
+      navigateTo('/playlist/' + plId + '/');
+    }
+  });
+
+  renderPlaylists();
+}
+
+// ── Playlist detail page ──
+function initPlaylistDetailPage() {
+  const plSongs = document.getElementById('pl-songs');
+  const plEmpty = document.getElementById('pl-empty');
+  const plPlayAll = document.getElementById('pl-play-all');
+  const plTitle = document.getElementById('pl-title');
+  const plSongCount = document.getElementById('pl-song-count');
+  const plAddBtn = document.getElementById('pl-add-songs-btn');
+  const addModal = document.getElementById('add-songs-modal');
+  const closeAddBtn = document.getElementById('close-add-songs');
+  const addSearch = document.getElementById('add-songs-search');
+  const addList = document.getElementById('add-songs-list');
+  if (!plSongs) return;
+
+  // Get playlist ID from URL
+  const urlParts = window.location.pathname.split('/');
+  const plIdx = urlParts.indexOf('playlist');
+  if (plIdx < 0) return;
+  const plId = urlParts[plIdx + 1];
+
+  function getPlaylist() {
+    return getPlaylists().find(p => p.id === plId);
+  }
+
+  function renderPlaylistSongs() {
+    const pl = getPlaylist();
+    if (!pl) { plSongs.innerHTML = '<p style="padding:1rem;color:var(--text3);">Playlist not found</p>'; return; }
+    plTitle.textContent = pl.name;
+    const songs = playlist.filter(s => pl.songs.includes(s.id));
+    plSongCount.textContent = songs.length;
+
+    if (!songs.length) {
+      plSongs.innerHTML = '';
+      if (plEmpty) plEmpty.style.display = '';
+      if (plPlayAll) plPlayAll.style.display = 'none';
+      return;
+    }
+    if (plEmpty) plEmpty.style.display = 'none';
+    if (plPlayAll) plPlayAll.style.display = '';
+
+    let html = '';
+    songs.forEach(s => {
+      const coverHTML = s.cover ? '<img src="' + s.cover + '" alt="">' : '🎵';
+      html += '<div class="song-row" data-id="' + s.id + '">' +
+        '<div class="row-cover">' + coverHTML + '</div>' +
+        '<div class="row-info"><div class="row-title">' + s.title + '</div>' +
+        '<div class="row-artist">' + s.artist + '</div></div>' +
+        '<button class="playlist-del-btn" data-remove-song="' + s.id + '">' +
+        '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/></svg>' +
+        '</button></div>';
+    });
+    plSongs.innerHTML = html;
+    attachCardListeners();
+  }
+
+  // Remove song from playlist
+  plSongs.addEventListener('click', (e) => {
+    const rmBtn = e.target.closest('[data-remove-song]');
+    if (rmBtn) {
+      e.stopPropagation();
+      removeFromPlaylist(plId, parseInt(rmBtn.dataset.removeSong));
+      renderPlaylistSongs();
+    }
+  });
+
+  // Play all
+  if (plPlayAll) {
+    plPlayAll.onclick = function() {
+      const pl = getPlaylist();
+      if (!pl) return;
+      const plSongsArr = playlist.filter(s => pl.songs.includes(s.id));
+      // Get genres from playlist songs
+      const plGenres = [...new Set(plSongsArr.map(s => s.genre).filter(g => g))];
+      let similarSongs = playlist.filter(s => !pl.songs.includes(s.id) && plGenres.includes(s.genre));
+      // Shuffle similar
+      for (let i = similarSongs.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [similarSongs[i], similarSongs[j]] = [similarSongs[j], similarSongs[i]];
+      }
+      playlist.length = 0;
+      plSongsArr.forEach(s => playlist.push(s));
+      similarSongs.forEach(s => playlist.push(s));
+      playSong(0);
+    };
+  }
+
+  // Add songs modal
+  if (plAddBtn) {
+    plAddBtn.onclick = function() {
+      addModal.style.display = 'flex';
+      addSearch.value = '';
+      renderAddSongs('');
+      setTimeout(() => addSearch.focus(), 100);
+    };
+  }
+  if (closeAddBtn) {
+    closeAddBtn.onclick = function() {
+      addModal.style.display = 'none';
+      renderPlaylistSongs();
+    };
+  }
+  if (addModal) {
+    addModal.addEventListener('click', (e) => {
+      if (e.target === addModal) { addModal.style.display = 'none'; renderPlaylistSongs(); }
+    });
+  }
+
+  function renderAddSongs(query) {
+    const pl = getPlaylist();
+    if (!pl) return;
+    let songs = playlist;
+    if (query) {
+      const q = query.toLowerCase();
+      songs = songs.filter(s => s.title.toLowerCase().includes(q) || s.artist.toLowerCase().includes(q));
+    }
+
+    let html = '';
+    songs.forEach(s => {
+      const inPl = pl.songs.includes(s.id);
+      const coverHTML = s.cover ? '<img src="' + s.cover + '" alt="">' : '🎵';
+      html += '<div class="song-row" style="cursor:default;">' +
+        '<div class="row-cover">' + coverHTML + '</div>' +
+        '<div class="row-info"><div class="row-title">' + s.title + '</div>' +
+        '<div class="row-artist">' + s.artist + '</div></div>' +
+        '<button class="chip ' + (inPl ? 'chip-active' : '') + '" data-add-song="' + s.id + '" style="font-size:0.7rem;padding:0.3rem 0.7rem;">' +
+        (inPl ? '✓' : '+') +
+        '</button></div>';
+    });
+    addList.innerHTML = html;
+  }
+
+  if (addSearch) {
+    addSearch.addEventListener('input', () => { renderAddSongs(addSearch.value); });
+  }
+
+  // Add/remove song in modal
+  if (addList) {
+    addList.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-add-song]');
+      if (!btn) return;
+      e.stopPropagation();
+      const songId = parseInt(btn.dataset.addSong);
+      const pl = getPlaylist();
+      if (!pl) return;
+      if (pl.songs.includes(songId)) {
+        removeFromPlaylist(plId, songId);
+        btn.classList.remove('chip-active');
+        btn.textContent = '+';
+      } else {
+        addToPlaylist(plId, songId);
+        btn.classList.add('chip-active');
+        btn.textContent = '✓';
+      }
+    });
+  }
+
+  // Render
+  if (playlist.length) {
+    renderPlaylistSongs();
+  } else {
+    const check = setInterval(() => {
+      if (playlist.length) { clearInterval(check); renderPlaylistSongs(); }
+    }, 200);
+  }
+}
+
 // Init hearts on page load
-document.addEventListener('DOMContentLoaded', () => { updateAllHearts(); updateFavCount(); initFavoritesPage(); });
+document.addEventListener('DOMContentLoaded', () => { updateAllHearts(); updateFavCount(); initFavoritesPage(); initLibraryPage(); initPlaylistDetailPage(); });
 </script>
 
 {% block extra_js %}{% endblock %}

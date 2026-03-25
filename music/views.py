@@ -33,6 +33,10 @@ def home(request):
 
 
 def library(request):
+    return render(request, 'music/library.html')
+
+
+def browse(request):
     songs = Song.objects.filter(is_active=True)
     genres = Genre.objects.all()
     moods = Mood.objects.all()
@@ -56,11 +60,15 @@ def library(request):
         'current_mood': mood_slug,
         'search': search,
     }
-    return render(request, 'music/library.html', context)
+    return render(request, 'music/browse.html', context)
 
 
 def favorites(request):
     return render(request, 'music/favorites.html')
+
+
+def playlist_detail(request, pl_id):
+    return render(request, 'music/playlist_detail.html', {'pl_id': pl_id})
 
 
 def pricing(request):

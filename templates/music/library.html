@@ -1,60 +1,60 @@
 {% extends 'music/base.html' %}
 
-{% block title %}{{ t.lib_title }} — SoundFree.ro{% endblock %}
+{% block title %}{{ t.lib_your_library }} — SoundFree.ro{% endblock %}
 
 {% block content %}
 
-<!-- SEARCH -->
-<div style="padding:1rem;">
-  <form method="get" style="display:flex;gap:0.5rem;">
-    <input type="text" name="search" value="{{ search }}" placeholder="{{ t.lib_search_placeholder }}"
-      style="flex:1;background:var(--bg3);border:none;color:var(--text);padding:0.65rem 1rem;border-radius:8px;font-size:0.9rem;outline:none;font-family:inherit;">
-    {% if search %}<a href="{% url 'music:library' %}" style="color:var(--text2);text-decoration:none;padding:0.65rem;font-size:0.85rem;display:flex;align-items:center;">✕</a>{% endif %}
-  </form>
+<!-- HEADER -->
+<div style="padding:1.25rem 1rem 0.75rem;">
+  <h1 style="font-size:1.5rem;font-weight:800;">{{ t.lib_your_library }}</h1>
 </div>
 
-<!-- FILTER CHIPS -->
-<div class="chips" style="margin-bottom:0.75rem;">
-  <a href="{% url 'music:library' %}" class="chip {% if not current_genre and not current_mood and not search %}chip-active{% endif %}">{{ t.lib_all_filter }}</a>
-  {% for genre in genres %}
-  <a href="{% url 'music:library' %}?genre={{ genre.slug }}" class="chip {% if current_genre == genre.slug %}chip-active{% endif %}">{{ genre.icon }} {{ genre.name }}</a>
-  {% endfor %}
-</div>
-
-<!-- RESULTS INFO -->
-<div style="padding:0 1rem 0.5rem;color:var(--text2);font-size:0.82rem;">
-  {% if search %}<strong style="color:var(--text);">{{ songs|length }}</strong> {{ t.lib_results_for }} „{{ search }}"
-  {% else %}<strong style="color:var(--text);">{{ songs|length }}</strong> {{ t.lib_results }}{% endif %}
-</div>
-
-<!-- SONG LIST -->
-{% if songs %}
-<div style="padding:0 0.5rem;">
-  {% for song in songs %}
-  <div class="song-row" data-id="{{ song.id }}">
-    <div class="row-cover">
-      {% if song.cover_image %}<img src="{{ song.cover_image.url }}" alt="{{ song.title }}">{% else %}🎵{% endif %}
+<!-- LIKED SONGS CARD -->
+<div style="padding:0 1rem 0.75rem;">
+  <a href="{% url 'music:favorites' %}" class="fav-card" id="lib-fav-card">
+    <div class="fav-card-icon">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
     </div>
-    <div class="row-info">
-      <div class="row-title">{{ song.title }}</div>
-      <div class="row-artist">{{ song.artist }}{% if song.genre %} · {{ song.genre.name }}{% endif %}</div>
+    <div class="fav-card-info">
+      <div class="fav-card-title">{{ t.fav_title }}</div>
+      <div class="fav-card-count"><span id="lib-fav-count">0</span> {{ t.fav_subtitle }}</div>
     </div>
-    <button class="fav-btn" data-id="{{ song.id }}">
-      <svg class="heart-empty" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-      <svg class="heart-full" viewBox="0 0 24 24" fill="#1db954" stroke="#1db954" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+  </a>
+</div>
+
+<!-- PLAYLISTS SECTION -->
+<div style="padding:0 1rem;">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
+    <h2 style="font-size:1.1rem;font-weight:700;">{{ t.lib_playlists }}</h2>
+    <button id="create-playlist-btn" style="background:none;border:1px solid var(--text3);color:var(--text);padding:0.4rem 0.9rem;border-radius:20px;font-size:0.8rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:0.35rem;font-family:inherit;">
+      <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+      {{ t.lib_create_playlist }}
     </button>
-    <span class="row-meta">{{ song.duration_display }}</span>
   </div>
-  {% endfor %}
+
+  <!-- Playlist list (rendered by JS) -->
+  <div id="playlist-list"></div>
+
+  <!-- Empty state -->
+  <div id="playlist-empty" style="text-align:center;padding:3rem 1rem;color:var(--text3);display:none;">
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--text3);margin-bottom:0.75rem;"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+    <h3 style="font-size:1rem;color:var(--text2);margin-bottom:0.35rem;">{{ t.lib_no_playlists }}</h3>
+    <p style="font-size:0.82rem;">{{ t.lib_no_playlists_desc }}</p>
+  </div>
 </div>
-{% else %}
-<div style="text-align:center;padding:4rem 1rem;color:var(--text3);">
-  <div style="font-size:3rem;margin-bottom:1rem;">🎵</div>
-  <h3 style="font-size:1.1rem;color:var(--text2);margin-bottom:0.5rem;">{{ t.lib_empty_title }}</h3>
-  <p style="font-size:0.85rem;">{{ t.lib_empty_desc }}</p>
-  <a href="{% url 'music:library' %}" style="color:var(--accent);text-decoration:none;margin-top:1rem;display:inline-block;">{{ t.lib_reset }}</a>
+
+<!-- CREATE PLAYLIST MODAL -->
+<div id="create-playlist-modal" style="display:none;position:fixed;inset:0;z-index:400;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);align-items:center;justify-content:center;">
+  <div style="background:var(--bg2);border-radius:12px;padding:1.5rem;width:90%;max-width:340px;margin:auto;">
+    <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:1rem;">{{ t.lib_create_playlist }}</h3>
+    <input type="text" id="new-playlist-name" placeholder="{{ t.lib_playlist_name }}"
+      style="width:100%;background:var(--bg3);border:none;color:var(--text);padding:0.75rem 1rem;border-radius:8px;font-size:0.95rem;outline:none;font-family:inherit;margin-bottom:1rem;box-sizing:border-box;">
+    <div style="display:flex;gap:0.5rem;justify-content:flex-end;">
+      <button id="cancel-playlist-btn" style="background:none;border:none;color:var(--text2);padding:0.6rem 1.2rem;border-radius:20px;font-size:0.9rem;cursor:pointer;font-family:inherit;">Anulează</button>
+      <button id="save-playlist-btn" class="btn-primary" style="padding:0.6rem 1.5rem;font-size:0.9rem;">Creează</button>
+    </div>
+  </div>
 </div>
-{% endif %}
 
 <div style="height:2rem;"></div>
 

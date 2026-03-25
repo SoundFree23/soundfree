@@ -8,7 +8,9 @@ urlpatterns = [
     # Site public
     path('', views.home, name='home'),
     path('library/', views.library, name='library'),
+    path('browse/', views.browse, name='browse'),
     path('favorites/', views.favorites, name='favorites'),
+    path('playlist/<str:pl_id>/', views.playlist_detail, name='playlist_detail'),
     path('pricing/', views.pricing, name='pricing'),
     path('song/<int:pk>/', views.song_detail, name='song_detail'),
     path('api/songs/', views.api_songs, name='api_songs'),
