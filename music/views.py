@@ -19,11 +19,13 @@ def set_language(request, lang):
 
 
 def home(request):
-    featured_songs = Song.objects.filter(is_active=True, is_featured=True)[:6]
+    featured_songs = Song.objects.filter(is_active=True, is_featured=True)[:8]
+    recent_songs = Song.objects.filter(is_active=True).order_by('-id')[:8]
     genres = Genre.objects.all()
     total_songs = Song.objects.filter(is_active=True).count()
     context = {
         'featured_songs': featured_songs,
+        'recent_songs': recent_songs,
         'genres': genres,
         'total_songs': total_songs,
     }

@@ -175,6 +175,23 @@ TRANSLATIONS = {
         'play_song': 'Redă melodia',
         'plays': 'redări',
         'related': 'Melodii similare',
+
+        # TAB BAR
+        'tab_home': 'Acasă',
+        'tab_search': 'Caută',
+        'tab_library': 'Biblioteca ta',
+        'tab_pricing': 'Prețuri',
+
+        # GREETINGS
+        'greeting_morning': 'Bună dimineața',
+        'greeting_afternoon': 'Bună ziua',
+        'greeting_evening': 'Bună seara',
+
+        # HOME SECTIONS
+        'home_genres_title': 'Explorează genuri',
+        'home_featured_title': 'Recomandate pentru tine',
+        'home_recent_title': 'Adăugate recent',
+        'home_all_songs': 'Vezi toate',
     },
 
     'en': {
@@ -353,5 +370,22 @@ TRANSLATIONS = {
         'play_song': 'Play track',
         'plays': 'plays',
         'related': 'Similar tracks',
+
+        # TAB BAR
+        'tab_home': 'Home',
+        'tab_search': 'Search',
+        'tab_library': 'Your Library',
+        'tab_pricing': 'Pricing',
+
+        # GREETINGS
+        'greeting_morning': 'Good morning',
+        'greeting_afternoon': 'Good afternoon',
+        'greeting_evening': 'Good evening',
+
+        # HOME SECTIONS
+        'home_genres_title': 'Explore genres',
+        'home_featured_title': 'Recommended for you',
+        'home_recent_title': 'Recently added',
+        'home_all_songs': 'See all',
     },
 }
