@@ -759,7 +759,16 @@ function navigateTo(url) {
       if (newTitle) document.title = newTitle.textContent;
       updateTabs(url);
       history.pushState({ url: url }, '', url);
+      // Execute inline scripts from loaded page
+      document.querySelector('main').querySelectorAll('script').forEach(oldScript => {
+        const newScript = document.createElement('script');
+        newScript.textContent = oldScript.textContent;
+        oldScript.parentNode.replaceChild(newScript, oldScript);
+      });
       attachCardListeners();
+      updateAllHearts();
+      updateFavCount();
+      initFavoritesPage();
       window.scrollTo(0, 0);
     })
     .catch(() => { window.location.href = url; });
@@ -845,8 +854,80 @@ loadSong = function(idx) {
   }
 };
 
+// ── Favorites page rendering ──
+function initFavoritesPage() {
+  const favList = document.getElementById('fav-list');
+  const favEmpty = document.getElementById('fav-empty');
+  const favPlayAll = document.getElementById('fav-play-all');
+  const favPageCount = document.getElementById('fav-page-count');
+  if (!favList) return; // Not on favorites page
+
+  function renderFavPage() {
+    const favIds = getFavorites();
+    const favSongs = playlist.filter(s => favIds.includes(s.id));
+    if (favPageCount) favPageCount.textContent = favSongs.length;
+
+    if (!favSongs.length) {
+      favList.innerHTML = '';
+      if (favEmpty) favEmpty.style.display = '';
+      if (favPlayAll) favPlayAll.style.display = 'none';
+      return;
+    }
+
+    if (favEmpty) favEmpty.style.display = 'none';
+    if (favPlayAll) favPlayAll.style.display = '';
+
+    let html = '';
+    favSongs.forEach(s => {
+      const coverHTML = s.cover ? '<img src="' + s.cover + '" alt="">' : '🎵';
+      html += '<div class="song-row" data-id="' + s.id + '">' +
+        '<div class="row-cover">' + coverHTML + '</div>' +
+        '<div class="row-info"><div class="row-title">' + s.title + '</div>' +
+        '<div class="row-artist">' + s.artist + '</div></div>' +
+        '<button class="fav-btn is-fav" data-id="' + s.id + '">' +
+        '<svg class="heart-empty" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>' +
+        '<svg class="heart-full" viewBox="0 0 24 24" fill="#1db954" stroke="#1db954" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>' +
+        '</button></div>';
+    });
+    favList.innerHTML = html;
+    attachCardListeners();
+  }
+
+  // Play all: favorites first, then rest
+  if (favPlayAll) {
+    favPlayAll.onclick = function() {
+      const favIds = getFavorites();
+      const favSongs = playlist.filter(s => favIds.includes(s.id));
+      const otherSongs = playlist.filter(s => !favIds.includes(s.id));
+      if (favSongs.length) {
+        playlist.length = 0;
+        favSongs.forEach(s => playlist.push(s));
+        otherSongs.forEach(s => playlist.push(s));
+        playSong(0);
+      }
+    };
+  }
+
+  // Render now if playlist loaded, otherwise wait
+  if (playlist.length) {
+    renderFavPage();
+  } else {
+    const check = setInterval(() => {
+      if (playlist.length) { clearInterval(check); renderFavPage(); }
+    }, 200);
+  }
+
+  // Override toggleFavorite to re-render on this page
+  const origTF = window._origToggleFavorite || toggleFavorite;
+  window._origToggleFavorite = origTF;
+  window.toggleFavorite = function(id) {
+    origTF(id);
+    renderFavPage();
+  };
+}
+
 // Init hearts on page load
-document.addEventListener('DOMContentLoaded', () => { updateAllHearts(); updateFavCount(); });
+document.addEventListener('DOMContentLoaded', () => { updateAllHearts(); updateFavCount(); initFavoritesPage(); });
 </script>
 
 {% block extra_js %}{% endblock %}
