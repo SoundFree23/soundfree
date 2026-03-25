@@ -171,7 +171,7 @@ def get_search_query(title, genre_name=None):
     return 'abstract music background'
 
 
-def search_pixabay(query, per_page=5):
+def search_pixabay(query, per_page=30, page=1):
     """Search Pixabay for images."""
     params = {
         'key': PIXABAY_API_KEY,
@@ -181,6 +181,7 @@ def search_pixabay(query, per_page=5):
         'min_width': 600,
         'min_height': 600,
         'per_page': per_page,
+        'page': page,
         'safesearch': 'true',
         'order': 'popular',
     }
@@ -227,13 +228,22 @@ def download_and_crop(url, size=600):
         return None
 
 
-def pick_image(hits, title):
-    """Pick a deterministic image from search results."""
+def pick_unique_image(hits, title, used_image_ids):
+    """Pick an image that hasn't been used yet."""
     if not hits:
         return None
+
+    # Filter out already used images
+    available = [h for h in hits if h.get('id') not in used_image_ids]
+
+    if not available:
+        # All images from this search were used, return None to trigger new search
+        return None
+
+    # Pick deterministically from available
     h = int(hashlib.md5(title.encode()).hexdigest(), 16)
-    idx = h % len(hits)
-    return hits[idx]
+    idx = h % len(available)
+    return available[idx]
 
 
 class Command(BaseCommand):
@@ -246,10 +256,11 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         from music.models import Song
 
-        if options['replace_generated']:
-            songs = Song.objects.filter(cover_image__startswith='covers/cover_')
-        elif options['force']:
+        # Always process ALL songs when --force
+        if options['force']:
             songs = Song.objects.all()
+        elif options['replace_generated']:
+            songs = Song.objects.filter(cover_image__startswith='covers/cover_')
         else:
             songs = Song.objects.filter(cover_image='') | Song.objects.filter(cover_image__isnull=True)
 
@@ -263,6 +274,7 @@ class Command(BaseCommand):
 
         success = 0
         failed = 0
+        used_image_ids = set()  # Track all used Pixabay image IDs to avoid duplicates
 
         for song in songs:
             title = song.title
@@ -270,32 +282,56 @@ class Command(BaseCommand):
             query = get_search_query(title, genre_name)
             self.stdout.write(f'  {title} -> searching: "{query}"')
 
-            hits = search_pixabay(query)
+            # Try multiple pages to find unique images
+            hit = None
+            for page in range(1, 4):  # Try up to 3 pages
+                hits = search_pixabay(query, per_page=30, page=page)
 
-            if not hits:
-                # Try simpler search
-                fallback_query = (genre_name or 'music') + ' background'
-                self.stdout.write(f'    No results, trying: "{fallback_query}"')
-                hits = search_pixabay(fallback_query)
+                if not hits:
+                    break
 
-            if not hits:
-                self.stdout.write(self.style.WARNING(f'    No image found for: {title}'))
+                hit = pick_unique_image(hits, title, used_image_ids)
+                if hit:
+                    break
+
+            # Fallback search if no unique image found
+            if not hit:
+                fallback_queries = [
+                    (genre_name or 'music') + ' background',
+                    'abstract music art',
+                    'music instrument artistic',
+                    'concert live music',
+                    'studio recording music',
+                ]
+                for fq in fallback_queries:
+                    self.stdout.write(f'    Trying fallback: "{fq}"')
+                    hits = search_pixabay(fq, per_page=30)
+                    if hits:
+                        hit = pick_unique_image(hits, title + fq, used_image_ids)
+                        if hit:
+                            break
+
+            if not hit:
+                self.stdout.write(self.style.WARNING(f'    No unique image found for: {title}'))
                 failed += 1
                 continue
 
-            hit = pick_image(hits, title)
             img_url = hit.get('webformatURL', '')
+            img_id = hit.get('id')
 
             if not img_url:
                 failed += 1
                 continue
 
-            self.stdout.write(f'    Downloading from Pixabay...')
+            self.stdout.write(f'    Downloading image #{img_id}...')
             img = download_and_crop(img_url)
 
             if not img:
                 failed += 1
                 continue
+
+            # Mark this image as used
+            used_image_ids.add(img_id)
 
             buffer = BytesIO()
             img.save(buffer, format='JPEG', quality=92)
@@ -304,7 +340,8 @@ class Command(BaseCommand):
             filename = f'cover_{song.id}.jpg'
             song.cover_image.save(filename, ContentFile(buffer.read()), save=True)
             success += 1
-            self.stdout.write(self.style.SUCCESS(f'    Done!'))
+            self.stdout.write(self.style.SUCCESS(f'    Done! (unique images used: {len(used_image_ids)})'))
 
         self.stdout.write('')
         self.stdout.write(self.style.SUCCESS(f'Finished! {success} covers generated, {failed} failed.'))
+        self.stdout.write(f'Total unique images used: {len(used_image_ids)}')
