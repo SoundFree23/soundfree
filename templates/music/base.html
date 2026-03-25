@@ -738,8 +738,9 @@ function playSong(idx) {
   }
   currentIdx = idx;
   loadSong(idx);
-  audio.play();
+  audio.play().catch(() => {});
   isPlaying = true;
+  if (!isAuthenticated) guestSongsPlayed++;
   updatePlayBtn();
   highlightActiveCard();
 }
@@ -812,7 +813,6 @@ audio.addEventListener('timeupdate', () => {
 });
 
 audio.addEventListener('ended', () => {
-  if (!isAuthenticated) guestSongsPlayed++;
   playSong((currentIdx + 1) % playlist.length);
 });
 
