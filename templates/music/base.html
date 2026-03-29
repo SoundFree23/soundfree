@@ -251,7 +251,8 @@
       font-size: 1.2rem; overflow: hidden;
     }
     .song-row .row-cover img { width: 100%; height: 100%; object-fit: cover; }
-    .song-row .row-info { flex: 1; min-width: 0; }
+    .song-row .row-info { flex: 0 1 auto; min-width: 0; max-width: 60%; }
+    .song-row { justify-content: flex-start; }
     .song-row .row-title {
       font-size: 0.9rem; font-weight: 500; color: var(--text);
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
