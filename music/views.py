@@ -41,14 +41,8 @@ def user_logout(request):
 
 
 def home(request):
-    featured_songs = Song.objects.filter(is_active=True, is_featured=True)[:8]
-    recent_songs = Song.objects.filter(is_active=True).order_by('-id')[:8]
-    genres = Genre.objects.all()
     total_songs = Song.objects.filter(is_active=True).count()
     context = {
-        'featured_songs': featured_songs,
-        'recent_songs': recent_songs,
-        'genres': genres,
         'total_songs': total_songs,
     }
     return render(request, 'music/home.html', context)
@@ -63,6 +57,8 @@ def browse(request):
     songs = Song.objects.filter(is_active=True)
     genres = Genre.objects.all()
     moods = Mood.objects.all()
+    featured_songs = Song.objects.filter(is_active=True, is_featured=True)[:8]
+    recent_songs = Song.objects.filter(is_active=True).order_by('-id')[:8]
 
     genre_slug = request.GET.get('genre')
     mood_slug = request.GET.get('mood')
@@ -79,6 +75,8 @@ def browse(request):
         'songs': songs,
         'genres': genres,
         'moods': moods,
+        'featured_songs': featured_songs,
+        'recent_songs': recent_songs,
         'current_genre': genre_slug,
         'current_mood': mood_slug,
         'search': search,
@@ -98,6 +96,29 @@ def playlist_detail(request, pl_id):
 
 def pricing(request):
     return render(request, 'music/pricing.html')
+
+
+from django.views.decorators.http import require_POST
+from django.core.mail import send_mail
+from django.conf import settings
+
+@require_POST
+def contact_submit(request):
+    name = request.POST.get('name', '')
+    email = request.POST.get('email', '')
+    business = request.POST.get('business', '')
+    message = request.POST.get('message', '')
+    try:
+        send_mail(
+            subject=f'[SoundFree] Contact: {name}',
+            message=f'Nume: {name}\nEmail: {email}\nTip locație: {business}\n\nMesaj:\n{message}',
+            from_email=settings.DEFAULT_FROM_EMAIL if hasattr(settings, 'DEFAULT_FROM_EMAIL') else 'noreply@soundfree.ro',
+            recipient_list=['info@soundfree.ro'],
+            fail_silently=True,
+        )
+    except Exception:
+        pass
+    return JsonResponse({'ok': True})
 
 
 def song_detail(request, pk):

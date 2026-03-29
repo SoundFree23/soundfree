@@ -4,8 +4,97 @@
 
 {% block content %}
 
+<!-- GREETING -->
+<div style="padding:1.25rem 1rem 0.5rem;">
+  <h1 style="font-size:1.5rem;font-weight:800;" id="greeting">{{ t.greeting_afternoon }}</h1>
+</div>
+
+<!-- FAVORITES CARD -->
+<div style="padding:0 1rem 0.25rem;">
+  <a href="{% url 'music:favorites' %}" class="fav-card" id="fav-card">
+    <div class="fav-card-icon">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+    </div>
+    <div class="fav-card-info">
+      <div class="fav-card-title">{{ t.fav_title }}</div>
+      <div class="fav-card-count"><span id="fav-count">0</span> {{ t.fav_subtitle }}</div>
+    </div>
+  </a>
+</div>
+
+<!-- GENRE GRID -->
+{% if genres %}
+<div class="sh">
+  <div class="sh-row">
+    <div class="sh-title">{{ t.home_genres_title }}</div>
+  </div>
+</div>
+<div style="padding:0 1rem;">
+  <div class="genre-grid">
+    {% for genre in genres %}
+    <a href="{% url 'music:browse' %}?genre={{ genre.slug }}" class="genre-card" data-gc="{{ forloop.counter0 }}">
+      <div class="gc-name">{{ genre.name }}</div>
+      <div class="gc-icon">{{ genre.icon }}</div>
+    </a>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<!-- FEATURED / RECOMMENDED -->
+{% if featured_songs %}
+<div class="sh">
+  <div class="sh-row">
+    <div class="sh-title">{{ t.home_featured_title }}</div>
+  </div>
+</div>
+<div class="h-scroll">
+  {% for song in featured_songs %}
+  <div class="h-card song-card" data-id="{{ song.id }}">
+    <div class="hc-cover">
+      {% if song.cover_image %}<img src="{{ song.cover_image.url }}" alt="{{ song.title }}">{% else %}🎵{% endif %}
+    </div>
+    <div class="hc-title">{{ song.title }}</div>
+    <div class="hc-sub">{{ song.artist }}</div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- RECENT -->
+{% if recent_songs %}
+<div class="sh">
+  <div class="sh-row">
+    <div class="sh-title">{{ t.home_recent_title }}</div>
+  </div>
+</div>
+<div style="padding:0 0.5rem;">
+  {% for song in recent_songs %}
+  <div class="song-row" data-id="{{ song.id }}">
+    <div class="row-cover">
+      {% if song.cover_image %}<img src="{{ song.cover_image.url }}" alt="{{ song.title }}">{% else %}🎵{% endif %}
+    </div>
+    <div class="row-info">
+      <div class="row-title">{{ song.title }}</div>
+      <div class="row-artist">{{ song.artist }}</div>
+    </div>
+    <button class="fav-btn" data-id="{{ song.id }}">
+      <svg class="heart-empty" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      <svg class="heart-full" viewBox="0 0 24 24" fill="#1db954" stroke="#1db954" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+    </button>
+    <span class="row-meta">{{ song.duration_display }}</span>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
 <!-- SEARCH -->
-<div style="padding:1rem;">
+<div class="sh">
+  <div class="sh-row">
+    <div class="sh-title">{{ t.tab_search }}</div>
+  </div>
+</div>
+<div style="padding:0 1rem;">
   <form method="get" action="{% url 'music:browse' %}" id="browse-search-form" style="display:flex;gap:0.5rem;">
     <input type="text" name="search" value="{{ search }}" placeholder="{{ t.lib_search_placeholder }}"
       style="flex:1;background:var(--bg3);border:none;color:var(--text);padding:0.65rem 1rem;border-radius:8px;font-size:0.9rem;outline:none;font-family:inherit;">
@@ -22,7 +111,7 @@ document.getElementById('browse-search-form').addEventListener('submit', functio
 </div>
 
 <!-- FILTER CHIPS -->
-<div class="chips" style="margin-bottom:0.75rem;">
+<div class="chips" style="margin-top:0.75rem;margin-bottom:0.75rem;">
   <a href="{% url 'music:browse' %}" class="chip {% if not current_genre and not current_mood and not search %}chip-active{% endif %}">{{ t.lib_all_filter }}</a>
   {% for genre in genres %}
   <a href="{% url 'music:browse' %}?genre={{ genre.slug }}" class="chip {% if current_genre == genre.slug %}chip-active{% endif %}">{{ genre.icon }} {{ genre.name }}</a>
@@ -56,6 +145,7 @@ document.getElementById('browse-search-form').addEventListener('submit', functio
   {% endfor %}
 </div>
 {% else %}
+{% if search or current_genre %}
 <div style="text-align:center;padding:4rem 1rem;color:var(--text3);">
   <div style="font-size:3rem;margin-bottom:1rem;">🎵</div>
   <h3 style="font-size:1.1rem;color:var(--text2);margin-bottom:0.5rem;">{{ t.lib_empty_title }}</h3>
@@ -63,7 +153,37 @@ document.getElementById('browse-search-form').addEventListener('submit', functio
   <a href="{% url 'music:browse' %}" style="color:var(--accent);text-decoration:none;margin-top:1rem;display:inline-block;">{{ t.lib_reset }}</a>
 </div>
 {% endif %}
+{% endif %}
 
 <div style="height:2rem;"></div>
+
+<script>
+// Colorize genre cards
+if (typeof colorizeGenreCards === 'function') colorizeGenreCards();
+
+// Update fav count
+(function() {
+  try {
+    const favs = JSON.parse(localStorage.getItem('soundfree_favorites')) || [];
+    const el = document.getElementById('fav-count');
+    if (el) el.textContent = favs.length;
+  } catch(e) {}
+})();
+
+// Dynamic greeting
+(function() {
+  const h = new Date().getHours();
+  const el = document.getElementById('greeting');
+  if (!el) return;
+  const greetings = {
+    morning: '{{ t.greeting_morning }}',
+    afternoon: '{{ t.greeting_afternoon }}',
+    evening: '{{ t.greeting_evening }}'
+  };
+  if (h < 12) el.textContent = greetings.morning;
+  else if (h < 18) el.textContent = greetings.afternoon;
+  else el.textContent = greetings.evening;
+})();
+</script>
 
 {% endblock %}

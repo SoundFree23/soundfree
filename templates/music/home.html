@@ -4,120 +4,109 @@
 
 {% block content %}
 
-<!-- GREETING -->
-<div style="padding:1.25rem 1rem 0.5rem;">
-  <h1 style="font-size:1.5rem;font-weight:800;" id="greeting">{{ t.greeting_afternoon }}</h1>
+<!-- HERO -->
+<div class="landing-hero">
+  <h1>{{ t.hero_title_1 }} <span>{{ t.hero_title_2 }}</span><br>{{ t.hero_title_3 }}</h1>
+  <p>{{ t.hero_desc }}</p>
+  <div class="hero-btns">
+    <a href="{% url 'music:browse' %}" class="btn-primary">{{ t.landing_listen_cta }}</a>
+    <a href="{% url 'music:pricing' %}" class="btn-outline">{{ t.landing_cta_pricing }}</a>
+  </div>
 </div>
 
-<!-- FAVORITES CARD -->
-<div style="padding:0 1rem 0.25rem;">
-  <a href="{% url 'music:favorites' %}" class="fav-card" id="fav-card">
-    <div class="fav-card-icon">
-      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-    </div>
-    <div class="fav-card-info">
-      <div class="fav-card-title">{{ t.fav_title }}</div>
-      <div class="fav-card-count"><span id="fav-count">0</span> {{ t.fav_subtitle }}</div>
-    </div>
-  </a>
+<!-- CINE SUNTEM -->
+<div class="landing-section">
+  <h2>{{ t.landing_about_title }}</h2>
+  <p class="section-text">{{ t.landing_about_text }}</p>
 </div>
 
-<!-- GENRE GRID -->
-{% if genres %}
-<div class="sh">
-  <div class="sh-row">
-    <div class="sh-title">{{ t.home_genres_title }}</div>
+<!-- AVANTAJE -->
+<div class="landing-section landing-section-alt">
+  <div class="adv-grid">
+    <div class="adv-card">
+      <div class="adv-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
+      </div>
+      <h3>{{ t.landing_adv1_title }}</h3>
+      <p>{{ t.landing_adv1_text }}</p>
+    </div>
+    <div class="adv-card">
+      <div class="adv-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+      </div>
+      <h3>{{ t.landing_adv2_title }}</h3>
+      <p>{{ t.landing_adv2_text }}</p>
+    </div>
+    <div class="adv-card">
+      <div class="adv-icon">
+        <svg viewBox="0 0 24 24"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>
+      </div>
+      <h3>{{ t.landing_adv3_title }}</h3>
+      <p>{{ t.landing_adv3_text }}</p>
+    </div>
   </div>
 </div>
-<div style="padding:0 1rem;">
-  <div class="genre-grid">
-    {% for genre in genres %}
-    <a href="{% url 'music:browse' %}?genre={{ genre.slug }}" class="genre-card" data-gc="{{ forloop.counter0 }}">
-      <div class="gc-name">{{ genre.name }}</div>
-      <div class="gc-icon">{{ genre.icon }}</div>
-    </a>
-    {% endfor %}
-  </div>
-</div>
-{% endif %}
 
-<!-- FEATURED / RECOMMENDED -->
-{% if featured_songs %}
-<div class="sh">
-  <div class="sh-row">
-    <div class="sh-title">{{ t.home_featured_title }}</div>
-    <a href="{% url 'music:browse' %}" class="sh-link">{{ t.home_all_songs }}</a>
-  </div>
+<!-- CADRUL LEGAL -->
+<div class="landing-section">
+  <h2>{{ t.landing_legal_title }}</h2>
+  <p class="section-text">{{ t.landing_legal_text }}</p>
 </div>
-<div class="h-scroll">
-  {% for song in featured_songs %}
-  <div class="h-card song-card" data-id="{{ song.id }}">
-    <div class="hc-cover">
-      {% if song.cover_image %}<img src="{{ song.cover_image.url }}" alt="{{ song.title }}">{% else %}🎵{% endif %}
-    </div>
-    <div class="hc-title">{{ song.title }}</div>
-    <div class="hc-sub">{{ song.artist }}</div>
-  </div>
-  {% endfor %}
-</div>
-{% endif %}
 
-<!-- RECENT -->
-{% if recent_songs %}
-<div class="sh">
-  <div class="sh-row">
-    <div class="sh-title">{{ t.home_recent_title }}</div>
-    <a href="{% url 'music:browse' %}" class="sh-link">{{ t.home_all_songs }}</a>
+<!-- PENTRU CINE -->
+<div class="landing-section">
+  <h2>{{ t.landing_audience_title }}</h2>
+  <div class="audience-grid">
+    <div class="audience-item"><div class="aud-emoji">🍽️</div>{{ t.landing_aud_restaurant }}</div>
+    <div class="audience-item"><div class="aud-emoji">💇</div>{{ t.landing_aud_salon }}</div>
+    <div class="audience-item"><div class="aud-emoji">🛍️</div>{{ t.landing_aud_retail }}</div>
+    <div class="audience-item"><div class="aud-emoji">🏨</div>{{ t.landing_aud_hotel }}</div>
+    <div class="audience-item"><div class="aud-emoji">🏋️</div>{{ t.landing_aud_gym }}</div>
+    <div class="audience-item"><div class="aud-emoji">🏢</div>{{ t.landing_aud_office }}</div>
   </div>
 </div>
-<div style="padding:0 0.5rem;">
-  {% for song in recent_songs %}
-  <div class="song-row" data-id="{{ song.id }}">
-    <div class="row-cover">
-      {% if song.cover_image %}<img src="{{ song.cover_image.url }}" alt="{{ song.title }}">{% else %}🎵{% endif %}
-    </div>
-    <div class="row-info">
-      <div class="row-title">{{ song.title }}</div>
-      <div class="row-artist">{{ song.artist }}</div>
-    </div>
-    <button class="fav-btn" data-id="{{ song.id }}">
-      <svg class="heart-empty" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-      <svg class="heart-full" viewBox="0 0 24 24" fill="#1db954" stroke="#1db954" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-    </button>
-  </div>
-  {% endfor %}
+
+<!-- CTA PRETURI -->
+<div class="landing-cta-bar">
+  <h2>{{ t.cta_title_1 }} {{ t.cta_title_2 }}?</h2>
+  <a href="{% url 'music:pricing' %}">{{ t.landing_cta_pricing }}</a>
 </div>
-{% endif %}
+
+<!-- CONTACT -->
+<div class="landing-section">
+  <h2>{{ t.contact_title }}</h2>
+  <p class="section-text" style="margin-bottom:1.5rem;">{{ t.contact_desc }}</p>
+  <div class="landing-contact">
+    <form id="contact-form">
+      {% csrf_token %}
+      <input type="text" name="name" placeholder="{{ t.contact_name_ph }}" required>
+      <input type="email" name="email" placeholder="{{ t.contact_email_ph }}" required>
+      <input type="text" name="business" placeholder="{{ t.contact_business_ph }}">
+      <textarea name="message" placeholder="{{ t.contact_message_ph }}" required></textarea>
+      <button type="submit">{{ t.contact_send }}</button>
+    </form>
+    <div id="contact-success" style="display:none;text-align:center;padding:2rem;color:var(--accent);font-weight:600;">
+      {{ t.contact_success }}
+    </div>
+  </div>
+</div>
 
 <div style="height:2rem;"></div>
 
 <script>
-// Colorize genre cards immediately
-if (typeof colorizeGenreCards === 'function') colorizeGenreCards();
-
-// Update fav count on homepage
-(function() {
-  try {
-    const favs = JSON.parse(localStorage.getItem('soundfree_favorites')) || [];
-    const el = document.getElementById('fav-count');
-    if (el) el.textContent = favs.length;
-  } catch(e) {}
-})();
-
-// Dynamic greeting based on time of day
-(function() {
-  const h = new Date().getHours();
-  const el = document.getElementById('greeting');
-  if (!el) return;
-  const greetings = {
-    morning: '{{ t.greeting_morning }}',
-    afternoon: '{{ t.greeting_afternoon }}',
-    evening: '{{ t.greeting_evening }}'
-  };
-  if (h < 12) el.textContent = greetings.morning;
-  else if (h < 18) el.textContent = greetings.afternoon;
-  else el.textContent = greetings.evening;
-})();
+document.getElementById('contact-form').addEventListener('submit', function(e) {
+  e.preventDefault();
+  var form = this;
+  fetch('{% url "music:contact_submit" %}', {
+    method: 'POST',
+    body: new FormData(form),
+  }).then(function(r) {
+    if (r.ok) {
+      form.style.display = 'none';
+      document.getElementById('contact-success').style.display = 'block';
+    }
+  });
+});
 </script>
 
 {% endblock %}
