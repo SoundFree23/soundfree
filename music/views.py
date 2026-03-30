@@ -113,7 +113,7 @@ def contact_submit(request):
             subject=f'[SoundFree] Contact: {name}',
             message=f'Nume: {name}\nEmail: {email}\nTip locație: {business}\n\nMesaj:\n{message}',
             from_email=settings.DEFAULT_FROM_EMAIL if hasattr(settings, 'DEFAULT_FROM_EMAIL') else 'noreply@soundfree.ro',
-            recipient_list=['info@soundfree.ro'],
+            recipient_list=['office@soundfree.ro'],
             fail_silently=True,
         )
     except Exception:
