@@ -22,6 +22,7 @@
   </a>
 </div>
 
+{% if not current_genre and not current_mood and not search %}
 <!-- GENRE GRID -->
 {% if genres %}
 <div class="sh">
@@ -86,6 +87,7 @@
   </div>
   {% endfor %}
 </div>
+{% endif %}
 {% endif %}
 
 <!-- SEARCH -->
