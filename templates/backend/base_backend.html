@@ -190,6 +190,10 @@
       <span class="icon">👥</span> Utilizatori
     </a>
 
+    <a href="{% url 'music:backend_messages' %}" class="sidebar-link {% block active_messages %}{% endblock %}">
+      <span class="icon">📩</span> Mesaje
+    </a>
+
     <div class="nav-section">Site</div>
     <a href="{% url 'music:home' %}" class="sidebar-link" target="_blank">
       <span class="icon">🌐</span> Vezi Site-ul

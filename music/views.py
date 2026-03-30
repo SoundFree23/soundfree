@@ -5,7 +5,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.db.models import Sum
-from .models import Song, Genre, Mood, Playlist
+from .models import Song, Genre, Mood, Playlist, ContactMessage
 from .forms import SongUploadForm, GenreForm
 
 
@@ -109,12 +109,11 @@ def contact_submit(request):
     business = request.POST.get('business', '')
     message = request.POST.get('message', '')
     try:
-        send_mail(
-            subject=f'[SoundFree] Contact: {name}',
-            message=f'Nume: {name}\nEmail: {email}\nTip locație: {business}\n\nMesaj:\n{message}',
-            from_email=settings.DEFAULT_FROM_EMAIL if hasattr(settings, 'DEFAULT_FROM_EMAIL') else 'noreply@soundfree.ro',
-            recipient_list=['office@soundfree.ro'],
-            fail_silently=True,
+        ContactMessage.objects.create(
+            name=name,
+            email=email,
+            business=business,
+            message=message,
         )
     except Exception:
         pass
@@ -328,6 +327,27 @@ def backend_user_playlists(request, user_id):
         'target_user': target_user,
         'playlists': playlists,
         'all_songs': all_songs,
+    })
+
+
+@login_required(login_url='/backend/login/')
+@user_passes_test(is_staff, login_url='/backend/login/')
+def backend_messages(request):
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        msg_id = request.POST.get('msg_id')
+        if action == 'mark_read' and msg_id:
+            ContactMessage.objects.filter(id=msg_id).update(is_read=True)
+        elif action == 'mark_unread' and msg_id:
+            ContactMessage.objects.filter(id=msg_id).update(is_read=False)
+        elif action == 'delete' and msg_id:
+            ContactMessage.objects.filter(id=msg_id).delete()
+        return redirect('music:backend_messages')
+    contact_messages = ContactMessage.objects.all()
+    unread_count = contact_messages.filter(is_read=False).count()
+    return render(request, 'backend/messages.html', {
+        'contact_messages': contact_messages,
+        'unread_count': unread_count,
     })
 
 

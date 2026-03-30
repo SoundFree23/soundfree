@@ -1,0 +1,70 @@
+{% extends 'backend/base_backend.html' %}
+{% block title %}Mesaje — Backend SoundFree{% endblock %}
+{% block page_title %}📩 Mesaje Contact{% endblock %}
+{% block active_messages %}active{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+  <div>
+    <h1>Mesaje de Contact</h1>
+    <p style="color:var(--text3);font-size:0.85rem;margin-top:0.25rem;">{{ contact_messages|length }} mesaje ({{ unread_count }} necitite)</p>
+  </div>
+</div>
+
+<div class="table-card">
+  <table>
+    <thead>
+      <tr>
+        <th>Status</th>
+        <th>Nume</th>
+        <th>Email</th>
+        <th>Tip locatie</th>
+        <th>Mesaj</th>
+        <th>Data</th>
+        <th>Actiuni</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for msg in contact_messages %}
+      <tr style="{% if not msg.is_read %}background:rgba(124,58,237,0.08);{% endif %}">
+        <td>
+          {% if msg.is_read %}
+            <span class="badge-inactive">Citit</span>
+          {% else %}
+            <span class="badge-active">Nou</span>
+          {% endif %}
+        </td>
+        <td><div class="td-title">{{ msg.name }}</div></td>
+        <td><a href="mailto:{{ msg.email }}" style="color:var(--accent2);text-decoration:none;font-size:0.85rem;">{{ msg.email }}</a></td>
+        <td style="color:var(--text2);font-size:0.85rem;">{% if msg.business %}{{ msg.business }}{% else %}—{% endif %}</td>
+        <td style="max-width:300px;color:var(--text2);font-size:0.85rem;white-space:pre-wrap;word-break:break-word;">{{ msg.message|truncatewords:30 }}</td>
+        <td style="color:var(--text3);font-size:0.8rem;white-space:nowrap;">{{ msg.created_at|date:"d.m.Y H:i" }}</td>
+        <td>
+          <div style="display:flex;gap:0.35rem;flex-wrap:wrap;">
+            <form method="post" style="display:inline;">
+              {% csrf_token %}
+              <input type="hidden" name="msg_id" value="{{ msg.id }}">
+              {% if msg.is_read %}
+                <button type="submit" name="action" value="mark_unread" class="btn btn-outline btn-sm" title="Marcheaza necitit">📩</button>
+              {% else %}
+                <button type="submit" name="action" value="mark_read" class="btn btn-outline btn-sm" title="Marcheaza citit">✅</button>
+              {% endif %}
+              <button type="submit" name="action" value="delete" class="btn btn-danger btn-sm" title="Sterge" onclick="return confirm('Stergi mesajul?')">🗑️</button>
+            </form>
+          </div>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="7" style="text-align:center;padding:3rem;color:var(--text3);">
+          <div style="font-size:2.5rem;margin-bottom:0.75rem;">📩</div>
+          <div>Niciun mesaj de contact.</div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

@@ -85,3 +85,20 @@ class Playlist(models.Model):
         if self.user:
             return f"{self.name} ({self.user.username})"
         return self.name
+
+
+class ContactMessage(models.Model):
+    name = models.CharField(max_length=200, verbose_name="Nume")
+    email = models.EmailField(verbose_name="Email")
+    business = models.CharField(max_length=200, blank=True, verbose_name="Tip locație")
+    message = models.TextField(verbose_name="Mesaj")
+    is_read = models.BooleanField(default=False, verbose_name="Citit")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Mesaj contact"
+        verbose_name_plural = "Mesaje contact"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.name} - {self.email}"
