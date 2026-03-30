@@ -117,6 +117,16 @@ def contact_submit(request):
         )
     except Exception:
         pass
+    try:
+        send_mail(
+            subject=f'[SoundFree] Contact: {name}',
+            message=f'Nume: {name}\nEmail: {email}\nTip locatie: {business}\n\nMesaj:\n{message}',
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=['office@soundfree.ro'],
+            fail_silently=True,
+        )
+    except Exception:
+        pass
     return JsonResponse({'ok': True})
 
 
