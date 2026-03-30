@@ -2,15 +2,17 @@
 Generate cover images for songs by downloading royalty-free photos from Pixabay.
 Searches based on song title keywords and genre.
 """
+import os
 import re
 import hashlib
+import logging
 import requests
 from io import BytesIO
 from django.core.management.base import BaseCommand
 from django.core.files.base import ContentFile
 from PIL import Image, ImageFilter, ImageEnhance
 
-PIXABAY_API_KEY = '55170064-bcd910d5d5d0aaf641a1c0e55'
+PIXABAY_API_KEY = os.environ.get('PIXABAY_API_KEY', '55170064-bcd910d5d5d0aaf641a1c0e55')
 PIXABAY_URL = 'https://pixabay.com/api/'
 
 # Map keywords to better search terms for Pixabay

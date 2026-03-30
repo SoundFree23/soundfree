@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__Claude_Preview__preview_start",
+      "Bash(C:UsersuserDesktoppythonvenvScriptspip.exe install:*)",
+      "Bash(venv/Scripts/pip.exe install:*)",
+      "Bash(\"C:/Users/user/Desktop/python/venv/Scripts/pip.exe\" install:*)",
+      "Bash(/c/Users/user/Desktop/python/venv/Scripts/pip.exe install:*)",
+      "Bash(venv/Scripts/pip install:*)",
+      "Bash(git --version)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "WebFetch(domain:www.taxepentrumuzica.ro)",
+      "WebFetch(domain:etradio.ro)"
+    ]
+  }
+}

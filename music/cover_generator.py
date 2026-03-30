@@ -1,14 +1,18 @@
 """
 Auto-generate cover images from Pixabay when uploading a song.
 """
+import os
 import re
 import hashlib
+import logging
 import requests
 from io import BytesIO
 from django.core.files.base import ContentFile
 from PIL import Image, ImageEnhance
 
-PIXABAY_API_KEY = '55170064-bcd910d5d5d0aaf641a1c0e55'
+logger = logging.getLogger(__name__)
+
+PIXABAY_API_KEY = os.environ.get('PIXABAY_API_KEY', '55170064-bcd910d5d5d0aaf641a1c0e55')
 PIXABAY_URL = 'https://pixabay.com/api/'
 
 KEYWORD_MAP = {
@@ -134,7 +138,8 @@ def search_pixabay(query, per_page=20):
         resp.raise_for_status()
         data = resp.json()
         return data.get('hits', [])
-    except Exception:
+    except requests.RequestException as e:
+        logger.warning(f'Pixabay search error: {e}')
         return []
 
 
@@ -156,7 +161,8 @@ def download_and_crop(url, size=600):
         enhancer = ImageEnhance.Color(img)
         img = enhancer.enhance(1.15)
         return img
-    except Exception:
+    except (requests.RequestException, IOError) as e:
+        logger.warning(f'Download/crop error for {url}: {e}')
         return None
 
 

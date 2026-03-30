@@ -1,5 +1,17 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
+
+
+def validate_audio_file(value):
+    """Validează că fișierul este audio (MP3 sau WAV)."""
+    import os
+    ext = os.path.splitext(value.name)[1].lower()
+    allowed = ['.mp3', '.wav', '.ogg', '.flac', '.aac', '.m4a']
+    if ext not in allowed:
+        raise ValidationError(
+            f'Tip de fișier invalid ({ext}). Extensii permise: {", ".join(allowed)}'
+        )
 
 
 class Genre(models.Model):
@@ -33,7 +45,7 @@ class Song(models.Model):
     artist = models.CharField(max_length=200, verbose_name="Artist / Compozitor")
     genre = models.ForeignKey(Genre, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Gen")
     mood = models.ForeignKey(Mood, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Mood")
-    audio_file = models.FileField(upload_to='songs/', verbose_name="Fișier audio (MP3/WAV)")
+    audio_file = models.FileField(upload_to='songs/', validators=[validate_audio_file], verbose_name="Fișier audio (MP3/WAV)")
     cover_image = models.ImageField(upload_to='covers/', null=True, blank=True, verbose_name="Copertă")
     duration = models.PositiveIntegerField(default=0, verbose_name="Durată (secunde)")
     bpm = models.PositiveIntegerField(null=True, blank=True, verbose_name="BPM")

@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: soundfree
+    runtime: python
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn myproject.wsgi:application --bind 0.0.0.0:$PORT"
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        value: ".onrender.com,soundfree.ro"
+      - key: CSRF_TRUSTED_ORIGINS
+        value: "https://*.onrender.com,https://soundfree.ro"
+      - key: PYTHON_VERSION
+        value: "3.12.3"
