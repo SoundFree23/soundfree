@@ -197,7 +197,7 @@ def backend_upload(request):
         if form.is_valid():
             song = form.save()
             # Auto-detect duration from audio file
-            if song.audio_file and song.duration == 0:
+            if song.audio_file:
                 try:
                     from mutagen import File as MutagenFile
                     audio = MutagenFile(song.audio_file.path)
