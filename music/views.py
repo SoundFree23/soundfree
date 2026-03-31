@@ -196,6 +196,16 @@ def backend_upload(request):
         form = SongUploadForm(request.POST, request.FILES)
         if form.is_valid():
             song = form.save()
+            # Auto-detect duration from audio file
+            if song.audio_file and song.duration == 0:
+                try:
+                    from mutagen import File as MutagenFile
+                    audio = MutagenFile(song.audio_file.path)
+                    if audio and audio.info:
+                        song.duration = int(audio.info.length)
+                        song.save(update_fields=['duration'])
+                except Exception:
+                    pass
             # Auto-generate cover if none was uploaded
             if not song.cover_image:
                 try:
