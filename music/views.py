@@ -69,7 +69,7 @@ def browse(request):
     if mood_slug:
         songs = songs.filter(mood__slug=mood_slug)
     if search:
-        songs = songs.filter(title__icontains=search) | songs.filter(artist__icontains=search)
+        songs = songs.filter(title__icontains=search)
 
     context = {
         'songs': songs,
@@ -139,7 +139,7 @@ def song_detail(request, pk):
 
 def api_songs(request):
     songs = Song.objects.filter(is_active=True).select_related('genre').values(
-        'id', 'title', 'artist', 'audio_file', 'cover_image', 'duration',
+        'id', 'title', 'audio_file', 'cover_image', 'duration',
         'genre__slug', 'genre__name'
     )
     songs_list = []
@@ -147,7 +147,7 @@ def api_songs(request):
         songs_list.append({
             'id': s['id'],
             'title': s['title'],
-            'artist': s['artist'],
+            'artist': 'SoundFree',
             'audio': request.build_absolute_uri(f"/media/{s['audio_file']}") if s['audio_file'] else '',
             'cover': request.build_absolute_uri(f"/media/{s['cover_image']}") if s['cover_image'] else '',
             'duration': s['duration'],
@@ -185,7 +185,7 @@ def backend_songs(request):
     search = request.GET.get('search', '')
     songs = Song.objects.select_related('genre', 'mood').order_by('-created_at')
     if search:
-        songs = songs.filter(title__icontains=search) | songs.filter(artist__icontains=search)
+        songs = songs.filter(title__icontains=search)
     return render(request, 'backend/songs.html', {'songs': songs, 'search': search})
 
 
@@ -373,7 +373,7 @@ def api_user_playlists(request):
             songs.append({
                 'id': s.id,
                 'title': s.title,
-                'artist': s.artist,
+                'artist': 'SoundFree',
                 'audio': s.audio_file.url if s.audio_file else '',
                 'cover': s.cover_image.url if s.cover_image else '',
                 'duration': s.duration,

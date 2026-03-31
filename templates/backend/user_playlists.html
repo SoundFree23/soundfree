@@ -56,7 +56,7 @@
           </div>
           <div style="flex:1;min-width:0;">
             <div style="font-size:0.85rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ song.title }}</div>
-            <div style="font-size:0.75rem;color:var(--text3);">{{ song.artist }}</div>
+            <div style="font-size:0.75rem;color:var(--text3);">SoundFree</div>
           </div>
           <form method="post" style="flex-shrink:0;">
             {% csrf_token %}
@@ -80,7 +80,7 @@
         <select name="song_id" class="form-input" style="flex:1;">
           <option value="">— Alege melodie —</option>
           {% for song in all_songs %}
-          <option value="{{ song.id }}">{{ song.title }} — {{ song.artist }}</option>
+          <option value="{{ song.id }}">{{ song.title }}</option>
           {% endfor %}
         </select>
         <button type="submit" class="btn btn-primary" style="white-space:nowrap;">+ Adaugă</button>

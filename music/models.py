@@ -42,7 +42,6 @@ class Mood(models.Model):
 
 class Song(models.Model):
     title = models.CharField(max_length=200, verbose_name="Titlu melodie")
-    artist = models.CharField(max_length=200, verbose_name="Artist / Compozitor")
     genre = models.ForeignKey(Genre, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Gen")
     mood = models.ForeignKey(Mood, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Mood")
     audio_file = models.FileField(upload_to='songs/', validators=[validate_audio_file], verbose_name="Fișier audio (MP3/WAV)")
@@ -60,7 +59,7 @@ class Song(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
-        return f"{self.title} - {self.artist}"
+        return self.title
 
     def duration_display(self):
         minutes = self.duration // 60

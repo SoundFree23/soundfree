@@ -29,13 +29,6 @@
         {% if form.title.errors %}<div style="color:var(--danger);font-size:0.75rem;">{{ form.title.errors.0 }}</div>{% endif %}
       </div>
 
-      <!-- Artist -->
-      <div class="form-group">
-        <label class="form-label">{{ form.artist.label }}</label>
-        {{ form.artist }}
-        {% if form.artist.errors %}<div style="color:var(--danger);font-size:0.75rem;">{{ form.artist.errors.0 }}</div>{% endif %}
-      </div>
-
       <!-- Gen -->
       <div class="form-group">
         <label class="form-label">{{ form.genre.label }}</label>

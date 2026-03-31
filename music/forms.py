@@ -5,10 +5,9 @@ from .models import Song, Genre, Mood, Playlist
 class SongUploadForm(forms.ModelForm):
     class Meta:
         model = Song
-        fields = ['title', 'artist', 'genre', 'mood', 'bpm', 'audio_file', 'cover_image', 'duration', 'is_featured', 'is_active']
+        fields = ['title', 'genre', 'mood', 'bpm', 'audio_file', 'cover_image', 'duration', 'is_featured', 'is_active']
         widgets = {
             'title': forms.TextInput(attrs={'placeholder': 'ex: Morning Breeze', 'class': 'form-input'}),
-            'artist': forms.TextInput(attrs={'placeholder': 'ex: SoundFree Studio', 'class': 'form-input'}),
             'genre': forms.Select(attrs={'class': 'form-input'}),
             'mood': forms.Select(attrs={'class': 'form-input'}),
             'bpm': forms.NumberInput(attrs={'placeholder': 'ex: 90', 'class': 'form-input'}),
@@ -20,7 +19,6 @@ class SongUploadForm(forms.ModelForm):
         }
         labels = {
             'title': 'Titlu melodie *',
-            'artist': 'Artist / Compozitor *',
             'genre': 'Gen muzical',
             'mood': 'Mood / Atmosferă',
             'bpm': 'BPM (tempo)',

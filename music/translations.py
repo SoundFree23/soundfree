@@ -64,7 +64,7 @@ TRANSLATIONS = {
 
         # LIBRARY
         'lib_title': '🎵 Biblioteca Muzicală',
-        'lib_search_placeholder': 'Caută după titlu sau artist...',
+        'lib_search_placeholder': 'Caută după titlu...',
         'lib_all_genres': 'Toate genurile',
         'lib_all_moods': 'Orice mood',
         'lib_search_btn': '🔍 Caută',
@@ -342,7 +342,7 @@ TRANSLATIONS = {
 
         # LIBRARY
         'lib_title': '🎵 Music Library',
-        'lib_search_placeholder': 'Search by title or artist...',
+        'lib_search_placeholder': 'Search by title...',
         'lib_all_genres': 'All genres',
         'lib_all_moods': 'Any mood',
         'lib_search_btn': '🔍 Search',

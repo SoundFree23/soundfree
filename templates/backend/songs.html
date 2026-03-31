@@ -12,7 +12,7 @@
   </div>
   <div style="display:flex;gap:0.75rem;align-items:center;">
     <form method="get" class="search-box">
-      <input type="text" name="search" value="{{ search }}" placeholder="Caută titlu / artist...">
+      <input type="text" name="search" value="{{ search }}" placeholder="Caută titlu...">
       <button type="submit">🔍</button>
     </form>
     <a href="{% url 'music:backend_upload' %}" class="btn btn-primary">⬆️ Upload nou</a>
@@ -44,7 +44,7 @@
         </td>
         <td>
           <div class="td-title">{{ song.title }}</div>
-          <div class="td-sub">{{ song.artist }}</div>
+          <div class="td-sub">SoundFree</div>
         </td>
         <td>{% if song.genre %}<span class="badge-genre">{{ song.genre.icon }} {{ song.genre.name }}</span>{% else %}<span style="color:var(--text3);">—</span>{% endif %}</td>
         <td>{% if song.mood %}<span style="font-size:0.78rem;color:{{ song.mood.color }};">{{ song.mood.name }}</span>{% else %}<span style="color:var(--text3);">—</span>{% endif %}</td>

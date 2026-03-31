@@ -16,14 +16,14 @@ class MoodAdmin(admin.ModelAdmin):
 
 @admin.register(Song)
 class SongAdmin(admin.ModelAdmin):
-    list_display = ['title', 'artist', 'genre', 'mood', 'bpm', 'plays_count', 'is_active', 'is_featured', 'created_at']
+    list_display = ['title', 'genre', 'mood', 'bpm', 'plays_count', 'is_active', 'is_featured', 'created_at']
     list_filter = ['genre', 'mood', 'is_active', 'is_featured']
-    search_fields = ['title', 'artist']
+    search_fields = ['title']
     list_editable = ['is_active', 'is_featured']
     readonly_fields = ['plays_count', 'created_at']
     fieldsets = (
         ('Informații melodie', {
-            'fields': ('title', 'artist', 'genre', 'mood', 'bpm')
+            'fields': ('title', 'genre', 'mood', 'bpm')
         }),
         ('Fișiere', {
             'fields': ('audio_file', 'cover_image')
