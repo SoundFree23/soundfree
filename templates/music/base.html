@@ -631,7 +631,7 @@ function colorizeGenreCards() {
 <footer>
   <p>{{ t.footer_copy }}</p>
   <p style="margin-top:0.5rem;">
-    <a href="#">{{ t.footer_terms }}</a> · <a href="#">{{ t.footer_privacy }}</a> · <a href="#">{{ t.footer_contact }}</a>
+    <a href="#">{{ t.footer_terms }}</a> · <a href="{% url 'music:privacy' %}">{{ t.footer_privacy }}</a> · <a href="#">{{ t.footer_contact }}</a>
   </p>
 </footer>
 
@@ -1510,5 +1510,30 @@ document.addEventListener('DOMContentLoaded', initAllPageFeatures);
 </script>
 
 {% block extra_js %}{% endblock %}
+
+<!-- GDPR COOKIE CONSENT BANNER -->
+<div id="cookie-banner" style="display:none; position:fixed; bottom:0; left:0; right:0; z-index:99999; background:rgba(18,18,18,0.97); border-top:1px solid rgba(124,58,237,0.3); backdrop-filter:blur(12px); padding:1rem 1.5rem; box-shadow:0 -4px 20px rgba(0,0,0,0.4);">
+  <div style="max-width:900px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap;">
+    <p style="margin:0; color:#b0b0b0; font-size:0.875rem; line-height:1.6; flex:1; min-width:200px;">
+      🔒 {{ t.cookie_text }}
+    </p>
+    <div style="display:flex; gap:0.6rem; flex-shrink:0;">
+      <a href="{% url 'music:privacy' %}" style="padding:0.5rem 1.1rem; border-radius:8px; font-size:0.85rem; font-weight:500; text-decoration:none; border:1px solid rgba(255,255,255,0.15); color:#ccc; transition:all 0.2s;">{{ t.cookie_details }}</a>
+      <button onclick="acceptCookies()" style="padding:0.5rem 1.4rem; border-radius:8px; font-size:0.85rem; font-weight:600; border:none; cursor:pointer; background:linear-gradient(135deg,#7c3aed,#06b6d4); color:#fff; transition:all 0.2s;">{{ t.cookie_accept }}</button>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  if (!localStorage.getItem('sf_cookie_consent')) {
+    document.getElementById('cookie-banner').style.display = 'block';
+  }
+})();
+function acceptCookies() {
+  localStorage.setItem('sf_cookie_consent', '1');
+  document.getElementById('cookie-banner').style.display = 'none';
+}
+</script>
+
 </body>
 </html>

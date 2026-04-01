@@ -168,6 +168,51 @@ TRANSLATIONS = {
         'footer_privacy': 'Confidențialitate',
         'footer_contact': 'Contact',
 
+        # PRIVACY POLICY
+        'privacy_title': 'Politica de Confidențialitate',
+        'privacy_subtitle': 'Ultima actualizare: 1 aprilie 2026',
+        'privacy_intro': 'SoundFree.ro (operat de SC SoundFree SRL, România) respectă confidențialitatea datelor dumneavoastră personale în conformitate cu Regulamentul General privind Protecția Datelor (GDPR - Regulamentul UE 2016/679) și legislația românească aplicabilă.',
+
+        'privacy_s1_title': '1. Operatorul de date',
+        'privacy_s1_text': 'Operatorul de date cu caracter personal este SC SoundFree SRL, cu sediul în România. Pentru orice întrebări legate de protecția datelor, ne puteți contacta la adresa de email: office@soundfree.ro.',
+
+        'privacy_s2_title': '2. Ce date colectăm',
+        'privacy_s2_items': 'Date de cont: nume, adresa de email, parola (criptată);Date de utilizare: melodii redate, playlist-uri create, preferințe;Date tehnice: adresa IP, tipul browserului, dispozitivul utilizat;Date de contact: mesajele trimise prin formularul de contact;Date de facturare: informațiile necesare emiterii facturilor (dacă este cazul)',
+
+        'privacy_s3_title': '3. Scopul prelucrării datelor',
+        'privacy_s3_items': 'Furnizarea și îmbunătățirea serviciului de streaming muzical;Gestionarea contului dumneavoastră și a abonamentului;Personalizarea experienței (recomandări, playlist-uri);Comunicări legate de serviciu (actualizări, suport tehnic);Respectarea obligațiilor legale și fiscale',
+
+        'privacy_s4_title': '4. Temeiul legal al prelucrării',
+        'privacy_s4_items': 'Executarea contractului — pentru furnizarea serviciului solicitat;Consimțământul — pentru comunicări de marketing (dacă este cazul);Interesul legitim — pentru îmbunătățirea și securizarea serviciului;Obligația legală — pentru conformarea cu legislația fiscală și comercială',
+
+        'privacy_s5_title': '5. Durata stocării datelor',
+        'privacy_s5_text': 'Datele personale sunt păstrate pe durata existenței contului dumneavoastră și pentru o perioadă de maximum 3 ani după ștergerea contului, conform cerințelor legale. Datele de facturare sunt păstrate conform legislației fiscale (10 ani).',
+
+        'privacy_s6_title': '6. Drepturile dumneavoastră (GDPR)',
+        'privacy_s6_items': 'Dreptul de acces — puteți solicita o copie a datelor dumneavoastră personale;Dreptul la rectificare — puteți cere corectarea datelor inexacte;Dreptul la ștergere ("dreptul de a fi uitat") — puteți solicita ștergerea datelor;Dreptul la restricționarea prelucrării — puteți limita modul în care vă procesăm datele;Dreptul la portabilitatea datelor — puteți primi datele într-un format structurat;Dreptul de opoziție — vă puteți opune prelucrării datelor în anumite situații;Dreptul de a depune o plângere la ANSPDCP (Autoritatea Națională de Supraveghere a Prelucrării Datelor cu Caracter Personal)',
+
+        'privacy_s7_title': '7. Cookies și tehnologii similare',
+        'privacy_s7_text': 'Utilizăm cookies esențiale pentru funcționarea site-ului (autentificare, preferințe de limbă, sesiune). Nu utilizăm cookies de marketing sau de urmărire de la terți fără consimțământul dumneavoastră explicit.',
+
+        'privacy_s8_title': '8. Partajarea datelor',
+        'privacy_s8_text': 'Nu vindem datele dumneavoastră personale. Datele pot fi partajate doar cu: furnizorii de servicii de hosting și infrastructură necesari funcționării platformei, și autoritățile competente atunci când legea o impune.',
+
+        'privacy_s9_title': '9. Securitatea datelor',
+        'privacy_s9_text': 'Implementăm măsuri tehnice și organizatorice adecvate pentru protejarea datelor dumneavoastră, inclusiv criptarea parolelor, conexiuni securizate (HTTPS) și acces restricționat la baza de date.',
+
+        'privacy_s10_title': '10. Modificări ale politicii',
+        'privacy_s10_text': 'Ne rezervăm dreptul de a actualiza această politică. Orice modificare semnificativă va fi comunicată prin email sau prin notificare pe platformă.',
+
+        'privacy_s11_title': '11. Contact',
+        'privacy_s11_text': 'Pentru exercitarea drepturilor GDPR sau orice întrebări privind datele dumneavoastră personale, contactați-ne la:',
+        'privacy_contact_email': 'Email: office@soundfree.ro',
+        'privacy_contact_authority': 'Autoritate de supraveghere: ANSPDCP — www.dataprotection.ro',
+
+        # COOKIE CONSENT BANNER
+        'cookie_text': 'Acest site folosește cookies esențiale pentru funcționare. Datele tale sunt protejate conform GDPR.',
+        'cookie_accept': 'Accept',
+        'cookie_details': 'Detalii',
+
         # PLAYER
         'player_select': 'Selectează o melodie',
         'royalty_free': 'MELODIE ROYALTY-FREE',
@@ -445,6 +490,51 @@ TRANSLATIONS = {
         'footer_terms': 'Terms',
         'footer_privacy': 'Privacy',
         'footer_contact': 'Contact',
+
+        # PRIVACY POLICY
+        'privacy_title': 'Privacy Policy',
+        'privacy_subtitle': 'Last updated: April 1, 2026',
+        'privacy_intro': 'SoundFree.ro (operated by SC SoundFree SRL, Romania) respects the privacy of your personal data in accordance with the General Data Protection Regulation (GDPR - EU Regulation 2016/679) and applicable Romanian legislation.',
+
+        'privacy_s1_title': '1. Data Controller',
+        'privacy_s1_text': 'The personal data controller is SC SoundFree SRL, based in Romania. For any questions regarding data protection, you can contact us at: office@soundfree.ro.',
+
+        'privacy_s2_title': '2. Data We Collect',
+        'privacy_s2_items': 'Account data: name, email address, password (encrypted);Usage data: tracks played, playlists created, preferences;Technical data: IP address, browser type, device used;Contact data: messages sent through the contact form;Billing data: information required for invoicing (if applicable)',
+
+        'privacy_s3_title': '3. Purpose of Data Processing',
+        'privacy_s3_items': 'Providing and improving the music streaming service;Managing your account and subscription;Personalizing the experience (recommendations, playlists);Service-related communications (updates, technical support);Compliance with legal and tax obligations',
+
+        'privacy_s4_title': '4. Legal Basis for Processing',
+        'privacy_s4_items': 'Contract performance — to provide the requested service;Consent — for marketing communications (if applicable);Legitimate interest — to improve and secure the service;Legal obligation — to comply with tax and commercial legislation',
+
+        'privacy_s5_title': '5. Data Retention Period',
+        'privacy_s5_text': 'Personal data is retained for the duration of your account and for a maximum of 3 years after account deletion, in accordance with legal requirements. Billing data is retained according to tax legislation (10 years).',
+
+        'privacy_s6_title': '6. Your Rights (GDPR)',
+        'privacy_s6_items': 'Right of access — you can request a copy of your personal data;Right to rectification — you can request correction of inaccurate data;Right to erasure ("right to be forgotten") — you can request deletion of your data;Right to restriction of processing — you can limit how we process your data;Right to data portability — you can receive your data in a structured format;Right to object — you can object to data processing in certain situations;Right to lodge a complaint with ANSPDCP (Romanian National Supervisory Authority for Personal Data Processing)',
+
+        'privacy_s7_title': '7. Cookies and Similar Technologies',
+        'privacy_s7_text': 'We use essential cookies for site functionality (authentication, language preferences, session). We do not use marketing or third-party tracking cookies without your explicit consent.',
+
+        'privacy_s8_title': '8. Data Sharing',
+        'privacy_s8_text': 'We do not sell your personal data. Data may only be shared with: hosting and infrastructure service providers necessary for platform operation, and competent authorities when required by law.',
+
+        'privacy_s9_title': '9. Data Security',
+        'privacy_s9_text': 'We implement appropriate technical and organizational measures to protect your data, including password encryption, secure connections (HTTPS), and restricted database access.',
+
+        'privacy_s10_title': '10. Policy Changes',
+        'privacy_s10_text': 'We reserve the right to update this policy. Any significant changes will be communicated via email or platform notification.',
+
+        'privacy_s11_title': '11. Contact',
+        'privacy_s11_text': 'To exercise your GDPR rights or for any questions regarding your personal data, contact us at:',
+        'privacy_contact_email': 'Email: office@soundfree.ro',
+        'privacy_contact_authority': 'Supervisory authority: ANSPDCP — www.dataprotection.ro',
+
+        # COOKIE CONSENT BANNER
+        'cookie_text': 'This site uses essential cookies for functionality. Your data is protected in accordance with GDPR.',
+        'cookie_accept': 'Accept',
+        'cookie_details': 'Details',
 
         # PLAYER
         'player_select': 'Select a track',

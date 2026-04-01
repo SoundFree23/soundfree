@@ -1,0 +1,117 @@
+{% extends 'music/base.html' %}
+{% load music_filters %}
+
+{% block title %}{{ t.privacy_title }} — SoundFree.ro{% endblock %}
+
+{% block content %}
+
+<style>
+  .privacy-header { text-align: center; padding: 4rem 0 2rem; background: var(--bg2); border-bottom: 1px solid var(--border); }
+  .privacy-header h1 { font-size: 2.5rem; font-weight: 800; margin-bottom: 0.75rem; }
+  .privacy-header p { color: var(--text2); font-size: 0.95rem; }
+  .privacy-content { max-width: 800px; margin: 0 auto; padding: 3rem 1.5rem 4rem; }
+  .privacy-intro { color: var(--text2); font-size: 1rem; line-height: 1.8; margin-bottom: 2.5rem; padding-bottom: 2rem; border-bottom: 1px solid var(--border); }
+  .privacy-section { margin-bottom: 2rem; }
+  .privacy-section h2 { font-size: 1.2rem; font-weight: 700; margin-bottom: 0.75rem; color: var(--text); }
+  .privacy-section p { color: var(--text2); font-size: 0.9rem; line-height: 1.8; }
+  .privacy-section ul { list-style: none; padding: 0; margin: 0.5rem 0 0; }
+  .privacy-section ul li { position: relative; padding-left: 1.5rem; color: var(--text2); font-size: 0.9rem; line-height: 1.8; margin-bottom: 0.25rem; }
+  .privacy-section ul li::before { content: ''; position: absolute; left: 0; top: 0.65rem; width: 6px; height: 6px; border-radius: 50%; background: var(--accent2); }
+  .privacy-contact-box { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; margin-top: 0.75rem; }
+  .privacy-contact-box p { margin: 0.25rem 0; color: var(--text2); font-size: 0.9rem; }
+  .privacy-contact-box a { color: var(--accent2); text-decoration: none; }
+  .privacy-contact-box a:hover { text-decoration: underline; }
+
+  @media (max-width: 600px) {
+    .privacy-header h1 { font-size: 1.5rem; }
+    .privacy-content { padding: 2rem 1rem 3rem; }
+  }
+</style>
+
+<div class="privacy-header">
+  <div class="container">
+    <h1>{{ t.privacy_title }}</h1>
+    <p>{{ t.privacy_subtitle }}</p>
+  </div>
+</div>
+
+<div class="privacy-content">
+  <p class="privacy-intro">{{ t.privacy_intro }}</p>
+
+  <div class="privacy-section">
+    <h2>{{ t.privacy_s1_title }}</h2>
+    <p>{{ t.privacy_s1_text }}</p>
+  </div>
+
+  <div class="privacy-section">
+    <h2>{{ t.privacy_s2_title }}</h2>
+    <ul>
+      {% for item in t.privacy_s2_items|split:";" %}
+        <li>{{ item }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <div class="privacy-section">
+    <h2>{{ t.privacy_s3_title }}</h2>
+    <ul>
+      {% for item in t.privacy_s3_items|split:";" %}
+        <li>{{ item }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <div class="privacy-section">
+    <h2>{{ t.privacy_s4_title }}</h2>
+    <ul>
+      {% for item in t.privacy_s4_items|split:";" %}
+        <li>{{ item }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <div class="privacy-section">
+    <h2>{{ t.privacy_s5_title }}</h2>
+    <p>{{ t.privacy_s5_text }}</p>
+  </div>
+
+  <div class="privacy-section">
+    <h2>{{ t.privacy_s6_title }}</h2>
+    <ul>
+      {% for item in t.privacy_s6_items|split:";" %}
+        <li>{{ item }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <div class="privacy-section">
+    <h2>{{ t.privacy_s7_title }}</h2>
+    <p>{{ t.privacy_s7_text }}</p>
+  </div>
+
+  <div class="privacy-section">
+    <h2>{{ t.privacy_s8_title }}</h2>
+    <p>{{ t.privacy_s8_text }}</p>
+  </div>
+
+  <div class="privacy-section">
+    <h2>{{ t.privacy_s9_title }}</h2>
+    <p>{{ t.privacy_s9_text }}</p>
+  </div>
+
+  <div class="privacy-section">
+    <h2>{{ t.privacy_s10_title }}</h2>
+    <p>{{ t.privacy_s10_text }}</p>
+  </div>
+
+  <div class="privacy-section">
+    <h2>{{ t.privacy_s11_title }}</h2>
+    <p>{{ t.privacy_s11_text }}</p>
+    <div class="privacy-contact-box">
+      <p>{{ t.privacy_contact_email }}</p>
+      <p>{{ t.privacy_contact_authority }}</p>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

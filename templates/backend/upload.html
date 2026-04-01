@@ -106,4 +106,17 @@
   </div>
 </form>
 
+<script>
+// Auto-fill title from audio filename
+document.querySelector('input[name="audio_file"]').addEventListener('change', function() {
+  var titleInput = document.querySelector('input[name="title"]');
+  if (titleInput && !titleInput.value.trim() && this.files.length) {
+    var name = this.files[0].name;
+    name = name.replace(/\.[^.]+$/, '');
+    name = name.replace(/[_-]/g, ' ');
+    titleInput.value = name;
+  }
+});
+</script>
+
 {% endblock %}
