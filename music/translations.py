@@ -58,7 +58,7 @@ TRANSLATIONS = {
 
         # CTA FINAL
         'cta_title_1': 'Gata să treci la',
-        'cta_title_2': 'muzică fără griji',
+        'cta_title_2': 'muzică fără griji?',
         'cta_desc': 'Alătură-te afacerilor din România care au ales muzica inteligentă.',
         'cta_btn': 'Începe Acum — 7 zile gratuit',
 
@@ -406,7 +406,7 @@ TRANSLATIONS = {
 
         # CTA FINAL
         'cta_title_1': 'Ready for',
-        'cta_title_2': 'worry-free music',
+        'cta_title_2': 'worry-free music?',
         'cta_desc': 'Join businesses in Romania that chose smart music.',
         'cta_btn': 'Start Now — 7 days free',
 
