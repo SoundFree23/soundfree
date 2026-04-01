@@ -1,4 +1,3 @@
-{% load static %}
 <!DOCTYPE html>
 <html lang="ro">
 <head>
@@ -47,10 +46,7 @@
     .nav-logo {
       font-size: 1.2rem; font-weight: 800; color: var(--text);
       text-decoration: none; letter-spacing: -0.5px;
-      display: flex; align-items: center; gap: 0.4rem;
-      margin-right: auto;
     }
-    .alien-logo { flex-shrink: 0; filter: hue-rotate(-10deg) saturate(1.3) brightness(1.05); }
     .nav-logo span { color: var(--accent); }
     .desktop-nav { display: none; gap: 0.25rem; align-items: center; }
     .desktop-nav a {
@@ -582,7 +578,7 @@
 <!-- TOP HEADER -->
 <div class="top-header">
   <a href="{% url 'music:home' %}" class="nav-logo">
-    <img src="{% static 'logo.png' %}" alt="SoundFree" class="alien-logo" height="60">
+    Sound<span>Free</span>
   </a>
   <div class="desktop-nav">
     <a href="{% url 'music:home' %}">{{ t.nav_home }}</a>
