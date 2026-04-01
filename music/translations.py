@@ -309,6 +309,31 @@ TRANSLATIONS = {
         'landing_cta_pricing': 'Vezi prețurile',
         'landing_listen_cta': 'Ascultă catalogul',
 
+        # LANDING Q&A
+        'landing_qa_title': 'Întrebări frecvente',
+        'landing_qa_sub': 'Răspunsuri la cele mai comune întrebări despre licențierea muzicală',
+
+        'landing_qa_q1': 'Este necesară o licență muzicală pentru afacerea mea?',
+        'landing_qa_a1': 'Da. Orice afacere — inclusiv magazine, restaurante, hoteluri și alte spații comerciale — care difuzează muzică este obligată prin lege să dețină o licență muzicală valabilă. SoundFree vă oferă acces la un repertoriu propriu, compus și licențiat integral de echipa noastră.',
+
+        'landing_qa_q2': 'Voi primi documentație oficială pentru licență?',
+        'landing_qa_a2': 'Da. La încheierea colaborării cu SoundFree, veți primi certificatul de utilizare care atestă că dețineți dreptul de a difuza repertoriul nostru în locația dumneavoastră. Acest document confirmă că muzica folosită provine dintr-un catalog propriu, cu drepturi depline.',
+
+        'landing_qa_q3': 'Cum se calculează costul abonamentului?',
+        'landing_qa_a3': 'Abonamentul SoundFree se bazează pe trei criterii: tipul de afacere (cafenea, restaurant, hotel etc.), suprafața locației și numărul de locații. Consultați pagina de prețuri pentru detalii sau contactați-ne pentru o ofertă personalizată.',
+
+        'landing_qa_q4': 'Funcționez doar sezonier. Trebuie să plătesc tot anul?',
+        'landing_qa_a4': 'Nu. SoundFree oferă planuri lunare flexibile, perfecte pentru afacerile sezoniere. Plătiți doar pentru lunile în care aveți nevoie de muzică.',
+
+        'landing_qa_q5': 'Am un televizor în local, dar fără sunet. Trebuie licență?',
+        'landing_qa_a5': 'Nu. Atâta timp cât televizorul funcționează fără sunet (modul mute) și nu este redat conținut muzical perceptibil de către clienți, nu se consideră comunicare publică a muzicii și nu este necesară o licență muzicală pentru această utilizare.',
+
+        'landing_qa_q6': 'Un organism de gestiune colectivă îmi cere taxe retroactive. Ce fac?',
+        'landing_qa_a6': 'Vă recomandăm să ne contactați pentru îndrumare. Echipa noastră vă poate oferi informații și documentație relevantă privind utilizarea repertoriului SoundFree în locația dumneavoastră.',
+
+        'landing_qa_q7': 'Ce fac în cazul unui control?',
+        'landing_qa_a7': 'Prezentați certificatul de utilizare SoundFree primit la încheierea abonamentului. Acesta atestă că difuzați muzică dintr-un repertoriu propriu, licențiat integral. Recomandăm să păstrați documentul la îndemână în locație.',
+
         # BACKEND USERS
         'backend_users': 'Utilizatori',
         'backend_create_user': 'Creează utilizator',
@@ -631,6 +656,31 @@ TRANSLATIONS = {
         'landing_aud_office': 'Offices & Coworking',
         'landing_cta_pricing': 'See pricing',
         'landing_listen_cta': 'Browse catalog',
+
+        # LANDING Q&A
+        'landing_qa_title': 'Frequently Asked Questions',
+        'landing_qa_sub': 'Answers to the most common questions about music licensing',
+
+        'landing_qa_q1': 'Does my business need a music license?',
+        'landing_qa_a1': 'Yes. Any business — including retail stores, hospitality venues and other commercial spaces — that plays music is legally required to hold a valid music license. SoundFree provides access to our own catalog, fully composed and licensed by our team.',
+
+        'landing_qa_q2': 'Will I receive official license documentation?',
+        'landing_qa_a2': 'Yes. When you subscribe to SoundFree, you will receive a usage certificate confirming your right to play our catalog at your venue. This document confirms that the music comes from our own catalog with full rights.',
+
+        'landing_qa_q3': 'How is the subscription cost calculated?',
+        'landing_qa_a3': 'The SoundFree subscription is based on three criteria: business type (café, restaurant, hotel, etc.), venue size, and number of locations. Check our pricing page for details or contact us for a custom quote.',
+
+        'landing_qa_q4': 'I only operate seasonally. Do I have to pay for the whole year?',
+        'landing_qa_a4': 'No. SoundFree offers flexible monthly plans, perfect for seasonal businesses. You only pay for the months you need music.',
+
+        'landing_qa_q5': 'I have a TV in my venue but with no sound. Do I need a license?',
+        'landing_qa_a5': 'No. As long as the TV operates without sound (mute mode) and no audible music content is played for customers, it is not considered public communication of music and no music license is required for this use.',
+
+        'landing_qa_q6': 'A collecting society is asking me for retroactive fees. What should I do?',
+        'landing_qa_a6': 'We recommend contacting us for guidance. Our team can provide relevant information and documentation regarding the use of the SoundFree catalog at your venue.',
+
+        'landing_qa_q7': 'What do I do in case of an inspection?',
+        'landing_qa_a7': 'Present the SoundFree usage certificate received with your subscription. It confirms that you play music from our own fully licensed catalog. We recommend keeping the document readily available at your venue.',
 
         # BACKEND USERS
         'backend_users': 'Users',
