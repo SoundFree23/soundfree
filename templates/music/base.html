@@ -37,15 +37,12 @@
     body.has-player { padding-bottom: calc(var(--player-h) + var(--tab-h) + var(--safe-bottom)); }
 
     /* ── TOP HEADER (mobile: simple, desktop: full nav) ── */
-    .top-header-wrap {
+    .top-header {
       position: sticky; top: 0; z-index: 100;
       background: rgba(18,18,18,0.9);
       backdrop-filter: blur(16px);
-    }
-    .top-header {
-      padding: 0.75rem 1.5rem;
+      padding: 0.75rem 1rem;
       display: flex; align-items: center; justify-content: space-between;
-      max-width: 900px; margin: 0 auto;
     }
     .nav-logo {
       font-size: 1.2rem; font-weight: 800; color: var(--text);
@@ -583,7 +580,6 @@
 <body>
 
 <!-- TOP HEADER -->
-<div class="top-header-wrap">
 <div class="top-header">
   <a href="{% url 'music:home' %}" class="nav-logo">
     <img src="{% static 'logo.png' %}" alt="SoundFree" class="alien-logo" height="60">
@@ -619,7 +615,6 @@
     </a>
     {% endif %}
   </div>
-</div>
 </div>
 
 <!-- EARLY INIT SCRIPT (before main so inline scripts in pages can call these) -->
