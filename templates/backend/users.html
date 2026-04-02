@@ -29,9 +29,23 @@
           <label class="form-label">Parolă</label>
           <input type="password" name="password" class="form-input" placeholder="Parolă sigură" required>
         </div>
-        <div class="form-group" style="margin-bottom:1.5rem;">
+        <div class="form-group" style="margin-bottom:1rem;">
           <label class="form-label">Email (opțional)</label>
           <input type="email" name="email" class="form-input" placeholder="email@exemplu.ro">
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+          <div class="form-group">
+            <label class="form-label">📅 Început abonament</label>
+            <input type="date" name="subscription_start" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">📅 Sfârșit abonament</label>
+            <input type="date" name="subscription_end" class="form-input" required>
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom:1.5rem;">
+          <label class="form-label">Observații (opțional)</label>
+          <input type="text" name="notes" class="form-input" placeholder="ex: Contract nr. 123, Cafenea Centru Vechi">
         </div>
         <button type="submit" class="btn btn-primary">✅ Creează utilizator</button>
       </div>
@@ -49,40 +63,62 @@
           <tr>
             <th>Username</th>
             <th>Email</th>
+            <th>Abonament</th>
             <th>Status</th>
-            <th>Data</th>
             <th>Acțiuni</th>
           </tr>
         </thead>
         <tbody>
           {% for u in users %}
           <tr>
-            <td style="font-weight:600;">{{ u.username }}</td>
-            <td style="color:var(--text2);">{{ u.email|default:"-" }}</td>
-            <td>
-              {% if u.is_active %}
-              <span style="color:var(--success);font-size:0.8rem;font-weight:600;">Activ</span>
+            <td style="font-weight:600;">
+              {{ u.username }}
+              {% if u.profile.notes %}<br><span style="color:var(--text3);font-size:0.7rem;font-weight:400;">{{ u.profile.notes }}</span>{% endif %}
+            </td>
+            <td style="color:var(--text2);font-size:0.85rem;">{{ u.email|default:"-" }}</td>
+            <td style="font-size:0.8rem;">
+              {% if u.profile.subscription_start and u.profile.subscription_end %}
+                <span style="color:var(--text2);">{{ u.profile.subscription_start|date:"d.m.Y" }}</span>
+                <br>→
+                <span style="color:var(--text2);">{{ u.profile.subscription_end|date:"d.m.Y" }}</span>
+                {% if u.profile.subscription_status == 'active' %}
+                  <br><span style="color:var(--success);font-weight:600;">{{ u.profile.days_remaining }} zile rămase</span>
+                {% endif %}
               {% else %}
-              <span style="color:var(--danger);font-size:0.8rem;font-weight:600;">Inactiv</span>
+                <span style="color:var(--text3);">Nesetat</span>
               {% endif %}
             </td>
-            <td style="color:var(--text3);font-size:0.8rem;">{{ u.date_joined|date:"d.m.Y" }}</td>
             <td>
-              <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
-                <a href="{% url 'music:backend_user_playlists' u.id %}" class="btn btn-primary" style="font-size:0.75rem;padding:0.3rem 0.6rem;text-decoration:none;">🎵 Playlisturi</a>
+              {% if u.profile.subscription_status == 'active' %}
+                <span style="background:rgba(34,197,94,0.15);color:#22c55e;padding:0.2rem 0.5rem;border-radius:6px;font-size:0.75rem;font-weight:600;">Activ</span>
+              {% elif u.profile.subscription_status == 'expired' %}
+                <span style="background:rgba(239,68,68,0.15);color:#ef4444;padding:0.2rem 0.5rem;border-radius:6px;font-size:0.75rem;font-weight:600;">Expirat</span>
+              {% elif u.profile.subscription_status == 'not_started' %}
+                <span style="background:rgba(234,179,8,0.15);color:#eab308;padding:0.2rem 0.5rem;border-radius:6px;font-size:0.75rem;font-weight:600;">Nu a început</span>
+              {% else %}
+                <span style="background:rgba(115,115,115,0.15);color:#737373;padding:0.2rem 0.5rem;border-radius:6px;font-size:0.75rem;font-weight:600;">Fără abonament</span>
+              {% endif %}
+              {% if not u.is_active %}
+                <br><span style="color:var(--danger);font-size:0.7rem;">Cont dezactivat</span>
+              {% endif %}
+            </td>
+            <td>
+              <div style="display:flex;gap:0.4rem;flex-wrap:wrap;">
+                <button type="button" class="btn btn-outline" style="font-size:0.7rem;padding:0.25rem 0.5rem;" onclick="openEditModal({{ u.id }}, '{{ u.profile.subscription_start|date:'Y-m-d'|default:'' }}', '{{ u.profile.subscription_end|date:'Y-m-d'|default:'' }}', '{{ u.profile.notes|default:'' }}', '{{ u.username }}')">📅 Editează</button>
+                <a href="{% url 'music:backend_user_playlists' u.id %}" class="btn btn-primary" style="font-size:0.7rem;padding:0.25rem 0.5rem;text-decoration:none;">🎵 Playlisturi</a>
                 <form method="post" style="display:inline;">
                   {% csrf_token %}
                   <input type="hidden" name="action" value="toggle">
                   <input type="hidden" name="user_id" value="{{ u.id }}">
-                  <button type="submit" class="btn btn-outline" style="font-size:0.75rem;padding:0.3rem 0.6rem;">
-                    {% if u.is_active %}Dezactivează{% else %}Activează{% endif %}
+                  <button type="submit" class="btn btn-outline" style="font-size:0.7rem;padding:0.25rem 0.5rem;">
+                    {% if u.is_active %}🔒{% else %}🔓{% endif %}
                   </button>
                 </form>
                 <form method="post" style="display:inline;" onsubmit="return confirm('Ștergi utilizatorul {{ u.username }}?');">
                   {% csrf_token %}
                   <input type="hidden" name="action" value="delete">
                   <input type="hidden" name="user_id" value="{{ u.id }}">
-                  <button type="submit" class="btn btn-danger" style="font-size:0.75rem;padding:0.3rem 0.6rem;">Șterge</button>
+                  <button type="submit" class="btn btn-danger" style="font-size:0.7rem;padding:0.25rem 0.5rem;">🗑️</button>
                 </form>
               </div>
             </td>
@@ -98,5 +134,52 @@
   </div>
 
 </div>
+
+<!-- Modal editare abonament -->
+<div id="edit-modal" style="display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);align-items:center;justify-content:center;">
+  <div style="background:#1a1a2e;border:1px solid var(--border);border-radius:16px;padding:2rem;width:90%;max-width:450px;margin:auto;">
+    <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:1.5rem;">📅 Editare abonament — <span id="edit-username"></span></h3>
+    <form method="post">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="update_subscription">
+      <input type="hidden" name="user_id" id="edit-user-id">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+        <div class="form-group">
+          <label class="form-label">Început abonament</label>
+          <input type="date" name="subscription_start" id="edit-sub-start" class="form-input">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Sfârșit abonament</label>
+          <input type="date" name="subscription_end" id="edit-sub-end" class="form-input">
+        </div>
+      </div>
+      <div class="form-group" style="margin-bottom:1.5rem;">
+        <label class="form-label">Observații</label>
+        <input type="text" name="notes" id="edit-notes" class="form-input" placeholder="ex: Contract nr. 123">
+      </div>
+      <div style="display:flex;gap:0.75rem;">
+        <button type="submit" class="btn btn-primary" style="flex:1;">💾 Salvează</button>
+        <button type="button" class="btn btn-outline" onclick="closeEditModal()">Anulează</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function openEditModal(userId, subStart, subEnd, notes, username) {
+  document.getElementById('edit-user-id').value = userId;
+  document.getElementById('edit-sub-start').value = subStart || '';
+  document.getElementById('edit-sub-end').value = subEnd || '';
+  document.getElementById('edit-notes').value = notes || '';
+  document.getElementById('edit-username').textContent = username;
+  document.getElementById('edit-modal').style.display = 'flex';
+}
+function closeEditModal() {
+  document.getElementById('edit-modal').style.display = 'none';
+}
+document.getElementById('edit-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeEditModal();
+});
+</script>
 
 {% endblock %}

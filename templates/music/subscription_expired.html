@@ -1,0 +1,19 @@
+{% extends 'music/base.html' %}
+
+{% block title %}{{ t.sub_expired_title }} — SoundFree.ro{% endblock %}
+
+{% block content %}
+
+<div style="display:flex;align-items:center;justify-content:center;min-height:60vh;padding:2rem;">
+  <div style="text-align:center;max-width:450px;">
+    <div style="font-size:4rem;margin-bottom:1.5rem;">⏰</div>
+    <h1 style="font-size:1.8rem;font-weight:800;margin-bottom:1rem;">{{ t.sub_expired_title }}</h1>
+    <p style="color:var(--text2);font-size:1rem;line-height:1.7;margin-bottom:2rem;">{{ t.sub_expired_desc }}</p>
+    <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+      <a href="{% url 'music:home' %}#contact" class="btn-primary" style="padding:0.75rem 2rem;border-radius:50px;font-weight:700;text-decoration:none;font-size:0.95rem;display:inline-block;">{{ t.sub_expired_contact }}</a>
+      <a href="{% url 'music:user_logout' %}" class="btn-outline" style="padding:0.75rem 2rem;border-radius:50px;font-weight:700;text-decoration:none;font-size:0.95rem;display:inline-block;border:2px solid var(--text3);color:var(--text);">{{ t.logout_btn }}</a>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

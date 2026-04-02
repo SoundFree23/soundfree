@@ -1,0 +1,77 @@
+{% extends 'music/base.html' %}
+{% load music_filters %}
+
+{% block title %}{{ t.terms_title }} — SoundFree.ro{% endblock %}
+
+{% block content %}
+
+<style>
+  .privacy-header { text-align: center; padding: 4rem 0 2rem; background: var(--bg2); border-bottom: 1px solid var(--border); }
+  .privacy-header h1 { font-size: 2.5rem; font-weight: 800; margin-bottom: 0.75rem; }
+  .privacy-header p { color: var(--text2); font-size: 0.95rem; }
+  .privacy-content { max-width: 800px; margin: 0 auto; padding: 3rem 1.5rem 4rem; }
+  .privacy-intro { color: var(--text2); font-size: 1rem; line-height: 1.8; margin-bottom: 2.5rem; padding-bottom: 2rem; border-bottom: 1px solid var(--border); }
+  .privacy-section { margin-bottom: 2rem; }
+  .privacy-section h2 { font-size: 1.2rem; font-weight: 700; margin-bottom: 0.75rem; color: var(--text); }
+  .privacy-section p { color: var(--text2); font-size: 0.9rem; line-height: 1.8; }
+  .privacy-section ul { list-style: none; padding: 0; margin: 0.5rem 0 0; }
+  .privacy-section ul li { position: relative; padding-left: 1.5rem; color: var(--text2); font-size: 0.9rem; line-height: 1.8; margin-bottom: 0.25rem; }
+  .privacy-section ul li::before { content: ''; position: absolute; left: 0; top: 0.65rem; width: 6px; height: 6px; border-radius: 50%; background: var(--accent2); }
+
+  @media (max-width: 600px) {
+    .privacy-header h1 { font-size: 1.5rem; }
+    .privacy-content { padding: 2rem 1rem 3rem; }
+  }
+</style>
+
+<div class="privacy-header">
+  <div class="container">
+    <h1>{{ t.terms_title }}</h1>
+    <p>{{ t.terms_subtitle }}</p>
+  </div>
+</div>
+
+<div class="privacy-content">
+  <p class="privacy-intro">{{ t.terms_intro }}</p>
+
+  <div class="privacy-section">
+    <h2>{{ t.terms_s1_title }}</h2>
+    <p>{{ t.terms_s1_text }}</p>
+  </div>
+
+  <div class="privacy-section">
+    <h2>{{ t.terms_s2_title }}</h2>
+    <p>{{ t.terms_s2_text }}</p>
+  </div>
+
+  <div class="privacy-section">
+    <h2>{{ t.terms_s3_title }}</h2>
+    <ul>
+      {% for item in t.terms_s3_items|split:";" %}
+        <li>{{ item }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <div class="privacy-section">
+    <h2>{{ t.terms_s4_title }}</h2>
+    <p>{{ t.terms_s4_text }}</p>
+  </div>
+
+  <div class="privacy-section">
+    <h2>{{ t.terms_s5_title }}</h2>
+    <p>{{ t.terms_s5_text }}</p>
+  </div>
+
+  <div class="privacy-section">
+    <h2>{{ t.terms_s6_title }}</h2>
+    <p>{{ t.terms_s6_text }}</p>
+  </div>
+
+  <div class="privacy-section">
+    <h2>{{ t.terms_s7_title }}</h2>
+    <p>{{ t.terms_s7_text }}</p>
+  </div>
+</div>
+
+{% endblock %}

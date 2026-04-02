@@ -62,6 +62,32 @@
     .lang-btn:hover { color: var(--text); }
     .lang-btn.lang-active { background: var(--accent); color: #fff !important; }
 
+    /* ── HAMBURGER MENU (mobile) ── */
+    .hamburger-btn {
+      display: none; background: none; border: none; color: var(--text);
+      cursor: pointer; padding: 4px; z-index: 201;
+    }
+    .hamburger-btn svg { width: 26px; height: 26px; }
+    .mobile-nav-overlay {
+      display: none; position: fixed; inset: 0; z-index: 199;
+      background: rgba(0,0,0,0.85); backdrop-filter: blur(20px);
+      flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem;
+    }
+    .mobile-nav-overlay.open { display: flex; }
+    .mobile-nav-overlay a {
+      color: var(--text); text-decoration: none; font-size: 1.3rem; font-weight: 600;
+      padding: 0.75rem 2rem; border-radius: 12px; transition: background 0.2s;
+    }
+    .mobile-nav-overlay a:hover { background: var(--bg3); }
+    .mobile-nav-close {
+      position: absolute; top: 1rem; right: 1rem;
+      background: none; border: none; color: var(--text); cursor: pointer;
+    }
+    .mobile-nav-close svg { width: 28px; height: 28px; }
+    @media (max-width: 768px) {
+      .hamburger-btn { display: flex; align-items: center; }
+    }
+
     /* ── MAIN ── */
     main { min-height: 60vh; }
 
@@ -592,6 +618,9 @@
       <a href="{% url 'music:set_language' 'ro' %}" class="lang-btn {% if current_lang == 'ro' %}lang-active{% endif %}">RO</a>
       <a href="{% url 'music:set_language' 'en' %}" class="lang-btn {% if current_lang == 'en' %}lang-active{% endif %}">EN</a>
     </div>
+    <button class="hamburger-btn" id="hamburger-btn" aria-label="Menu">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+    </button>
     {% if user.is_authenticated %}
     <div style="position:relative;" id="user-menu-wrap">
       <button id="user-menu-btn" style="color:var(--text);background:var(--bg3);border:none;font-size:0.75rem;padding:0.3rem 0.65rem;border-radius:18px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:0.3rem;">
@@ -625,6 +654,22 @@ function colorizeGenreCards() {
 }
 </script>
 
+<!-- MOBILE NAV OVERLAY -->
+<div class="mobile-nav-overlay" id="mobile-nav">
+  <button class="mobile-nav-close" id="mobile-nav-close">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+  </button>
+  <a href="{% url 'music:home' %}">{{ t.nav_home }}</a>
+  <a href="{% url 'music:browse' %}">{{ t.tab_search }}</a>
+  <a href="{% url 'music:library' %}">{{ t.nav_library }}</a>
+  <a href="{% url 'music:pricing' %}">{{ t.nav_pricing }}</a>
+  {% if user.is_authenticated %}
+  <a href="{% url 'music:user_logout' %}">{{ t.logout_btn }}</a>
+  {% else %}
+  <a href="{% url 'music:user_login' %}" style="background:var(--accent);color:#fff;">{{ t.login_btn }}</a>
+  {% endif %}
+</div>
+
 <!-- MAIN -->
 <main>
   {% block content %}{% endblock %}
@@ -634,7 +679,7 @@ function colorizeGenreCards() {
 <footer>
   <p>{{ t.footer_copy }}</p>
   <p style="margin-top:0.5rem;">
-    <a href="#">{{ t.footer_terms }}</a> · <a href="{% url 'music:privacy' %}">{{ t.footer_privacy }}</a> · <a href="#">{{ t.footer_contact }}</a>
+    <a href="{% url 'music:terms' %}">{{ t.footer_terms }}</a> · <a href="{% url 'music:privacy' %}">{{ t.footer_privacy }}</a> · <a href="{% url 'music:home' %}#contact">{{ t.footer_contact }}</a>
   </p>
 </footer>
 
@@ -739,6 +784,14 @@ function colorizeGenreCards() {
 
 <script>
 const isAuthenticated = {{ user.is_authenticated|yesno:"true,false" }};
+
+// Mobile hamburger menu
+const hamburgerBtn = document.getElementById('hamburger-btn');
+const mobileNav = document.getElementById('mobile-nav');
+const mobileNavClose = document.getElementById('mobile-nav-close');
+hamburgerBtn.addEventListener('click', () => { mobileNav.classList.add('open'); });
+mobileNavClose.addEventListener('click', () => { mobileNav.classList.remove('open'); });
+mobileNav.addEventListener('click', (e) => { if (e.target.tagName === 'A') mobileNav.classList.remove('open'); });
 
 // User menu dropdown
 if (isAuthenticated) {

@@ -1,5 +1,37 @@
 from django.contrib import admin
-from .models import Song, Genre, Mood, Playlist
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.contrib.auth.models import User
+from .models import Song, Genre, Mood, Playlist, UserProfile
+
+
+class UserProfileInline(admin.StackedInline):
+    model = UserProfile
+    can_delete = False
+    verbose_name_plural = 'Profil abonament'
+    fields = ('subscription_start', 'subscription_end', 'notes')
+
+
+class UserAdmin(BaseUserAdmin):
+    inlines = (UserProfileInline,)
+    list_display = ['username', 'email', 'is_active', 'is_staff', 'get_subscription_status', 'get_subscription_end']
+
+    def get_subscription_status(self, obj):
+        if hasattr(obj, 'profile'):
+            status = obj.profile.subscription_status()
+            labels = {'active': 'Activ', 'expired': 'Expirat', 'not_started': 'Nu a început', 'no_subscription': 'Fără abonament', 'staff': 'Staff'}
+            return labels.get(status, status)
+        return '-'
+    get_subscription_status.short_description = 'Status abonament'
+
+    def get_subscription_end(self, obj):
+        if hasattr(obj, 'profile') and obj.profile.subscription_end:
+            return obj.profile.subscription_end
+        return '-'
+    get_subscription_end.short_description = 'Expiră la'
+
+
+admin.site.unregister(User)
+admin.site.register(User, UserAdmin)
 
 
 @admin.register(Genre)

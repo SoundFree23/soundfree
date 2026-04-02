@@ -53,7 +53,7 @@
   {% for song in featured_songs %}
   <div class="h-card song-card" data-id="{{ song.id }}">
     <div class="hc-cover">
-      {% if song.cover_image %}<img src="{{ song.cover_image.url }}" alt="{{ song.title }}">{% else %}🎵{% endif %}
+      {% if song.cover_image %}<img src="{{ song.cover_image.url }}" alt="{{ song.title }}" loading="lazy">{% else %}🎵{% endif %}
     </div>
     <div class="hc-title">{{ song.title }}</div>
     <div class="hc-sub">SoundFree</div>
@@ -73,7 +73,7 @@
   {% for song in recent_songs %}
   <div class="song-row" data-id="{{ song.id }}">
     <div class="row-cover">
-      {% if song.cover_image %}<img src="{{ song.cover_image.url }}" alt="{{ song.title }}">{% else %}🎵{% endif %}
+      {% if song.cover_image %}<img src="{{ song.cover_image.url }}" alt="{{ song.title }}" loading="lazy">{% else %}🎵{% endif %}
     </div>
     <div class="row-info">
       <div class="row-title">{{ song.title }}</div>
@@ -132,7 +132,7 @@ document.getElementById('browse-search-form').addEventListener('submit', functio
   {% for song in songs %}
   <div class="song-row" data-id="{{ song.id }}">
     <div class="row-cover">
-      {% if song.cover_image %}<img src="{{ song.cover_image.url }}" alt="{{ song.title }}">{% else %}🎵{% endif %}
+      {% if song.cover_image %}<img src="{{ song.cover_image.url }}" alt="{{ song.title }}" loading="lazy">{% else %}🎵{% endif %}
     </div>
     <div class="row-info">
       <div class="row-title">{{ song.title }}</div>

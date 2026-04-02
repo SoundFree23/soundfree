@@ -17,6 +17,12 @@
     </div>
     {% endif %}
 
+    {% if subscription_expired %}
+    <div style="background:rgba(234,179,8,0.15);border:1px solid rgba(234,179,8,0.3);border-radius:8px;padding:0.75rem 1rem;margin-bottom:1rem;color:#eab308;font-size:0.85rem;">
+      ⏰ {{ t.sub_login_expired }}
+    </div>
+    {% endif %}
+
     <form method="post" action="{% url 'music:user_login' %}{% if request.GET.next %}?next={{ request.GET.next }}{% endif %}">
       {% csrf_token %}
       <div style="margin-bottom:1rem;">

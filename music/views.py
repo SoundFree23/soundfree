@@ -5,12 +5,18 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.db.models import Sum
-from .models import Song, Genre, Mood, Playlist, ContactMessage
+from .models import Song, Genre, Mood, Playlist, ContactMessage, UserProfile
 from .forms import SongUploadForm, GenreForm
 
 
 def is_staff(user):
     return user.is_staff
+
+
+def get_or_create_profile(user):
+    """Returnează profilul utilizatorului, creându-l dacă nu există."""
+    profile, _ = UserProfile.objects.get_or_create(user=user)
+    return profile
 
 
 def set_language(request, lang):
@@ -22,17 +28,31 @@ def set_language(request, lang):
 
 def user_login(request):
     error = None
+    expired = False
     if request.method == 'POST':
         username = request.POST.get('username', '').strip()
         password = request.POST.get('password', '')
         user = authenticate(request, username=username, password=password)
         if user is not None:
-            login(request, user)
-            next_url = request.GET.get('next', '/')
-            return redirect(next_url)
+            # Staff users bypass subscription check
+            if user.is_staff:
+                login(request, user)
+                next_url = request.GET.get('next', '/')
+                return redirect(next_url)
+            # Check subscription period
+            profile = get_or_create_profile(user)
+            if profile.is_subscription_active():
+                login(request, user)
+                next_url = request.GET.get('next', '/')
+                return redirect(next_url)
+            else:
+                expired = True
         else:
             error = True
-    return render(request, 'music/login.html', {'login_error': error})
+    return render(request, 'music/login.html', {
+        'login_error': error,
+        'subscription_expired': expired,
+    })
 
 
 def user_logout(request):
@@ -50,6 +70,10 @@ def home(request):
 
 @login_required(login_url='/login/')
 def library(request):
+    if not request.user.is_staff:
+        profile = get_or_create_profile(request.user)
+        if not profile.is_subscription_active():
+            return render(request, 'music/subscription_expired.html')
     return render(request, 'music/library.html')
 
 
@@ -86,11 +110,19 @@ def browse(request):
 
 @login_required(login_url='/login/')
 def favorites(request):
+    if not request.user.is_staff:
+        profile = get_or_create_profile(request.user)
+        if not profile.is_subscription_active():
+            return render(request, 'music/subscription_expired.html')
     return render(request, 'music/favorites.html')
 
 
 @login_required(login_url='/login/')
 def playlist_detail(request, pl_id):
+    if not request.user.is_staff:
+        profile = get_or_create_profile(request.user)
+        if not profile.is_subscription_active():
+            return render(request, 'music/subscription_expired.html')
     return render(request, 'music/playlist_detail.html', {'pl_id': pl_id})
 
 
@@ -100,6 +132,10 @@ def pricing(request):
 
 def privacy(request):
     return render(request, 'music/privacy.html')
+
+
+def terms(request):
+    return render(request, 'music/terms.html')
 
 
 from django.views.decorators.http import require_POST
@@ -284,6 +320,7 @@ def backend_genres(request):
 @login_required(login_url='/backend/login/')
 @user_passes_test(is_staff, login_url='/backend/login/')
 def backend_users(request):
+    from datetime import datetime
     error = None
     if request.method == 'POST':
         action = request.POST.get('action')
@@ -291,13 +328,38 @@ def backend_users(request):
             username = request.POST.get('username', '').strip()
             password = request.POST.get('password', '')
             email = request.POST.get('email', '').strip()
+            sub_start = request.POST.get('subscription_start', '').strip()
+            sub_end = request.POST.get('subscription_end', '').strip()
+            notes = request.POST.get('notes', '').strip()
             if username and password:
                 if User.objects.filter(username=username).exists():
                     error = 'exists'
                 else:
-                    User.objects.create_user(username=username, password=password, email=email, is_staff=False)
+                    new_user = User.objects.create_user(username=username, password=password, email=email, is_staff=False)
+                    profile = get_or_create_profile(new_user)
+                    if sub_start:
+                        profile.subscription_start = datetime.strptime(sub_start, '%Y-%m-%d').date()
+                    if sub_end:
+                        profile.subscription_end = datetime.strptime(sub_end, '%Y-%m-%d').date()
+                    if notes:
+                        profile.notes = notes
+                    profile.save()
                     messages.success(request, '✅ Utilizator creat!')
                     return redirect('music:backend_users')
+        elif action == 'update_subscription':
+            user_id = request.POST.get('user_id')
+            sub_start = request.POST.get('subscription_start', '').strip()
+            sub_end = request.POST.get('subscription_end', '').strip()
+            notes = request.POST.get('notes', '').strip()
+            u = User.objects.filter(id=user_id, is_staff=False).first()
+            if u:
+                profile = get_or_create_profile(u)
+                profile.subscription_start = datetime.strptime(sub_start, '%Y-%m-%d').date() if sub_start else None
+                profile.subscription_end = datetime.strptime(sub_end, '%Y-%m-%d').date() if sub_end else None
+                profile.notes = notes
+                profile.save()
+                messages.success(request, '✅ Abonament actualizat!')
+            return redirect('music:backend_users')
         elif action == 'delete':
             user_id = request.POST.get('user_id')
             User.objects.filter(id=user_id, is_staff=False).delete()
@@ -310,6 +372,9 @@ def backend_users(request):
                 u.save()
             return redirect('music:backend_users')
     users = User.objects.filter(is_staff=False).order_by('-date_joined')
+    # Ensure all users have profiles
+    for u in users:
+        get_or_create_profile(u)
     return render(request, 'backend/users.html', {'users': users, 'user_error': error})
 
 

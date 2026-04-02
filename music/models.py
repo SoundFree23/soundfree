@@ -1,6 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from datetime import date
 
 
 def validate_audio_file(value):
@@ -101,3 +104,60 @@ class ContactMessage(models.Model):
 
     def __str__(self):
         return f"{self.name} - {self.email}"
+
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    subscription_start = models.DateField(null=True, blank=True, verbose_name="Început abonament")
+    subscription_end = models.DateField(null=True, blank=True, verbose_name="Sfârșit abonament")
+    notes = models.TextField(blank=True, verbose_name="Observații")
+
+    class Meta:
+        verbose_name = "Profil utilizator"
+        verbose_name_plural = "Profile utilizatori"
+
+    def __str__(self):
+        return f"Profil: {self.user.username}"
+
+    def is_subscription_active(self):
+        """Verifică dacă abonamentul este activ la data curentă."""
+        if self.user.is_staff:
+            return True
+        if not self.subscription_start or not self.subscription_end:
+            return False
+        today = date.today()
+        return self.subscription_start <= today <= self.subscription_end
+
+    def days_remaining(self):
+        """Returnează zilele rămase din abonament."""
+        if not self.subscription_end:
+            return 0
+        remaining = (self.subscription_end - date.today()).days
+        return max(0, remaining)
+
+    def subscription_status(self):
+        """Returnează statusul abonamentului."""
+        if self.user.is_staff:
+            return 'staff'
+        if not self.subscription_start or not self.subscription_end:
+            return 'no_subscription'
+        today = date.today()
+        if today < self.subscription_start:
+            return 'not_started'
+        if today > self.subscription_end:
+            return 'expired'
+        return 'active'
+
+
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    """Creează automat un UserProfile la crearea unui User."""
+    if created:
+        UserProfile.objects.get_or_create(user=instance)
+
+
+@receiver(post_save, sender=User)
+def save_user_profile(sender, instance, **kwargs):
+    """Salvează profilul utilizatorului."""
+    if hasattr(instance, 'profile'):
+        instance.profile.save()
