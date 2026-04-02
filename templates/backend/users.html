@@ -105,6 +105,7 @@
             <td>
               <div style="display:flex;gap:0.4rem;flex-wrap:wrap;">
                 <button type="button" class="btn btn-outline" style="font-size:0.7rem;padding:0.25rem 0.5rem;" onclick="openEditModal({{ u.id }}, '{{ u.profile.subscription_start|date:'Y-m-d'|default:'' }}', '{{ u.profile.subscription_end|date:'Y-m-d'|default:'' }}', '{{ u.profile.notes|default:'' }}', '{{ u.username }}')">📅 Editează</button>
+                <button type="button" class="btn btn-outline" style="font-size:0.7rem;padding:0.25rem 0.5rem;background:rgba(29,185,84,0.15);border-color:#1db954;color:#1db954;" onclick="openQrModal('{{ u.username }}', '{{ u.profile.verification_token }}')">📱 QR Code</button>
                 <a href="{% url 'music:backend_user_playlists' u.id %}" class="btn btn-primary" style="font-size:0.7rem;padding:0.25rem 0.5rem;text-decoration:none;">🎵 Playlisturi</a>
                 <form method="post" style="display:inline;">
                   {% csrf_token %}
@@ -180,6 +181,50 @@ function closeEditModal() {
 document.getElementById('edit-modal').addEventListener('click', function(e) {
   if (e.target === this) closeEditModal();
 });
+
+// QR Code Modal
+function openQrModal(username, token) {
+  var verifyUrl = window.location.origin + '/verify/' + token + '/';
+  document.getElementById('qr-username').textContent = username;
+  document.getElementById('qr-link').textContent = verifyUrl;
+  document.getElementById('qr-link').href = verifyUrl;
+  document.getElementById('qr-image').src = 'https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=' + encodeURIComponent(verifyUrl);
+  document.getElementById('qr-download').href = 'https://api.qrserver.com/v1/create-qr-code/?size=500x500&format=png&data=' + encodeURIComponent(verifyUrl);
+  document.getElementById('qr-modal').style.display = 'flex';
+}
+function closeQrModal() {
+  document.getElementById('qr-modal').style.display = 'none';
+}
+document.getElementById('qr-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeQrModal();
+});
+function copyQrLink() {
+  var link = document.getElementById('qr-link').textContent;
+  navigator.clipboard.writeText(link).then(function() {
+    document.getElementById('copy-btn').textContent = '✅ Copiat!';
+    setTimeout(function() { document.getElementById('copy-btn').textContent = '📋 Copiază link'; }, 2000);
+  });
+}
 </script>
+
+<!-- Modal QR Code -->
+<div id="qr-modal" style="display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);align-items:center;justify-content:center;">
+  <div style="background:#1a1a2e;border:1px solid var(--border);border-radius:16px;padding:2rem;width:90%;max-width:400px;margin:auto;text-align:center;">
+    <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:0.5rem;">📱 QR Code Verificare Licență</h3>
+    <p style="color:var(--text2);font-size:0.85rem;margin-bottom:1.5rem;">Client: <strong id="qr-username"></strong></p>
+    <div style="background:#fff;border-radius:12px;padding:1rem;display:inline-block;margin-bottom:1rem;">
+      <img id="qr-image" src="" alt="QR Code" style="width:250px;height:250px;display:block;">
+    </div>
+    <div style="margin-bottom:1rem;">
+      <a id="qr-link" href="#" target="_blank" style="color:var(--accent);font-size:0.75rem;word-break:break-all;text-decoration:none;"></a>
+    </div>
+    <div style="display:flex;gap:0.5rem;justify-content:center;flex-wrap:wrap;">
+      <button type="button" id="copy-btn" class="btn btn-primary" style="font-size:0.8rem;padding:0.4rem 1rem;" onclick="copyQrLink()">📋 Copiază link</button>
+      <a id="qr-download" href="#" download="qr-soundfree.png" class="btn btn-outline" style="font-size:0.8rem;padding:0.4rem 1rem;text-decoration:none;">⬇️ Descarcă QR</a>
+      <button type="button" class="btn btn-outline" style="font-size:0.8rem;padding:0.4rem 1rem;" onclick="window.print()">🖨️ Printează</button>
+      <button type="button" class="btn btn-outline" style="font-size:0.8rem;padding:0.4rem 1rem;" onclick="closeQrModal()">Închide</button>
+    </div>
+  </div>
+</div>
 
 {% endblock %}

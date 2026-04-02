@@ -1,3 +1,4 @@
+import uuid
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
@@ -111,6 +112,7 @@ class UserProfile(models.Model):
     subscription_start = models.DateField(null=True, blank=True, verbose_name="Început abonament")
     subscription_end = models.DateField(null=True, blank=True, verbose_name="Sfârșit abonament")
     notes = models.TextField(blank=True, verbose_name="Observații")
+    verification_token = models.UUIDField(default=uuid.uuid4, unique=True, verbose_name="Token verificare")
 
     class Meta:
         verbose_name = "Profil utilizator"

@@ -14,6 +14,7 @@ urlpatterns = [
     path('pricing/', views.pricing, name='pricing'),
     path('privacy/', views.privacy, name='privacy'),
     path('terms/', views.terms, name='terms'),
+    path('verify/<uuid:token>/', views.license_verify, name='license_verify'),
     path('song/<int:pk>/', views.song_detail, name='song_detail'),
     path('api/songs/', views.api_songs, name='api_songs'),
     path('login/', views.user_login, name='user_login'),

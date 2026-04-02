@@ -138,6 +138,24 @@ def terms(request):
     return render(request, 'music/terms.html')
 
 
+def license_verify(request, token):
+    from datetime import datetime
+    profile = UserProfile.objects.filter(verification_token=token).select_related('user').first()
+    if not profile:
+        return render(request, 'music/verify_license.html', {'not_found': True})
+    context = {
+        'profile': profile,
+        'username': profile.user.username,
+        'status': profile.subscription_status(),
+        'days_remaining': profile.days_remaining(),
+        'subscription_start': profile.subscription_start,
+        'subscription_end': profile.subscription_end,
+        'verified_at': datetime.now(),
+        'not_found': False,
+    }
+    return render(request, 'music/verify_license.html', context)
+
+
 from django.views.decorators.http import require_POST
 from django.core.mail import send_mail
 from django.conf import settings
