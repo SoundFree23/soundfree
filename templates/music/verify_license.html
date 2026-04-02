@@ -4,284 +4,354 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Verificare Licență Muzicală — SoundFree.ro</title>
+  <title>Verificare Licență — SoundFree.ro</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --bg: #0a0a0a;
+      --card: #161616;
+      --card2: #1e1e1e;
+      --border: #2a2a2a;
+      --accent: #1db954;
+      --accent2: #1ed760;
+      --text: #ffffff;
+      --text2: #a1a1a1;
+      --text3: #666;
+      --success: #1db954;
+      --danger: #ff4757;
+      --warn: #ffa502;
+    }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: 'Inter', -apple-system, sans-serif;
-      background: #f5f5f7;
-      color: #1d1d1f;
+      background: var(--bg);
+      color: var(--text);
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 1.5rem;
+      padding: 1rem;
+      background-image: radial-gradient(ellipse at 50% 0%, rgba(29,185,84,0.08) 0%, transparent 60%);
     }
-    .verify-container {
+
+    .verify-wrap {
       width: 100%;
-      max-width: 420px;
-      background: #fff;
+      max-width: 400px;
+    }
+
+    /* Logo area */
+    .verify-logo-area {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+    .verify-logo-area img {
+      height: 48px;
+      margin-bottom: 0.5rem;
+    }
+    .verify-logo-area h1 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text2);
+      letter-spacing: -0.3px;
+    }
+
+    /* Main card */
+    .verify-card {
+      background: var(--card);
+      border: 1px solid var(--border);
       border-radius: 20px;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
       overflow: hidden;
     }
-    .verify-header {
+
+    /* Status banner */
+    .status-banner {
+      padding: 1.75rem 1.5rem;
       text-align: center;
-      padding: 2rem 1.5rem 1.5rem;
-      border-bottom: 1px solid #e5e5e7;
+      position: relative;
+      overflow: hidden;
     }
-    .verify-logo {
-      height: 50px;
-      margin-bottom: 1rem;
+    .status-banner::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      opacity: 0.12;
     }
-    .verify-header h1 {
-      font-size: 1.4rem;
-      font-weight: 700;
-      color: #1d1d1f;
-      margin-bottom: 0.25rem;
-    }
-    .verify-header p {
-      font-size: 0.85rem;
-      color: #86868b;
-    }
-    .verify-body {
-      padding: 1.5rem;
-    }
+    .status-banner.active { background: linear-gradient(135deg, rgba(29,185,84,0.2), rgba(29,185,84,0.05)); }
+    .status-banner.active::before { background: linear-gradient(135deg, var(--accent), transparent); }
+    .status-banner.expired { background: linear-gradient(135deg, rgba(255,71,87,0.2), rgba(255,71,87,0.05)); }
+    .status-banner.expired::before { background: linear-gradient(135deg, var(--danger), transparent); }
+    .status-banner.inactive { background: linear-gradient(135deg, rgba(100,100,100,0.15), rgba(100,100,100,0.05)); }
 
-    /* Status Badge */
-    .status-badge {
-      border-radius: 12px;
-      padding: 1.25rem 1.5rem;
-      margin-bottom: 1rem;
+    .status-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 0.75rem;
+      font-size: 1.5rem;
     }
-    .status-badge.active {
-      background: #f0fdf4;
-      border: 2px solid #22c55e;
-    }
-    .status-badge.expired {
-      background: #fef2f2;
-      border: 2px solid #ef4444;
-    }
-    .status-badge.inactive {
-      background: #f5f5f5;
-      border: 2px solid #9ca3af;
-    }
-    .status-label {
-      font-size: 1.3rem;
+    .status-banner.active .status-icon { background: rgba(29,185,84,0.2); }
+    .status-banner.expired .status-icon { background: rgba(255,71,87,0.2); }
+    .status-banner.inactive .status-icon { background: rgba(100,100,100,0.2); }
+
+    .status-text {
+      font-size: 1.5rem;
       font-weight: 800;
-      letter-spacing: 0.5px;
-      margin-bottom: 0.25rem;
-    }
-    .status-badge.active .status-label { color: #16a34a; }
-    .status-badge.expired .status-label { color: #dc2626; }
-    .status-badge.inactive .status-label { color: #6b7280; }
-    .status-desc {
-      font-size: 0.85rem;
-      color: #6b7280;
-    }
-
-    /* Info Cards */
-    .info-card {
-      background: #f9fafb;
-      border: 1px solid #e5e7eb;
-      border-radius: 12px;
-      padding: 1rem 1.25rem;
-      margin-bottom: 0.75rem;
-    }
-    .info-label {
-      font-size: 0.7rem;
-      font-weight: 600;
-      text-transform: uppercase;
       letter-spacing: 1px;
-      color: #9ca3af;
-      margin-bottom: 0.4rem;
+      position: relative;
     }
-    .info-value {
-      font-size: 1rem;
+    .status-banner.active .status-text { color: var(--accent); }
+    .status-banner.expired .status-text { color: var(--danger); }
+    .status-banner.inactive .status-text { color: var(--text3); }
+
+    .status-sub {
+      font-size: 0.82rem;
+      color: var(--text2);
+      margin-top: 0.3rem;
+      position: relative;
+    }
+
+    /* Body */
+    .verify-body {
+      padding: 1.25rem 1.5rem;
+    }
+
+    /* Info rows */
+    .info-row {
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 0.6rem;
+    }
+    .info-row-label {
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--text3);
+      margin-bottom: 0.35rem;
+    }
+    .info-row-value {
+      font-size: 0.95rem;
       font-weight: 600;
-      color: #1d1d1f;
+      color: var(--text);
     }
-    .info-value.big {
-      font-size: 1.1rem;
+
+    /* Days remaining highlight */
+    .days-box {
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.25rem;
+      margin-bottom: 0.6rem;
+      text-align: center;
     }
-    .info-value .highlight {
-      font-size: 2rem;
+    .days-number {
+      font-size: 2.5rem;
       font-weight: 800;
-      color: #1d1d1f;
+      color: var(--accent);
+      line-height: 1;
     }
-    .info-sub {
-      font-size: 0.8rem;
-      color: #9ca3af;
+    .days-label {
+      font-size: 0.85rem;
+      color: var(--text2);
       margin-top: 0.25rem;
     }
+    .days-expiry {
+      font-size: 0.75rem;
+      color: var(--text3);
+      margin-top: 0.5rem;
+      padding-top: 0.5rem;
+      border-top: 1px solid var(--border);
+    }
+    .days-expiry strong {
+      color: var(--text2);
+    }
 
-    /* Client info */
-    .client-card {
+    /* Client row */
+    .client-row {
       display: flex;
       align-items: center;
       gap: 0.75rem;
-      background: #f9fafb;
-      border: 1px solid #e5e7eb;
-      border-radius: 12px;
-      padding: 1rem 1.25rem;
-      margin-bottom: 0.75rem;
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 0.85rem 1.25rem;
+      margin-bottom: 0.6rem;
     }
-    .client-avatar {
-      width: 40px;
-      height: 40px;
+    .client-dot {
+      width: 36px;
+      height: 36px;
       border-radius: 50%;
-      background: linear-gradient(135deg, #1db954, #148a08);
+      background: linear-gradient(135deg, var(--accent), #148a08);
       display: flex;
       align-items: center;
       justify-content: center;
       color: #fff;
-      font-weight: 700;
-      font-size: 1rem;
+      font-weight: 800;
+      font-size: 0.85rem;
       flex-shrink: 0;
     }
-    .client-info {
-      flex: 1;
-    }
-    .client-name {
+    .client-name { font-weight: 600; font-size: 0.9rem; }
+    .client-type { font-size: 0.75rem; color: var(--text3); }
+
+    /* Expired message */
+    .expired-msg {
+      color: var(--danger);
       font-weight: 600;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
     }
-    .client-sub {
+    .expired-sub {
+      color: var(--text3);
       font-size: 0.8rem;
-      color: #9ca3af;
+      margin-top: 0.25rem;
     }
 
     /* Footer */
     .verify-footer {
       text-align: center;
-      padding: 1rem 1.5rem 1.5rem;
-      border-top: 1px solid #e5e5e7;
+      padding: 1rem 1.5rem 1.25rem;
+      border-top: 1px solid var(--border);
     }
     .verify-footer p {
-      font-size: 0.75rem;
-      color: #9ca3af;
-    }
-    .verify-footer .timestamp {
       font-size: 0.7rem;
-      color: #c7c7cc;
-      margin-top: 0.5rem;
+      color: var(--text3);
+    }
+    .verify-footer .ts {
+      color: #444;
+      font-size: 0.65rem;
+      margin-top: 0.35rem;
     }
 
-    /* Not Found */
+    /* Not found */
     .not-found {
       text-align: center;
       padding: 3rem 1.5rem;
     }
-    .not-found-icon {
-      font-size: 3rem;
-      margin-bottom: 1rem;
+    .not-found-icon { font-size: 2.5rem; margin-bottom: 1rem; opacity: 0.6; }
+    .not-found h2 { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.4rem; }
+    .not-found p { color: var(--text3); font-size: 0.85rem; }
+
+    /* Pulse animation for active */
+    @keyframes pulse-green {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(29,185,84,0.3); }
+      50% { box-shadow: 0 0 0 8px rgba(29,185,84,0); }
     }
-    .not-found h2 {
-      font-size: 1.2rem;
-      font-weight: 700;
-      margin-bottom: 0.5rem;
-    }
-    .not-found p {
-      color: #86868b;
-      font-size: 0.9rem;
+    .status-banner.active .status-icon {
+      animation: pulse-green 2s ease-in-out infinite;
     }
   </style>
 </head>
 <body>
 
-<div class="verify-container">
-  {% if not_found %}
-  <div class="verify-header">
-    <img src="{% static 'logo.png' %}" alt="SoundFree" class="verify-logo">
-    <h1>Verificare Licență Muzicală</h1>
-  </div>
-  <div class="not-found">
-    <div class="not-found-icon">❌</div>
-    <h2>Licență negăsită</h2>
-    <p>Codul de verificare nu este valid sau a fost dezactivat.</p>
-  </div>
-  <div class="verify-footer">
-    <p>SoundFree.ro — Muzică royalty-free pentru afaceri</p>
-  </div>
+<div class="verify-wrap">
 
-  {% else %}
-
-  <div class="verify-header">
-    <img src="{% static 'logo.png' %}" alt="SoundFree" class="verify-logo">
+  <div class="verify-logo-area">
+    <img src="{% static 'logo.png' %}" alt="SoundFree.ro">
     <h1>Verificare Licență Muzicală</h1>
   </div>
 
-  <div class="verify-body">
+  <div class="verify-card">
 
-    <!-- Status -->
+    {% if not_found %}
+
+    <div class="status-banner inactive">
+      <div class="status-icon">🚫</div>
+      <div class="status-text">INVALIDĂ</div>
+      <div class="status-sub">Codul de verificare nu este valid</div>
+    </div>
+    <div class="not-found">
+      <p>Licența nu a fost găsită. Verificați dacă ați scanat codul QR corect sau contactați SoundFree.ro.</p>
+    </div>
+
+    {% else %}
+
+    <!-- Status Banner -->
     {% if status == 'active' %}
-    <div class="status-badge active">
-      <div class="status-label">ACTIVĂ</div>
-      <div class="status-desc">Licența muzicală este activă</div>
+    <div class="status-banner active">
+      <div class="status-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1db954" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <div class="status-text">ACTIVĂ</div>
+      <div class="status-sub">Licența muzicală este validă</div>
     </div>
     {% elif status == 'expired' %}
-    <div class="status-badge expired">
-      <div class="status-label">EXPIRATĂ</div>
-      <div class="status-desc">Licența muzicală a expirat</div>
+    <div class="status-banner expired">
+      <div class="status-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ff4757" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+      </div>
+      <div class="status-text">EXPIRATĂ</div>
+      <div class="status-sub">Licența muzicală nu mai este validă</div>
     </div>
     {% elif status == 'not_started' %}
-    <div class="status-badge inactive">
-      <div class="status-label">NU A ÎNCEPUT</div>
-      <div class="status-desc">Licența nu este încă activă</div>
+    <div class="status-banner inactive">
+      <div class="status-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </div>
+      <div class="status-text">NU A ÎNCEPUT</div>
+      <div class="status-sub">Licența nu este încă activă</div>
     </div>
     {% else %}
-    <div class="status-badge inactive">
-      <div class="status-label">INACTIVĂ</div>
-      <div class="status-desc">Nicio licență configurată</div>
+    <div class="status-banner inactive">
+      <div class="status-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+      </div>
+      <div class="status-text">NECONFIGURATĂ</div>
+      <div class="status-sub">Nicio licență asociată</div>
     </div>
     {% endif %}
 
-    <!-- Client -->
-    <div class="client-card">
-      <div class="client-avatar">{{ username.0|upper }}</div>
-      <div class="client-info">
-        <div class="client-name">{{ username }}</div>
-        <div class="client-sub">Client SoundFree.ro</div>
+    <div class="verify-body">
+
+      <!-- Client -->
+      <div class="client-row">
+        <div class="client-dot">{{ username.0|upper }}</div>
+        <div>
+          <div class="client-name">{{ username }}</div>
+          <div class="client-type">Licență SoundFree.ro</div>
+        </div>
       </div>
+
+      {% if subscription_start and subscription_end %}
+      <!-- Perioadă -->
+      <div class="info-row">
+        <div class="info-row-label">Perioada licenței</div>
+        <div class="info-row-value">{{ subscription_start|date:"d.m.Y" }} — {{ subscription_end|date:"d.m.Y" }}</div>
+      </div>
+
+      <!-- Zile rămase / Expirat -->
+      {% if status == 'active' %}
+      <div class="days-box">
+        <div class="days-number">{{ days_remaining }}</div>
+        <div class="days-label">zile rămase</div>
+        <div class="days-expiry">Licența expiră la <strong>{{ subscription_end|date:"d.m.Y" }}</strong></div>
+      </div>
+      {% elif status == 'expired' %}
+      <div class="info-row">
+        <div class="expired-msg">Licența a expirat la {{ subscription_end|date:"d.m.Y" }}</div>
+        <div class="expired-sub">Contactați SoundFree.ro pentru reînnoirea licenței.</div>
+      </div>
+      {% elif status == 'not_started' %}
+      <div class="info-row">
+        <div class="info-row-value">Activare la {{ subscription_start|date:"d.m.Y" }}</div>
+      </div>
+      {% endif %}
+      {% endif %}
+
     </div>
 
-    <!-- Perioadă -->
-    {% if subscription_start and subscription_end %}
-    <div class="info-card">
-      <div class="info-label">Perioada licenței</div>
-      <div class="info-value">{{ subscription_start|date:"d/m/Y" }} — {{ subscription_end|date:"d/m/Y" }}</div>
+    <div class="verify-footer">
+      <p>SoundFree.ro — Muzică licențiată pentru spații comerciale</p>
+      <p class="ts">Verificare: {{ verified_at|date:"d.m.Y, H:i:s" }}</p>
     </div>
 
-    <!-- Zile rămase -->
-    {% if status == 'active' %}
-    <div class="info-card">
-      <div class="info-value">
-        Mai rămân <span class="highlight">{{ days_remaining }}</span> zile până la expirare
-      </div>
-      <div class="info-sub">Licența expiră la: <strong>{{ subscription_end|date:"d/m/Y" }}</strong></div>
-    </div>
-    {% elif status == 'expired' %}
-    <div class="info-card">
-      <div class="info-value" style="color:#dc2626;">Licența a expirat la {{ subscription_end|date:"d/m/Y" }}</div>
-      <div class="info-sub">Contactați SoundFree.ro pentru reînnoire.</div>
-    </div>
-    {% elif status == 'not_started' %}
-    <div class="info-card">
-      <div class="info-value">Licența devine activă la {{ subscription_start|date:"d/m/Y" }}</div>
-    </div>
-    {% endif %}
     {% endif %}
 
   </div>
-
-  <div class="verify-footer">
-    <p>SoundFree.ro — Muzică royalty-free pentru afaceri</p>
-    <p class="timestamp">Verificare efectuată: {{ verified_at|date:"d/m/Y H:i:s" }}</p>
-  </div>
-
-  {% endif %}
 </div>
 
 </body>
