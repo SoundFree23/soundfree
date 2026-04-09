@@ -349,10 +349,20 @@
         brand_name: document.getElementById('f-brand').value,
         company_cui: document.getElementById('f-cui').value,
         company_address: '',
-        venue_address: document.getElementById('conf-venue').textContent,
+        venue_address: (function() {
+          var p = [document.getElementById('f-venue-street').value, 'Nr. ' + document.getElementById('f-venue-nr').value];
+          var b = document.getElementById('f-venue-bloc').value;
+          var s = document.getElementById('f-venue-scara').value;
+          var e = document.getElementById('f-venue-etaj').value;
+          var a = document.getElementById('f-venue-ap').value;
+          if (b) p.push(b); if (s) p.push(s); if (e) p.push(e); if (a) p.push(a);
+          p.push(document.getElementById('f-venue-city').value);
+          p.push(document.getElementById('f-venue-county').value);
+          return p.join(', ');
+        })(),
         company_email: document.getElementById('f-email').value,
         company_phone: document.getElementById('f-phone').value,
-        company_reg: document.getElementById('f-reg').value
+        company_reg: ''
       })
     }).then(function(r) { return r.json(); }).then(function(data) {
       if (data.ok) { window.location.href = data.redirect; }
