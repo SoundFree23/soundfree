@@ -137,7 +137,7 @@
         <li><span class="check">✓</span> {{ t.feature_playlist }}</li>
         <li><span class="check">✓</span> {{ t.feature_support_email }}</li>
       </ul>
-      <a href="{% url 'music:purchase' %}" class="plan-btn plan-btn-primary">{{ t.choose_plan }}</a>
+      <a href="#" id="buy-btn" class="plan-btn plan-btn-primary" data-no-spa>{{ t.choose_plan }}</a>
     </div>
 
   </div>
@@ -272,6 +272,17 @@
   });
 
   updatePrices();
+
+  var buyBtn = document.getElementById('buy-btn');
+  if (buyBtn) {
+    buyBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      var price = calcPrice();
+      var annual = isAnnual ? Math.round(price * 12 * 0.8) : price;
+      var url = '{% url "music:purchase" %}?biz=' + currentBiz + '&size=' + currentSize + '&billing=' + (isAnnual ? 'annual' : 'monthly') + '&price=' + price + '&total=' + annual;
+      window.location.href = url;
+    });
+  }
 </script>
 
 {% endblock %}
