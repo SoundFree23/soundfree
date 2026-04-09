@@ -310,6 +310,9 @@ TRANSLATIONS = {
         'contact_message_ph': 'Scrie mesajul tău...',
         'contact_send': 'Trimite mesajul',
         'contact_success': 'Mesajul a fost trimis cu succes!',
+        'contact_address': 'Șos. Ștefan cel Mare și Sfânt, Nr. 42-46, cam. 1, Et. 4, Ap. 50, Iași',
+        'contact_cert_alt': 'Certificat de înregistrare SOUNDFREE S.R.L.',
+        'contact_cert_label': 'Certificat de înregistrare — ONRC',
 
         # LANDING PAGE
         'landing_about_title': 'Cine suntem',
@@ -681,6 +684,9 @@ TRANSLATIONS = {
         'contact_message_ph': 'Write your message...',
         'contact_send': 'Send message',
         'contact_success': 'Message sent successfully!',
+        'contact_address': 'Șos. Ștefan cel Mare și Sfânt, Nr. 42-46, cam. 1, Et. 4, Ap. 50, Iași',
+        'contact_cert_alt': 'Registration certificate SOUNDFREE S.R.L.',
+        'contact_cert_label': 'Registration certificate — ONRC',
 
         # LANDING PAGE
         'landing_about_title': 'Who we are',

@@ -461,6 +461,40 @@
     }
     .audience-item .aud-emoji { font-size: 2rem; margin-bottom: 0.5rem; }
 
+    .contact-wrapper {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem;
+      max-width: 1000px; margin: 0 auto; padding: 1rem 0;
+      align-items: start;
+    }
+    .company-info { display: flex; flex-direction: column; gap: 1.5rem; }
+    .company-card {
+      background: var(--bg3); border-radius: 12px; padding: 1.5rem;
+    }
+    .company-card h3 {
+      font-size: 1.1rem; font-weight: 700; color: var(--accent);
+      margin-bottom: 1rem; letter-spacing: 0.5px;
+    }
+    .company-details { display: flex; flex-direction: column; gap: 0.7rem; }
+    .detail-row {
+      display: flex; align-items: flex-start; gap: 0.6rem;
+      font-size: 0.85rem; color: var(--text2); line-height: 1.5;
+    }
+    .detail-row svg { width: 18px; height: 18px; flex-shrink: 0; color: var(--accent); margin-top: 1px; }
+    .detail-row a { color: var(--text2); text-decoration: none; transition: color 0.2s; }
+    .detail-row a:hover { color: var(--accent); }
+    .certificate-section { text-align: center; }
+    .certificate-img {
+      width: 100%; max-width: 380px; border-radius: 8px;
+      border: 1px solid var(--border); cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .certificate-img:hover { transform: scale(1.02); box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+    .cert-label { font-size: 0.75rem; color: var(--text3); margin-top: 0.5rem; }
+
+    @media (max-width: 768px) {
+      .contact-wrapper { grid-template-columns: 1fr; gap: 1.5rem; }
+    }
+
     .landing-contact {
       max-width: 600px; margin: 0 auto; padding: 2rem 0 1rem;
     }
@@ -678,6 +712,10 @@ function colorizeGenreCards() {
 <!-- FOOTER -->
 <footer>
   <p>{{ t.footer_copy }}</p>
+  <p style="margin-top:0.4rem;font-size:0.75rem;">SOUNDFREE S.R.L. · CUI 54416770 · J2026022358004</p>
+  <p style="margin-top:0.3rem;font-size:0.75rem;">
+    <a href="tel:+40740149975">0740 149 975</a> · <a href="mailto:office@soundfree.ro">office@soundfree.ro</a>
+  </p>
   <p style="margin-top:0.5rem;">
     <a href="{% url 'music:terms' %}">{{ t.footer_terms }}</a> · <a href="{% url 'music:privacy' %}">{{ t.footer_privacy }}</a> · <a href="{% url 'music:home' %}#contact">{{ t.footer_contact }}</a>
   </p>
