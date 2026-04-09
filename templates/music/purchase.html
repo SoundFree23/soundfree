@@ -65,12 +65,12 @@
 
   /* Config pills reuse */
   .config-pills { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-  .config-pill { padding: 0.5rem 1rem; border-radius: 10px; border: 1px solid var(--border); background: var(--card); color: var(--text2); font-size: 0.85rem; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+  .config-pill { padding: 0.5rem 1rem; border-radius: 10px; border: 1px solid var(--border); background: var(--card); color: var(--text2); font-size: 0.85rem; cursor: pointer; transition: all 0.2s; white-space: nowrap; -webkit-tap-highlight-color: transparent; touch-action: manipulation; user-select: none; }
   .config-pill:hover { border-color: var(--accent); color: var(--text); }
   .config-pill.active { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; border-color: transparent; font-weight: 600; }
 
   .billing-toggle { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
-  .billing-opt { flex: 1; text-align: center; padding: 0.75rem; border-radius: 10px; border: 1px solid var(--border); background: var(--card); color: var(--text2); font-size: 0.9rem; cursor: pointer; transition: all 0.2s; }
+  .billing-opt { flex: 1; text-align: center; padding: 0.75rem; border-radius: 10px; border: 1px solid var(--border); background: var(--card); color: var(--text2); font-size: 0.9rem; cursor: pointer; transition: all 0.2s; -webkit-tap-highlight-color: transparent; touch-action: manipulation; user-select: none; }
   .billing-opt.active { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; border-color: transparent; font-weight: 600; }
   .billing-opt .save { font-size: 0.7rem; display: block; opacity: 0.8; }
 </style>
@@ -302,22 +302,27 @@
     window.scrollTo({top: 0, behavior: 'smooth'});
   }
 
-  // Pill handlers
-  document.querySelectorAll('#p-biz-pills .config-pill').forEach(p => {
-    if (p.dataset.biz === sel.biz) { /* keep default or URL */ }
-    p.addEventListener('click', () => {
+  // Pill handlers - use both click and touchend for mobile compatibility
+  function addTap(el, fn) {
+    var touched = false;
+    el.addEventListener('touchend', function(e) { e.preventDefault(); touched = true; fn(); }, {passive: false});
+    el.addEventListener('click', function() { if (!touched) fn(); touched = false; });
+  }
+
+  document.querySelectorAll('#p-biz-pills .config-pill').forEach(function(p) {
+    addTap(p, function() {
       document.querySelector('#p-biz-pills .active')?.classList.remove('active');
       p.classList.add('active'); sel.biz = p.dataset.biz; updateSummary();
     });
   });
-  document.querySelectorAll('#p-size-pills .config-pill').forEach(p => {
-    p.addEventListener('click', () => {
+  document.querySelectorAll('#p-size-pills .config-pill').forEach(function(p) {
+    addTap(p, function() {
       document.querySelector('#p-size-pills .active')?.classList.remove('active');
       p.classList.add('active'); sel.size = parseInt(p.dataset.size); updateSummary();
     });
   });
-  document.querySelectorAll('.billing-opt').forEach(p => {
-    p.addEventListener('click', () => {
+  document.querySelectorAll('.billing-opt').forEach(function(p) {
+    addTap(p, function() {
       document.querySelector('.billing-opt.active')?.classList.remove('active');
       p.classList.add('active'); sel.billing = p.dataset.billing; updateSummary();
     });
