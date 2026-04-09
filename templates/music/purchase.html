@@ -154,9 +154,33 @@
           <input class="form-input" type="text" id="f-reg" placeholder="J00/0000/0000">
         </div>
       </div>
-      <div class="form-group">
-        <div class="form-label">{{ t.purchase_venue_street }} *</div>
-        <input class="form-input" type="text" id="f-venue-street" required placeholder="{{ t.purchase_venue_street_ph }}">
+      <div class="form-row">
+        <div class="form-group" style="flex:2;">
+          <div class="form-label">{{ t.purchase_venue_street }} *</div>
+          <input class="form-input" type="text" id="f-venue-street" required placeholder="{{ t.purchase_venue_street_ph }}">
+        </div>
+        <div class="form-group" style="flex:1;">
+          <div class="form-label">{{ t.purchase_venue_nr }} *</div>
+          <input class="form-input" type="text" id="f-venue-nr" required placeholder="Nr. 5">
+        </div>
+      </div>
+      <div class="form-row" style="grid-template-columns: 1fr 1fr 1fr 1fr;">
+        <div class="form-group">
+          <div class="form-label">{{ t.purchase_venue_bloc }}</div>
+          <input class="form-input" type="text" id="f-venue-bloc" placeholder="Bl. A1">
+        </div>
+        <div class="form-group">
+          <div class="form-label">{{ t.purchase_venue_scara }}</div>
+          <input class="form-input" type="text" id="f-venue-scara" placeholder="Sc. B">
+        </div>
+        <div class="form-group">
+          <div class="form-label">{{ t.purchase_venue_etaj }}</div>
+          <input class="form-input" type="text" id="f-venue-etaj" placeholder="Et. 2">
+        </div>
+        <div class="form-group">
+          <div class="form-label">{{ t.purchase_venue_ap }}</div>
+          <input class="form-input" type="text" id="f-venue-ap" placeholder="Ap. 10">
+        </div>
       </div>
       <div class="form-row">
         <div class="form-group">
@@ -288,7 +312,7 @@
   document.getElementById('btn-to-step2').addEventListener('click', function() { goStep(2); });
   document.getElementById('btn-back-1').addEventListener('click', function() { goStep(1); });
   document.getElementById('btn-to-step3').addEventListener('click', function() {
-    var fields = ['f-company', 'f-cui', 'f-venue-street', 'f-venue-city', 'f-venue-county', 'f-email', 'f-phone'];
+    var fields = ['f-company', 'f-cui', 'f-venue-street', 'f-venue-nr', 'f-venue-city', 'f-venue-county', 'f-email', 'f-phone'];
     for (var i = 0; i < fields.length; i++) {
       var el = document.getElementById(fields[i]);
       if (!el.value.trim()) { el.focus(); return; }
@@ -298,8 +322,18 @@
     document.getElementById('conf-billing').textContent = sel.billing === 'annual' ? '{{ t.billing_annual }}' : '{{ t.billing_monthly }}';
     document.getElementById('conf-company').textContent = document.getElementById('f-company').value;
     document.getElementById('conf-brand').textContent = document.getElementById('f-brand').value || '-';
-    var venueAddr = document.getElementById('f-venue-street').value + ', ' + document.getElementById('f-venue-city').value + ', ' + document.getElementById('f-venue-county').value;
-    document.getElementById('conf-venue').textContent = venueAddr;
+    var vParts = [document.getElementById('f-venue-street').value, 'Nr. ' + document.getElementById('f-venue-nr').value];
+    var bloc = document.getElementById('f-venue-bloc').value;
+    var scara = document.getElementById('f-venue-scara').value;
+    var etaj = document.getElementById('f-venue-etaj').value;
+    var ap = document.getElementById('f-venue-ap').value;
+    if (bloc) vParts.push(bloc);
+    if (scara) vParts.push(scara);
+    if (etaj) vParts.push(etaj);
+    if (ap) vParts.push(ap);
+    vParts.push(document.getElementById('f-venue-city').value);
+    vParts.push(document.getElementById('f-venue-county').value);
+    document.getElementById('conf-venue').textContent = vParts.join(', ');
     document.getElementById('conf-cui').textContent = document.getElementById('f-cui').value;
     document.getElementById('conf-total').textContent = getTotal() + ' lei';
     goStep(3);
@@ -321,7 +355,7 @@
         brand_name: document.getElementById('f-brand').value,
         company_cui: document.getElementById('f-cui').value,
         company_address: '',
-        venue_address: document.getElementById('f-venue-street').value + ', ' + document.getElementById('f-venue-city').value + ', ' + document.getElementById('f-venue-county').value,
+        venue_address: document.getElementById('conf-venue').textContent,
         company_email: document.getElementById('f-email').value,
         company_phone: document.getElementById('f-phone').value,
         company_reg: document.getElementById('f-reg').value
