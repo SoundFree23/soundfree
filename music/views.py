@@ -618,11 +618,16 @@ def backend_orders(request):
                 generated_password = None
                 user = order.user
                 if not user:
-                    # Check if user with this email already exists
-                    existing = User.objects.filter(email=order.company_email).first()
+                    # Check if user with this email AND same venue address already exists
+                    existing = None
+                    existing_orders = Order.objects.filter(
+                        company_email=order.company_email, status='paid'
+                    ).exclude(id=order.id).order_by('-created_at')
+                    for eo in existing_orders:
+                        if eo.venue_address == order.venue_address and eo.user:
+                            existing = eo.user
+                            break
                     if existing:
-                        user = existing
-                    else:
                         # Generate username from email
                         base_username = order.company_email.split('@')[0].replace('.', '_').replace('-', '_')[:20]
                         username = base_username
