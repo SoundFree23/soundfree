@@ -21,6 +21,9 @@ urlpatterns = [
     path('logout/', views.user_logout, name='user_logout'),
     path('lang/<str:lang>/', views.set_language, name='set_language'),
     path('contact/', views.contact_submit, name='contact_submit'),
+    path('purchase/', views.purchase, name='purchase'),
+    path('purchase/submit/', views.purchase_submit, name='purchase_submit'),
+    path('purchase/confirm/<str:ref>/', views.purchase_confirm, name='purchase_confirm'),
 
     # Backend admin
     path('backend/', views.backend_dashboard, name='backend_dashboard'),

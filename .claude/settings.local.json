@@ -17,7 +17,8 @@
       "Bash(python manage.py migrate)",
       "Bash(cmd /c \"python manage.py migrate\")",
       "Bash(cmd.exe /c \"python manage.py migrate\")",
-      "Bash(powershell -Command \"cd ''C:\\\\Users\\\\user\\\\Desktop\\\\python''; python manage.py migrate\")"
+      "Bash(powershell -Command \"cd ''C:\\\\Users\\\\user\\\\Desktop\\\\python''; python manage.py migrate\")",
+      "WebSearch"
     ]
   }
 }

@@ -122,7 +122,7 @@
     <div class="plan-card">
       <div class="plan-name">{{ t.plan_starter_name }}</div>
       <div class="plan-price">
-        <div class="price-amount" id="price-starter">59</div>
+        <div class="price-amount" id="price-starter">47</div>
         <div class="price-period">&nbsp;{{ t.per_month }}</div>
       </div>
       <div class="price-annual" id="annual-note-1"></div>
@@ -136,14 +136,14 @@
         <li><span class="x">✗</span> <span style="color:var(--text3)">{{ t.feature_no_dl }}</span></li>
         <li><span class="x">✗</span> <span style="color:var(--text3)">{{ t.feature_no_support }}</span></li>
       </ul>
-      <button class="plan-btn plan-btn-outline">{{ t.try_free }}</button>
+      <a href="{% url 'music:purchase' %}?plan=starter" class="plan-btn plan-btn-outline">{{ t.choose_plan }}</a>
     </div>
 
     <div class="plan-card popular">
       <div class="popular-badge">{{ t.popular_badge }}</div>
       <div class="plan-name">{{ t.plan_business_name }}</div>
       <div class="plan-price">
-        <div class="price-amount" id="price-business">119</div>
+        <div class="price-amount" id="price-business">79</div>
         <div class="price-period">&nbsp;{{ t.per_month }}</div>
       </div>
       <div class="price-annual" id="annual-note-2"></div>
@@ -157,13 +157,13 @@
         <li><span class="check">✓</span> {{ t.feature_playlist }}</li>
         <li><span class="check">✓</span> {{ t.feature_support_email }}</li>
       </ul>
-      <button class="plan-btn plan-btn-primary">{{ t.try_free }}</button>
+      <a href="{% url 'music:purchase' %}?plan=business" class="plan-btn plan-btn-primary">{{ t.choose_plan }}</a>
     </div>
 
     <div class="plan-card">
       <div class="plan-name">{{ t.plan_enterprise_name }}</div>
       <div class="plan-price">
-        <div class="price-amount" id="price-enterprise">249</div>
+        <div class="price-amount" id="price-enterprise">135</div>
         <div class="price-period">&nbsp;{{ t.per_month }}</div>
       </div>
       <div class="price-annual" id="annual-note-3"></div>
@@ -177,7 +177,7 @@
         <li><span class="check">✓</span> {{ t.feature_api }}</li>
         <li><span class="check">✓</span> {{ t.feature_support_phone }}</li>
       </ul>
-      <button class="plan-btn plan-btn-outline">{{ t.contact_us }}</button>
+      <a href="{% url 'music:purchase' %}?plan=enterprise" class="plan-btn plan-btn-outline">{{ t.choose_plan }}</a>
     </div>
 
   </div>
@@ -233,12 +233,12 @@
 
 <script>
   // --- Pricing configuration ---
-  const basePrices = { starter: 59, business: 119, enterprise: 249 };
+  const basePrices = { starter: 59, business: 99, enterprise: 169 };
 
   const bizMultipliers = {
-    cafenea: 1.0, restaurant: 1.15, bar: 1.3, club: 1.6,
-    hotel: 1.4, salon: 1.0, retail: 1.0, birou: 0.85,
-    cabinet: 0.85, gym: 1.15
+    cafenea: 1.0, restaurant: 1.35, bar: 1.7, club: 2.85,
+    hotel: 2.0, salon: 0.5, retail: 0.5, birou: 0.85,
+    cabinet: 0.5, gym: 1.35
   };
 
   const sizeMultipliers = [0.85, 1.0, 1.15, 1.35, 1.5];

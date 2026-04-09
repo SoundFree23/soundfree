@@ -5,7 +5,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.db.models import Sum
-from .models import Song, Genre, Mood, Playlist, ContactMessage, UserProfile
+from .models import Song, Genre, Mood, Playlist, ContactMessage, UserProfile, Order
 from .forms import SongUploadForm, GenreForm
 
 
@@ -188,6 +188,71 @@ def contact_submit(request):
     except Exception:
         pass
     return JsonResponse({'ok': True})
+
+
+def purchase(request):
+    lang = request.session.get('lang', 'ro')
+    from .translations import TRANSLATIONS
+    t = TRANSLATIONS.get(lang, TRANSLATIONS['ro'])
+    return render(request, 'music/purchase.html', {'t': t, 'current_lang': lang})
+
+
+import json
+
+@require_POST
+def purchase_submit(request):
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'ok': False, 'error': 'Invalid data'}, status=400)
+
+    size_labels = ['< 100 mp', '101-250 mp', '251-500 mp', '501-1000 mp', '> 1000 mp']
+    size_idx = int(data.get('business_size', 1))
+    size_label = size_labels[size_idx] if 0 <= size_idx < len(size_labels) else '101-250 mp'
+
+    order = Order.objects.create(
+        user=request.user if request.user.is_authenticated else None,
+        plan=data.get('plan', 'business'),
+        billing=data.get('billing', 'annual'),
+        business_type=data.get('business_type', 'cafenea'),
+        business_size=size_label,
+        price_monthly=int(data.get('price_monthly', 0)),
+        price_total=int(data.get('price_total', 0)),
+        company_name=data.get('company_name', ''),
+        company_cui=data.get('company_cui', ''),
+        company_address=data.get('company_address', ''),
+        company_email=data.get('company_email', ''),
+        company_phone=data.get('company_phone', ''),
+        company_reg=data.get('company_reg', ''),
+    )
+
+    # Send notification email to admin
+    try:
+        send_mail(
+            subject=f'[SoundFree] Comandă nouă: {order.reference}',
+            message=f'Comandă nouă #{order.reference}\n\nFirmă: {order.company_name}\nCUI: {order.company_cui}\nPlan: {order.plan}\nPreț: {order.price_total} lei\nEmail: {order.company_email}\nTelefon: {order.company_phone}',
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=['office@soundfree.ro'],
+            fail_silently=True,
+        )
+    except Exception:
+        pass
+
+    from django.urls import reverse
+    return JsonResponse({
+        'ok': True,
+        'redirect': reverse('music:purchase_confirm', args=[order.reference])
+    })
+
+
+def purchase_confirm(request, ref):
+    order = get_object_or_404(Order, reference=ref)
+    lang = request.session.get('lang', 'ro')
+    from .translations import TRANSLATIONS
+    t = TRANSLATIONS.get(lang, TRANSLATIONS['ro'])
+    return render(request, 'music/purchase_confirm.html', {
+        't': t, 'current_lang': lang, 'order': order
+    })
 
 
 def song_detail(request, pk):

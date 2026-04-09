@@ -1,0 +1,53 @@
+{% extends 'music/base.html' %}
+
+{% block title %}{{ t.confirm_title }} — SoundFree.ro{% endblock %}
+
+{% block content %}
+<style>
+  .confirm-page { max-width: 700px; margin: 0 auto; padding: 3rem 1rem 4rem; text-align: center; }
+  .confirm-icon { font-size: 4rem; margin-bottom: 1rem; }
+  .confirm-page h1 { font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem; }
+  .confirm-page .sub { color: var(--text2); margin-bottom: 2rem; }
+  .confirm-card { background: var(--bg3); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; text-align: left; margin-bottom: 1.5rem; }
+  .confirm-card h3 { font-size: 1rem; font-weight: 600; color: var(--text2); margin-bottom: 1rem; }
+  .confirm-row { display: flex; justify-content: space-between; padding: 0.4rem 0; font-size: 0.9rem; color: var(--text2); }
+  .confirm-row .val { color: var(--text); font-weight: 600; }
+  .confirm-row.total { border-top: 1px solid var(--border); padding-top: 0.75rem; margin-top: 0.5rem; font-weight: 700; font-size: 1.1rem; color: var(--accent); }
+  .bank-card { background: linear-gradient(135deg, rgba(34,197,94,0.08), rgba(34,197,94,0.02)); border: 1px solid rgba(34,197,94,0.2); border-radius: 12px; padding: 1.5rem; text-align: left; margin-bottom: 1.5rem; }
+  .bank-card h3 { font-size: 1rem; font-weight: 700; color: #22c55e; margin-bottom: 1rem; }
+  .bank-row { display: flex; justify-content: space-between; padding: 0.4rem 0; font-size: 0.875rem; }
+  .bank-row .label { color: var(--text3); }
+  .bank-row .value { color: var(--text); font-weight: 600; user-select: all; }
+  .back-link { display: inline-block; margin-top: 1.5rem; color: var(--accent); text-decoration: none; font-weight: 600; }
+</style>
+
+<div class="confirm-page">
+  <div class="confirm-icon">&#9989;</div>
+  <h1>{{ t.confirm_title }}</h1>
+  <p class="sub">{{ t.confirm_sub }}</p>
+
+  <div class="confirm-card">
+    <h3>{{ t.purchase_order_summary }}</h3>
+    <div class="confirm-row"><span>{{ t.confirm_ref }}</span><span class="val">{{ order.reference }}</span></div>
+    <div class="confirm-row"><span>{{ t.purchase_plan }}</span><span class="val">{{ order.get_plan_display }}</span></div>
+    <div class="confirm-row"><span>{{ t.config_business }}</span><span class="val">{{ order.business_type }}</span></div>
+    <div class="confirm-row"><span>{{ t.config_size }}</span><span class="val">{{ order.business_size }}</span></div>
+    <div class="confirm-row"><span>{{ t.purchase_billing }}</span><span class="val">{{ order.get_billing_display }}</span></div>
+    <div class="confirm-row"><span>{{ t.purchase_company_name }}</span><span class="val">{{ order.company_name }}</span></div>
+    <div class="confirm-row"><span>{{ t.purchase_cui }}</span><span class="val">{{ order.company_cui }}</span></div>
+    <div class="confirm-row total"><span>{{ t.purchase_total }}</span><span>{{ order.price_total }} lei</span></div>
+  </div>
+
+  <div class="bank-card">
+    <h3>{{ t.purchase_bank_title }}</h3>
+    <div class="bank-row"><span class="label">{{ t.purchase_bank_holder }}</span><span class="value">SOUNDFREE SRL</span></div>
+    <div class="bank-row"><span class="label">IBAN</span><span class="value">RO57RZBR0000060030141147</span></div>
+    <div class="bank-row"><span class="label">{{ t.purchase_bank_name }}</span><span class="value">Raiffeisen Bank</span></div>
+    <div class="bank-row"><span class="label">SWIFT</span><span class="value">RZBRROBU</span></div>
+    <div class="bank-row"><span class="label">{{ t.purchase_bank_ref }}</span><span class="value">{{ order.reference }}</span></div>
+    <p style="margin-top:1rem;font-size:0.8rem;color:var(--text3);">{{ t.purchase_bank_note }}</p>
+  </div>
+
+  <a href="{% url 'music:home' %}" class="back-link">← {{ t.confirm_back_home }}</a>
+</div>
+{% endblock %}

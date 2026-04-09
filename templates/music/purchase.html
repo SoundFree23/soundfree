@@ -1,0 +1,371 @@
+{% extends 'music/base.html' %}
+
+{% block title %}{{ t.purchase_title }} — SoundFree.ro{% endblock %}
+
+{% block content %}
+
+<style>
+  .purchase-page { max-width: 800px; margin: 0 auto; padding: 2rem 1rem 4rem; }
+  .purchase-page h1 { text-align: center; font-size: 2rem; font-weight: 800; margin-bottom: 0.5rem; }
+  .purchase-sub { text-align: center; color: var(--text2); margin-bottom: 2.5rem; }
+
+  /* Steps indicator */
+  .steps { display: flex; justify-content: center; gap: 0; margin-bottom: 2.5rem; }
+  .step { display: flex; align-items: center; gap: 0.5rem; }
+  .step-num { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; border: 2px solid var(--border); color: var(--text3); background: var(--bg3); transition: all 0.3s; }
+  .step.active .step-num { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .step.done .step-num { background: #22c55e; color: #fff; border-color: #22c55e; }
+  .step-label { font-size: 0.8rem; color: var(--text3); font-weight: 600; }
+  .step.active .step-label { color: var(--text); }
+  .step-line { width: 60px; height: 2px; background: var(--border); margin: 0 0.75rem; margin-top: -0.5rem; }
+  .step-line.done { background: #22c55e; }
+
+  /* Form panels */
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  .form-group { margin-bottom: 1.25rem; }
+  .form-label { display: block; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text3); margin-bottom: 0.5rem; }
+  .form-input, .form-select {
+    width: 100%; background: var(--bg3); border: 1px solid var(--border); color: var(--text);
+    padding: 0.75rem 1rem; border-radius: 8px; font-size: 0.9rem; font-family: inherit;
+    outline: none; box-sizing: border-box; transition: border-color 0.2s;
+  }
+  .form-input:focus, .form-select:focus { border-color: var(--accent); }
+  .form-select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23888' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 1rem center; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  @media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
+
+  /* Price summary card */
+  .price-card {
+    background: var(--bg3); border: 1px solid var(--border); border-radius: 12px;
+    padding: 1.5rem; margin-bottom: 1.5rem;
+  }
+  .price-card h3 { font-size: 1rem; font-weight: 600; color: var(--text2); margin-bottom: 1rem; }
+  .price-row { display: flex; justify-content: space-between; padding: 0.4rem 0; font-size: 0.9rem; color: var(--text2); }
+  .price-row.total { border-top: 1px solid var(--border); padding-top: 0.75rem; margin-top: 0.5rem; font-weight: 700; font-size: 1.1rem; color: var(--accent); }
+
+  /* Bank details card */
+  .bank-card {
+    background: linear-gradient(135deg, rgba(34,197,94,0.08), rgba(34,197,94,0.02));
+    border: 1px solid rgba(34,197,94,0.2); border-radius: 12px;
+    padding: 1.5rem; margin-bottom: 1.5rem;
+  }
+  .bank-card h3 { font-size: 1rem; font-weight: 700; color: #22c55e; margin-bottom: 1rem; }
+  .bank-row { display: flex; justify-content: space-between; padding: 0.4rem 0; font-size: 0.875rem; }
+  .bank-row .label { color: var(--text3); }
+  .bank-row .value { color: var(--text); font-weight: 600; user-select: all; }
+
+  .btn-row { display: flex; gap: 1rem; margin-top: 2rem; }
+  .btn-back { flex: 0 0 auto; padding: 0.8rem 1.5rem; border-radius: 10px; font-size: 0.9rem; font-weight: 600; border: 1px solid var(--border); background: transparent; color: var(--text2); cursor: pointer; font-family: inherit; }
+  .btn-back:hover { border-color: var(--accent); }
+  .btn-next { flex: 1; padding: 0.8rem; border-radius: 10px; font-size: 0.95rem; font-weight: 700; border: none; background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; cursor: pointer; font-family: inherit; }
+  .btn-next:hover { opacity: 0.9; }
+  .btn-next:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* Config pills reuse */
+  .config-pills { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .config-pill { padding: 0.5rem 1rem; border-radius: 10px; border: 1px solid var(--border); background: var(--card); color: var(--text2); font-size: 0.85rem; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+  .config-pill:hover { border-color: var(--accent); color: var(--text); }
+  .config-pill.active { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; border-color: transparent; font-weight: 600; }
+
+  .billing-toggle { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
+  .billing-opt { flex: 1; text-align: center; padding: 0.75rem; border-radius: 10px; border: 1px solid var(--border); background: var(--card); color: var(--text2); font-size: 0.9rem; cursor: pointer; transition: all 0.2s; }
+  .billing-opt.active { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; border-color: transparent; font-weight: 600; }
+  .billing-opt .save { font-size: 0.7rem; display: block; opacity: 0.8; }
+</style>
+
+<div class="purchase-page">
+  <h1>{{ t.purchase_title }}</h1>
+  <p class="purchase-sub">{{ t.purchase_sub }}</p>
+
+  <!-- Steps -->
+  <div class="steps">
+    <div class="step active" id="step-ind-1">
+      <div class="step-num">1</div>
+      <div class="step-label">{{ t.step_plan }}</div>
+    </div>
+    <div class="step-line" id="line-1"></div>
+    <div class="step" id="step-ind-2">
+      <div class="step-num">2</div>
+      <div class="step-label">{{ t.step_company }}</div>
+    </div>
+    <div class="step-line" id="line-2"></div>
+    <div class="step" id="step-ind-3">
+      <div class="step-num">3</div>
+      <div class="step-label">{{ t.step_confirm }}</div>
+    </div>
+  </div>
+
+  <!-- STEP 1: Plan selection -->
+  <div class="panel active" id="panel-1">
+    <div class="form-group">
+      <div class="form-label">{{ t.config_business }}</div>
+      <div class="config-pills" id="p-biz-pills">
+        <div class="config-pill active" data-biz="cafenea">{{ t.biz_cafenea }}</div>
+        <div class="config-pill" data-biz="restaurant">{{ t.biz_restaurant }}</div>
+        <div class="config-pill" data-biz="bar">{{ t.biz_bar }}</div>
+        <div class="config-pill" data-biz="club">{{ t.biz_club }}</div>
+        <div class="config-pill" data-biz="hotel">{{ t.biz_hotel }}</div>
+        <div class="config-pill" data-biz="salon">{{ t.biz_salon }}</div>
+        <div class="config-pill" data-biz="retail">{{ t.biz_retail }}</div>
+        <div class="config-pill" data-biz="birou">{{ t.biz_birou }}</div>
+        <div class="config-pill" data-biz="cabinet">{{ t.biz_cabinet }}</div>
+        <div class="config-pill" data-biz="gym">{{ t.biz_gym }}</div>
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="form-label">{{ t.config_size }}</div>
+      <div class="config-pills" id="p-size-pills">
+        <div class="config-pill" data-size="0">{{ t.config_size_1 }}</div>
+        <div class="config-pill active" data-size="1">{{ t.config_size_2 }}</div>
+        <div class="config-pill" data-size="2">{{ t.config_size_3 }}</div>
+        <div class="config-pill" data-size="3">{{ t.config_size_4 }}</div>
+        <div class="config-pill" data-size="4">{{ t.config_size_5 }}</div>
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="form-label">{{ t.purchase_plan }}</div>
+      <div class="config-pills" id="p-plan-pills">
+        <div class="config-pill" data-plan="starter">🏪 Starter — 1 {{ t.purchase_location }}</div>
+        <div class="config-pill active" data-plan="business">🏢 Business — {{ t.purchase_up_to }} 5 {{ t.purchase_locations }}</div>
+        <div class="config-pill" data-plan="enterprise">🏨 Enterprise — {{ t.purchase_unlimited }}</div>
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="form-label">{{ t.purchase_billing }}</div>
+      <div class="billing-toggle">
+        <div class="billing-opt" data-billing="monthly">{{ t.billing_monthly }}</div>
+        <div class="billing-opt active" data-billing="annual">{{ t.billing_annual }} <span class="save">-20%</span></div>
+      </div>
+    </div>
+
+    <div class="price-card" id="step1-price">
+      <h3>{{ t.purchase_summary }}</h3>
+      <div class="price-row"><span id="sum-plan-label">Business</span><span id="sum-price-monthly">79 lei/{{ t.purchase_mo }}</span></div>
+      <div class="price-row total"><span>{{ t.purchase_total }}</span><span id="sum-price-total">948 lei/{{ t.purchase_yr }}</span></div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-next" onclick="goStep(2)">{{ t.purchase_next }} →</button>
+    </div>
+  </div>
+
+  <!-- STEP 2: Company details -->
+  <div class="panel" id="panel-2">
+    <form id="company-form">
+      <div class="form-row">
+        <div class="form-group">
+          <div class="form-label">{{ t.purchase_company_name }} *</div>
+          <input class="form-input" type="text" id="f-company" required placeholder="S.C. Exemplu S.R.L.">
+        </div>
+        <div class="form-group">
+          <div class="form-label">{{ t.purchase_cui }} *</div>
+          <input class="form-input" type="text" id="f-cui" required placeholder="12345678">
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="form-label">{{ t.purchase_address }} *</div>
+        <input class="form-input" type="text" id="f-address" required placeholder="Str. Exemplu nr. 1, Oraș, Județ">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <div class="form-label">{{ t.purchase_email }} *</div>
+          <input class="form-input" type="email" id="f-email" required placeholder="contact@firma.ro">
+        </div>
+        <div class="form-group">
+          <div class="form-label">{{ t.purchase_phone }} *</div>
+          <input class="form-input" type="tel" id="f-phone" required placeholder="07xx xxx xxx">
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="form-label">{{ t.purchase_reg }} ({{ t.purchase_optional }})</div>
+        <input class="form-input" type="text" id="f-reg" placeholder="J00/0000/0000">
+      </div>
+    </form>
+
+    <div class="btn-row">
+      <button class="btn-back" onclick="goStep(1)">← {{ t.purchase_back }}</button>
+      <button class="btn-next" onclick="goStep(3)">{{ t.purchase_next }} →</button>
+    </div>
+  </div>
+
+  <!-- STEP 3: Confirm & Pay -->
+  <div class="panel" id="panel-3">
+    <div class="price-card">
+      <h3>{{ t.purchase_order_summary }}</h3>
+      <div class="price-row"><span>{{ t.purchase_plan }}</span><span id="conf-plan">Business</span></div>
+      <div class="price-row"><span>{{ t.config_business }}</span><span id="conf-biz">Cafenea</span></div>
+      <div class="price-row"><span>{{ t.config_size }}</span><span id="conf-size">101-250 mp</span></div>
+      <div class="price-row"><span>{{ t.purchase_billing }}</span><span id="conf-billing">Anual</span></div>
+      <div class="price-row"><span>{{ t.purchase_company_name }}</span><span id="conf-company">-</span></div>
+      <div class="price-row"><span>{{ t.purchase_cui }}</span><span id="conf-cui">-</span></div>
+      <div class="price-row total"><span>{{ t.purchase_total }}</span><span id="conf-total">948 lei</span></div>
+    </div>
+
+    <div class="bank-card">
+      <h3>{{ t.purchase_bank_title }}</h3>
+      <div class="bank-row"><span class="label">{{ t.purchase_bank_holder }}</span><span class="value">SOUNDFREE SRL</span></div>
+      <div class="bank-row"><span class="label">IBAN</span><span class="value">RO57RZBR0000060030141147</span></div>
+      <div class="bank-row"><span class="label">{{ t.purchase_bank_name }}</span><span class="value">Raiffeisen Bank</span></div>
+      <div class="bank-row"><span class="label">SWIFT</span><span class="value">RZBRROBU</span></div>
+      <div class="bank-row"><span class="label">{{ t.purchase_bank_ref }}</span><span class="value" id="conf-ref">-</span></div>
+      <p style="margin-top:1rem;font-size:0.8rem;color:var(--text3);">{{ t.purchase_bank_note }}</p>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-back" onclick="goStep(2)">← {{ t.purchase_back }}</button>
+      <button class="btn-next" id="btn-submit">{{ t.purchase_submit }}</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const basePrices = { starter: 59, business: 99, enterprise: 169 };
+  const bizMultipliers = {
+    cafenea: 1.0, restaurant: 1.35, bar: 1.7, club: 2.85,
+    hotel: 2.0, salon: 0.5, retail: 0.5, birou: 0.85,
+    cabinet: 0.5, gym: 1.35
+  };
+  const sizeMultipliers = [0.85, 1.0, 1.15, 1.35, 1.5];
+  const bizLabels = {
+    cafenea:'Cafenea', restaurant:'Restaurant', bar:'Bar', club:'Club',
+    hotel:'Hotel', salon:'Salon', retail:'Retail', birou:'Birou',
+    cabinet:'Cabinet', gym:'Sală fitness'
+  };
+  const sizeLabels = ['< 100 mp','101-250 mp','251-500 mp','501-1000 mp','> 1000 mp'];
+
+  let sel = { biz:'cafenea', size:1, plan:'business', billing:'annual' };
+
+  // Read plan from URL
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('plan') && basePrices[params.get('plan')]) {
+    sel.plan = params.get('plan');
+  }
+
+  function calcPrice() {
+    let p = basePrices[sel.plan] * bizMultipliers[sel.biz] * sizeMultipliers[sel.size];
+    return Math.round(p);
+  }
+
+  function updateSummary() {
+    const monthly = calcPrice();
+    const annual = Math.round(monthly * 12 * 0.8);
+    const isAnnual = sel.billing === 'annual';
+    const mo = '{{ t.purchase_mo }}';
+    const yr = '{{ t.purchase_yr }}';
+
+    document.getElementById('sum-plan-label').textContent = sel.plan.charAt(0).toUpperCase() + sel.plan.slice(1);
+    document.getElementById('sum-price-monthly').textContent = monthly + ' lei/' + mo;
+
+    if (isAnnual) {
+      document.getElementById('sum-price-total').textContent = annual + ' lei/' + yr;
+    } else {
+      document.getElementById('sum-price-total').textContent = monthly + ' lei/' + mo;
+    }
+  }
+
+  function getTotal() {
+    const monthly = calcPrice();
+    if (sel.billing === 'annual') return Math.round(monthly * 12 * 0.8);
+    return monthly;
+  }
+
+  function goStep(n) {
+    if (n === 3) {
+      // Validate step 2
+      var fields = ['f-company','f-cui','f-address','f-email','f-phone'];
+      for (var i=0; i<fields.length; i++) {
+        var el = document.getElementById(fields[i]);
+        if (!el.value.trim()) { el.focus(); return; }
+      }
+      // Fill confirmation
+      document.getElementById('conf-plan').textContent = sel.plan.charAt(0).toUpperCase() + sel.plan.slice(1);
+      document.getElementById('conf-biz').textContent = bizLabels[sel.biz];
+      document.getElementById('conf-size').textContent = sizeLabels[sel.size];
+      document.getElementById('conf-billing').textContent = sel.billing === 'annual' ? '{{ t.billing_annual }}' : '{{ t.billing_monthly }}';
+      document.getElementById('conf-company').textContent = document.getElementById('f-company').value;
+      document.getElementById('conf-cui').textContent = document.getElementById('f-cui').value;
+      document.getElementById('conf-total').textContent = getTotal() + ' lei';
+    }
+
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel-' + n).classList.add('active');
+
+    for (var s=1; s<=3; s++) {
+      var ind = document.getElementById('step-ind-' + s);
+      ind.classList.remove('active','done');
+      if (s < n) ind.classList.add('done');
+      if (s === n) ind.classList.add('active');
+      if (s < 3) {
+        document.getElementById('line-' + s).classList.toggle('done', s < n);
+      }
+    }
+    window.scrollTo({top: 0, behavior: 'smooth'});
+  }
+
+  // Pill handlers
+  document.querySelectorAll('#p-biz-pills .config-pill').forEach(p => {
+    if (p.dataset.biz === sel.biz) { /* keep default or URL */ }
+    p.addEventListener('click', () => {
+      document.querySelector('#p-biz-pills .active')?.classList.remove('active');
+      p.classList.add('active'); sel.biz = p.dataset.biz; updateSummary();
+    });
+  });
+  document.querySelectorAll('#p-size-pills .config-pill').forEach(p => {
+    p.addEventListener('click', () => {
+      document.querySelector('#p-size-pills .active')?.classList.remove('active');
+      p.classList.add('active'); sel.size = parseInt(p.dataset.size); updateSummary();
+    });
+  });
+  document.querySelectorAll('#p-plan-pills .config-pill').forEach(p => {
+    p.addEventListener('click', () => {
+      document.querySelector('#p-plan-pills .active')?.classList.remove('active');
+      p.classList.add('active'); sel.plan = p.dataset.plan; updateSummary();
+    });
+  });
+  document.querySelectorAll('.billing-opt').forEach(p => {
+    p.addEventListener('click', () => {
+      document.querySelector('.billing-opt.active')?.classList.remove('active');
+      p.classList.add('active'); sel.billing = p.dataset.billing; updateSummary();
+    });
+  });
+
+  // Set active plan pill from URL
+  if (sel.plan !== 'business') {
+    document.querySelector('#p-plan-pills .active')?.classList.remove('active');
+    document.querySelector('#p-plan-pills [data-plan="'+sel.plan+'"]')?.classList.add('active');
+  }
+
+  // Submit
+  document.getElementById('btn-submit').addEventListener('click', function() {
+    this.disabled = true;
+    this.textContent = '...';
+    fetch('{% url "music:purchase_submit" %}', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json', 'X-CSRFToken':'{{ csrf_token }}'},
+      body: JSON.stringify({
+        plan: sel.plan, billing: sel.billing, business_type: sel.biz,
+        business_size: sel.size, price_monthly: calcPrice(), price_total: getTotal(),
+        company_name: document.getElementById('f-company').value,
+        company_cui: document.getElementById('f-cui').value,
+        company_address: document.getElementById('f-address').value,
+        company_email: document.getElementById('f-email').value,
+        company_phone: document.getElementById('f-phone').value,
+        company_reg: document.getElementById('f-reg').value
+      })
+    }).then(r => r.json()).then(data => {
+      if (data.ok) {
+        window.location.href = data.redirect;
+      } else {
+        alert(data.error || 'Error');
+        this.disabled = false;
+        this.textContent = '{{ t.purchase_submit }}';
+      }
+    });
+  });
+
+  updateSummary();
+</script>
+
+{% endblock %}

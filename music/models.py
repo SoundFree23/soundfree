@@ -152,6 +152,58 @@ class UserProfile(models.Model):
         return 'active'
 
 
+class Order(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'În așteptare'),
+        ('paid', 'Plătită'),
+        ('cancelled', 'Anulată'),
+    ]
+    PLAN_CHOICES = [
+        ('starter', 'Starter'),
+        ('business', 'Business'),
+        ('enterprise', 'Enterprise'),
+    ]
+    BILLING_CHOICES = [
+        ('monthly', 'Lunar'),
+        ('annual', 'Anual'),
+    ]
+
+    reference = models.CharField(max_length=20, unique=True, verbose_name="Referință")
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='orders', verbose_name="Utilizator")
+    plan = models.CharField(max_length=20, choices=PLAN_CHOICES, verbose_name="Plan")
+    billing = models.CharField(max_length=10, choices=BILLING_CHOICES, default='annual', verbose_name="Facturare")
+    business_type = models.CharField(max_length=50, verbose_name="Tip afacere")
+    business_size = models.CharField(max_length=50, verbose_name="Suprafață")
+    price_monthly = models.IntegerField(verbose_name="Preț lunar (lei)")
+    price_total = models.IntegerField(verbose_name="Preț total (lei)")
+
+    # Company details
+    company_name = models.CharField(max_length=200, verbose_name="Denumire firmă")
+    company_cui = models.CharField(max_length=20, verbose_name="CUI")
+    company_address = models.TextField(verbose_name="Adresa firmei")
+    company_email = models.EmailField(verbose_name="Email firmă")
+    company_phone = models.CharField(max_length=30, verbose_name="Telefon firmă")
+    company_reg = models.CharField(max_length=30, blank=True, verbose_name="Nr. Reg. Comerț")
+
+    status = models.CharField(max_length=15, choices=STATUS_CHOICES, default='pending', verbose_name="Status")
+    oblio_invoice = models.CharField(max_length=100, blank=True, verbose_name="Nr. factură Oblio")
+    created_at = models.DateTimeField(auto_now_add=True)
+    paid_at = models.DateTimeField(null=True, blank=True, verbose_name="Data plată")
+
+    class Meta:
+        verbose_name = "Comandă"
+        verbose_name_plural = "Comenzi"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.reference} - {self.company_name} ({self.get_status_display()})"
+
+    def save(self, *args, **kwargs):
+        if not self.reference:
+            self.reference = f"SF-{uuid.uuid4().hex[:8].upper()}"
+        super().save(*args, **kwargs)
+
+
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
     """Creează automat un UserProfile la crearea unui User."""
