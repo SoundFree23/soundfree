@@ -302,11 +302,9 @@
     window.scrollTo({top: 0, behavior: 'smooth'});
   }
 
-  // Pill handlers - use both click and touchend for mobile compatibility
+  // Pill handlers
   function addTap(el, fn) {
-    var touched = false;
-    el.addEventListener('touchend', function(e) { e.preventDefault(); touched = true; fn(); }, {passive: false});
-    el.addEventListener('click', function() { if (!touched) fn(); touched = false; });
+    el.addEventListener('click', function(e) { e.stopPropagation(); fn(); });
   }
 
   document.querySelectorAll('#p-biz-pills .config-pill').forEach(function(p) {

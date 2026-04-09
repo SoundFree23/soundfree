@@ -238,9 +238,7 @@
   }
 
   function addTap(el, fn) {
-    var touched = false;
-    el.addEventListener('touchend', function(e) { e.preventDefault(); touched = true; fn(); }, {passive: false});
-    el.addEventListener('click', function() { if (!touched) fn(); touched = false; });
+    el.addEventListener('click', function(e) { e.stopPropagation(); fn(); });
   }
 
   const toggle = document.getElementById('billing-toggle');
