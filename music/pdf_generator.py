@@ -110,13 +110,24 @@ def generate_license_pdf(order, profile):
     c.setLineWidth(0.5)
     c.roundRect(margin + 5, margin + 5, width - 2 * margin - 10, height - 2 * margin - 10, 8)
 
-    # Logo
-    logo_path = os.path.join(settings.BASE_DIR, 'static', 'Logo.png')
-    if os.path.exists(logo_path):
-        logo = ImageReader(logo_path)
-        logo_w = 60 * mm
-        logo_h = 24 * mm
-        c.drawImage(logo, (width - logo_w) / 2, height - margin - 45 * mm, width=logo_w, height=logo_h, mask='auto')
+    # Logo text
+    logo_y = height - margin - 38 * mm
+    # Music note
+    c.setFont(FONT, 28)
+    c.setFillColor(GREEN)
+    note_w = c.stringWidth('\u266b', FONT, 28)
+    total_logo_w = note_w + 5 + c.stringWidth('Sound', FONT_BOLD, 30) + c.stringWidth('Free', FONT_BOLD, 30)
+    logo_x = (width - total_logo_w) / 2
+    c.drawString(logo_x, logo_y, '\u266b')
+    # "Sound" in white
+    c.setFont(FONT_BOLD, 30)
+    c.setFillColor(WHITE)
+    sound_x = logo_x + note_w + 5
+    c.drawString(sound_x, logo_y, 'Sound')
+    # "Free" in green
+    c.setFillColor(GREEN)
+    free_x = sound_x + c.stringWidth('Sound', FONT_BOLD, 30)
+    c.drawString(free_x, logo_y, 'Free')
 
     # Title
     y = height - margin - 55 * mm

@@ -621,7 +621,7 @@ def backend_orders(request):
                     # Send email with PDF attached
                     email = EmailMessage(
                         subject='[SoundFree] Licența ta a fost activată!',
-                        body=f'Bună ziua,\n\nPlata pentru comanda {order.reference} a fost confirmată.\nLicența dumneavoastră muzicală SoundFree este acum activă.\n\nDetalii:\n- Firmă: {order.company_name}\n- Brand: {order.brand_name or "-"}\n- Adresa locație: {order.venue_address}\n- Valoare: {order.price_total} lei\n- Facturare: {order.get_billing_display()}\n\nÎn atașament veți găsi Licența Muzicală SoundFree.\nPuteți accesa biblioteca muzicală pe www.soundfree.ro\n\nMulțumim!\nEchipa SoundFree',
+                        body=f'Bună ziua,\n\nPlata pentru comanda {order.reference} a fost confirmată.\nLicența dumneavoastră muzicală SoundFree este acum activă.\n\nDetalii:\n- Firmă: {order.company_name}\n- Brand: {order.brand_name or "-"}\n- Adresa locație: {order.venue_address}\n- Valoare: {order.price_total} lei\n- Facturare: {order.get_billing_display()}\n\nÎn atașament veți găsi Licența Muzicală SoundFree.\nPuteți accesa biblioteca muzicală pe www.soundfree.ro\n\nMulțumim!\n\n♫ SoundFree\nMuzică licențiată pentru afacerea ta\nwww.soundfree.ro | office@soundfree.ro | 0740 149 975',
                         from_email=settings.DEFAULT_FROM_EMAIL,
                         to=[order.company_email],
                     )
