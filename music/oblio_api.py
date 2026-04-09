@@ -55,6 +55,7 @@ class OblioAPI:
             'language': 'RO',
             'precision': 2,
             'useStock': 0,
+            'sendEmail': 1,
         }
 
         try:
