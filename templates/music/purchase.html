@@ -31,7 +31,20 @@
   }
   .form-input:focus { border-color: var(--accent); }
   .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-  @media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
+  @media (max-width: 600px) {
+    .form-row { grid-template-columns: 1fr !important; }
+    .form-row[style*="repeat(4"] { grid-template-columns: 1fr 1fr !important; }
+    .purchase-page { padding: 1.5rem 0.75rem 4rem; }
+    .purchase-page h1 { font-size: 1.5rem; }
+    .steps { gap: 0; }
+    .step-line { width: 30px; }
+    .step-label { font-size: 0.7rem; }
+    .config-pills { gap: 0.35rem; }
+    .config-pill { font-size: 0.78rem; padding: 0.4rem 0.7rem; }
+    .price-row { font-size: 0.8rem; }
+    .bank-row { flex-direction: column; gap: 0.15rem; }
+    .bank-row .value { font-size: 0.8rem; }
+  }
 
   .price-card { background: var(--bg3); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; }
   .price-card h3 { font-size: 1rem; font-weight: 600; color: var(--text2); margin-bottom: 1rem; }
@@ -163,7 +176,7 @@
           <input class="form-input" type="text" id="f-venue-nr" required placeholder="Nr. 5">
         </div>
       </div>
-      <div class="form-row" style="grid-template-columns: 1fr 1fr 1fr 1fr;">
+      <div class="form-row" style="grid-template-columns: repeat(4, 1fr); gap: 0.5rem;">
         <div class="form-group">
           <div class="form-label">{{ t.purchase_venue_bloc }}</div>
           <input class="form-input" type="text" id="f-venue-bloc" placeholder="Bl. A1">
