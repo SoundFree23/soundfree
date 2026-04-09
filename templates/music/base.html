@@ -461,12 +461,10 @@
     }
     .audience-item .aud-emoji { font-size: 2rem; margin-bottom: 0.5rem; }
 
-    .contact-wrapper {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem;
-      max-width: 1000px; margin: 0 auto; padding: 1rem 0;
-      align-items: start;
+    .company-info {
+      display: flex; flex-direction: column; gap: 1.5rem;
+      max-width: 600px; margin: 1.5rem auto 0; align-items: center;
     }
-    .company-info { display: flex; flex-direction: column; gap: 1.5rem; }
     .company-card {
       background: var(--bg3); border-radius: 12px; padding: 1.5rem;
     }
@@ -490,10 +488,6 @@
     }
     .certificate-img:hover { transform: scale(1.02); box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
     .cert-label { font-size: 0.75rem; color: var(--text3); margin-top: 0.5rem; }
-
-    @media (max-width: 768px) {
-      .contact-wrapper { grid-template-columns: 1fr; gap: 1.5rem; }
-    }
 
     .landing-contact {
       max-width: 600px; margin: 0 auto; padding: 2rem 0 1rem;

@@ -103,58 +103,56 @@
   <h2>{{ t.contact_title }}</h2>
   <p class="section-text" style="margin-bottom:1.5rem;">{{ t.contact_desc }}</p>
 
-  <div class="contact-wrapper">
-    <!-- Company Info -->
-    <div class="company-info">
-      <div class="company-card">
-        <h3>SOUNDFREE S.R.L.</h3>
-        <div class="company-details">
-          <div class="detail-row">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-            <span>{{ t.contact_address }}</span>
-          </div>
-          <div class="detail-row">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
-            <a href="tel:+40740149975">0740 149 975</a>
-          </div>
-          <div class="detail-row">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-            <a href="mailto:office@soundfree.ro">office@soundfree.ro</a>
-          </div>
-          <div class="detail-row">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-            <span>CUI: 54416770</span>
-          </div>
-          <div class="detail-row">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-            <span>Reg. Com.: J2026022358004</span>
-          </div>
-        </div>
-      </div>
+  <!-- Contact Form -->
+  <div class="landing-contact">
+    <form id="contact-form">
+      {% csrf_token %}
+      <input type="text" name="name" placeholder="{{ t.contact_name_ph }}" required>
+      <input type="email" name="email" placeholder="{{ t.contact_email_ph }}" required>
+      <input type="text" name="business" placeholder="{{ t.contact_business_ph }}">
+      <textarea name="message" placeholder="{{ t.contact_message_ph }}" required></textarea>
+      <button type="submit">{{ t.contact_send }}</button>
+    </form>
+    <div id="contact-success" style="display:none;text-align:center;padding:2rem;color:var(--accent);font-weight:600;">
+      {{ t.contact_success }}
+    </div>
+  </div>
 
-      <!-- Certificate -->
-      {% load static %}
-      <div class="certificate-section">
-        <a href="{% static 'certificat.jpg' %}" target="_blank">
-          <img src="{% static 'certificat.jpg' %}" alt="{{ t.contact_cert_alt }}" class="certificate-img">
-        </a>
-        <p class="cert-label">{{ t.contact_cert_label }}</p>
+  <!-- Company Info -->
+  <div class="company-info">
+    <div class="company-card">
+      <h3>SOUNDFREE S.R.L.</h3>
+      <div class="company-details">
+        <div class="detail-row">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <span>{{ t.contact_address }}</span>
+        </div>
+        <div class="detail-row">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+          <a href="tel:+40740149975">0740 149 975</a>
+        </div>
+        <div class="detail-row">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          <a href="mailto:office@soundfree.ro">office@soundfree.ro</a>
+        </div>
+        <div class="detail-row">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <span>CUI: 54416770</span>
+        </div>
+        <div class="detail-row">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          <span>Reg. Com.: J2026022358004</span>
+        </div>
       </div>
     </div>
 
-    <!-- Contact Form -->
-    <div class="landing-contact">
-      <form id="contact-form">
-        {% csrf_token %}
-        <input type="text" name="name" placeholder="{{ t.contact_name_ph }}" required>
-        <input type="email" name="email" placeholder="{{ t.contact_email_ph }}" required>
-        <input type="text" name="business" placeholder="{{ t.contact_business_ph }}">
-        <textarea name="message" placeholder="{{ t.contact_message_ph }}" required></textarea>
-        <button type="submit">{{ t.contact_send }}</button>
-      </form>
-      <div id="contact-success" style="display:none;text-align:center;padding:2rem;color:var(--accent);font-weight:600;">
-        {{ t.contact_success }}
-      </div>
+    <!-- Certificate -->
+    {% load static %}
+    <div class="certificate-section">
+      <a href="{% static 'certificat.jpg' %}" target="_blank">
+        <img src="{% static 'certificat.jpg' %}" alt="{{ t.contact_cert_alt }}" class="certificate-img">
+      </a>
+      <p class="cert-label">{{ t.contact_cert_label }}</p>
     </div>
   </div>
 </div>
