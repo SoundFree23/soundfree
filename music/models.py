@@ -179,6 +179,7 @@ class Order(models.Model):
 
     # Company details
     company_name = models.CharField(max_length=200, verbose_name="Denumire firmă")
+    brand_name = models.CharField(max_length=200, blank=True, verbose_name="Nume brand / locație")
     company_cui = models.CharField(max_length=20, verbose_name="CUI")
     company_address = models.TextField(verbose_name="Adresa firmei")
     company_email = models.EmailField(verbose_name="Email firmă")

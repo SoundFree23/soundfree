@@ -219,6 +219,7 @@ def purchase_submit(request):
         price_monthly=int(data.get('price_monthly', 0)),
         price_total=int(data.get('price_total', 0)),
         company_name=data.get('company_name', ''),
+        brand_name=data.get('brand_name', ''),
         company_cui=data.get('company_cui', ''),
         company_address=data.get('company_address', ''),
         company_email=data.get('company_email', ''),

@@ -160,8 +160,18 @@
           <input class="form-input" type="text" id="f-company" required placeholder="S.C. Exemplu S.R.L.">
         </div>
         <div class="form-group">
+          <div class="form-label">{{ t.purchase_brand_name }}</div>
+          <input class="form-input" type="text" id="f-brand" placeholder="{{ t.purchase_brand_ph }}">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
           <div class="form-label">{{ t.purchase_cui }} *</div>
           <input class="form-input" type="text" id="f-cui" required placeholder="12345678">
+        </div>
+        <div class="form-group">
+          <div class="form-label">{{ t.purchase_reg }} ({{ t.purchase_optional }})</div>
+          <input class="form-input" type="text" id="f-reg" placeholder="J00/0000/0000">
         </div>
       </div>
       <div class="form-group">
@@ -177,10 +187,6 @@
           <div class="form-label">{{ t.purchase_phone }} *</div>
           <input class="form-input" type="tel" id="f-phone" required placeholder="07xx xxx xxx">
         </div>
-      </div>
-      <div class="form-group">
-        <div class="form-label">{{ t.purchase_reg }} ({{ t.purchase_optional }})</div>
-        <input class="form-input" type="text" id="f-reg" placeholder="J00/0000/0000">
       </div>
     </form>
 
@@ -199,6 +205,7 @@
       <div class="price-row"><span>{{ t.config_size }}</span><span id="conf-size">101-250 mp</span></div>
       <div class="price-row"><span>{{ t.purchase_billing }}</span><span id="conf-billing">Anual</span></div>
       <div class="price-row"><span>{{ t.purchase_company_name }}</span><span id="conf-company">-</span></div>
+      <div class="price-row"><span>{{ t.purchase_brand_name }}</span><span id="conf-brand">-</span></div>
       <div class="price-row"><span>{{ t.purchase_cui }}</span><span id="conf-cui">-</span></div>
       <div class="price-row total"><span>{{ t.purchase_total }}</span><span id="conf-total">948 lei</span></div>
     </div>
@@ -285,6 +292,7 @@
       document.getElementById('conf-size').textContent = sizeLabels[sel.size];
       document.getElementById('conf-billing').textContent = sel.billing === 'annual' ? '{{ t.billing_annual }}' : '{{ t.billing_monthly }}';
       document.getElementById('conf-company').textContent = document.getElementById('f-company').value;
+      document.getElementById('conf-brand').textContent = document.getElementById('f-brand').value || '-';
       document.getElementById('conf-cui').textContent = document.getElementById('f-cui').value;
       document.getElementById('conf-total').textContent = getTotal() + ' lei';
     }
@@ -348,6 +356,7 @@
         plan: sel.plan, billing: sel.billing, business_type: sel.biz,
         business_size: sel.size, price_monthly: calcPrice(), price_total: getTotal(),
         company_name: document.getElementById('f-company').value,
+        brand_name: document.getElementById('f-brand').value,
         company_cui: document.getElementById('f-cui').value,
         company_address: document.getElementById('f-address').value,
         company_email: document.getElementById('f-email').value,

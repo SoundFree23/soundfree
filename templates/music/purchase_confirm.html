@@ -34,6 +34,7 @@
     <div class="confirm-row"><span>{{ t.config_size }}</span><span class="val">{{ order.business_size }}</span></div>
     <div class="confirm-row"><span>{{ t.purchase_billing }}</span><span class="val">{{ order.get_billing_display }}</span></div>
     <div class="confirm-row"><span>{{ t.purchase_company_name }}</span><span class="val">{{ order.company_name }}</span></div>
+    {% if order.brand_name %}<div class="confirm-row"><span>{{ t.purchase_brand_name }}</span><span class="val">{{ order.brand_name }}</span></div>{% endif %}
     <div class="confirm-row"><span>{{ t.purchase_cui }}</span><span class="val">{{ order.company_cui }}</span></div>
     <div class="confirm-row total"><span>{{ t.purchase_total }}</span><span>{{ order.price_total }} lei</span></div>
   </div>
