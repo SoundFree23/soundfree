@@ -77,3 +77,44 @@ class OblioAPI:
         except Exception as e:
             print(f'Oblio API error: {e}')
             return None
+
+    @classmethod
+    def create_invoice_from_proforma(cls, order):
+        """Create an invoice from an existing proforma in Oblio."""
+        if not order.oblio_invoice:
+            return None
+
+        # Parse series name and number from oblio_invoice (e.g. "PRO1")
+        series = ''
+        number = ''
+        for i, c in enumerate(order.oblio_invoice):
+            if c.isdigit():
+                series = order.oblio_invoice[:i]
+                number = order.oblio_invoice[i:]
+                break
+
+        data = {
+            'cif': settings.OBLIO_CIF,
+            'seriesName': series,
+            'number': number,
+        }
+
+        try:
+            resp = requests.put(
+                f'{cls.BASE_URL}/docs/proforma',
+                json=data,
+                headers=cls.headers(),
+            )
+            if resp.status_code == 401:
+                cls.token = None
+                resp = requests.put(
+                    f'{cls.BASE_URL}/docs/proforma',
+                    json=data,
+                    headers=cls.headers(),
+                )
+            resp.raise_for_status()
+            result = resp.json()
+            return result.get('data', {})
+        except Exception as e:
+            print(f'Oblio invoice error: {e}')
+            return None

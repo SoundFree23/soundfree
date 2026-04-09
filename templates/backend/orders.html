@@ -1,0 +1,87 @@
+{% extends 'backend/base_backend.html' %}
+{% block title %}Comenzi — Backend SoundFree{% endblock %}
+{% block page_title %}🧾 Comenzi{% endblock %}
+{% block active_orders %}active{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+  <div>
+    <h1>Comenzi</h1>
+    <p style="color:var(--text3);font-size:0.85rem;margin-top:0.25rem;">{{ orders|length }} comenzi ({{ pending_count }} in asteptare)</p>
+  </div>
+</div>
+
+<div class="table-card">
+  <table>
+    <thead>
+      <tr>
+        <th>Status</th>
+        <th>Referinta</th>
+        <th>Firma / Brand</th>
+        <th>CUI</th>
+        <th>Tip afacere</th>
+        <th>Pret</th>
+        <th>Data</th>
+        <th>Actiuni</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for order in orders %}
+      <tr style="{% if order.status == 'pending' %}background:rgba(234,179,8,0.08);{% elif order.status == 'paid' %}background:rgba(34,197,94,0.06);{% endif %}">
+        <td>
+          {% if order.status == 'pending' %}
+            <span class="badge-active" style="background:rgba(234,179,8,0.15);color:#eab308;">In asteptare</span>
+          {% elif order.status == 'paid' %}
+            <span class="badge-active">Platita</span>
+          {% else %}
+            <span class="badge-inactive">Anulata</span>
+          {% endif %}
+        </td>
+        <td><div class="td-title">{{ order.reference }}</div>
+          {% if order.oblio_invoice %}<div style="font-size:0.75rem;color:var(--text3);">Oblio: {{ order.oblio_invoice }}</div>{% endif %}
+        </td>
+        <td>
+          <div class="td-title">{{ order.company_name }}</div>
+          {% if order.brand_name %}<div style="font-size:0.8rem;color:var(--accent2);">{{ order.brand_name }}</div>{% endif %}
+        </td>
+        <td style="font-size:0.85rem;color:var(--text2);">{{ order.company_cui }}</td>
+        <td style="font-size:0.85rem;color:var(--text2);">{{ order.business_type }}<br><span style="color:var(--text3);">{{ order.business_size }}</span></td>
+        <td style="font-weight:600;color:var(--accent);">{{ order.price_total }} lei<br><span style="font-weight:400;font-size:0.75rem;color:var(--text3);">{{ order.get_billing_display }}</span></td>
+        <td style="color:var(--text3);font-size:0.8rem;white-space:nowrap;">{{ order.created_at|date:"d.m.Y H:i" }}
+          {% if order.paid_at %}<br><span style="color:#22c55e;">Platit: {{ order.paid_at|date:"d.m.Y" }}</span>{% endif %}
+        </td>
+        <td>
+          <div style="display:flex;gap:0.35rem;flex-wrap:wrap;">
+            {% if order.status == 'pending' %}
+            <form method="post" style="display:inline;">
+              {% csrf_token %}
+              <input type="hidden" name="order_id" value="{{ order.id }}">
+              <button type="submit" name="action" value="confirm_payment" class="btn btn-primary btn-sm" title="Confirma plata" onclick="return confirm('Confirmi plata pentru {{ order.reference }}?\n\nAceasta actiune va:\n- Marca comanda ca platita\n- Genera factura in Oblio\n- Activa abonamentul\n- Trimite email clientului')">
+                ✅ Confirma plata
+              </button>
+              <button type="submit" name="action" value="cancel" class="btn btn-danger btn-sm" title="Anuleaza" onclick="return confirm('Anulezi comanda {{ order.reference }}?')">
+                ❌
+              </button>
+            </form>
+            {% elif order.status == 'paid' %}
+              <span style="color:#22c55e;font-size:0.8rem;">✅ Confirmata</span>
+            {% else %}
+              <span style="color:var(--text3);font-size:0.8rem;">Anulata</span>
+            {% endif %}
+          </div>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="8" style="text-align:center;padding:3rem;color:var(--text3);">
+          <div style="font-size:2.5rem;margin-bottom:0.75rem;">🧾</div>
+          <div>Nicio comanda inregistrata.</div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

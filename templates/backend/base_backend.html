@@ -193,6 +193,9 @@
     <a href="{% url 'music:backend_messages' %}" class="sidebar-link {% block active_messages %}{% endblock %}">
       <span class="icon">📩</span> Mesaje
     </a>
+    <a href="{% url 'music:backend_orders' %}" class="sidebar-link {% block active_orders %}{% endblock %}">
+      <span class="icon">🧾</span> Comenzi
+    </a>
 
     <div class="nav-section">Site</div>
     <a href="{% url 'music:home' %}" class="sidebar-link" target="_blank">

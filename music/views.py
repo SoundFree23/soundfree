@@ -537,6 +537,65 @@ def backend_messages(request):
     })
 
 
+@login_required(login_url='/backend/login/')
+@user_passes_test(is_staff, login_url='/backend/login/')
+def backend_orders(request):
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        order_id = request.POST.get('order_id')
+        if action == 'confirm_payment' and order_id:
+            from django.utils import timezone
+            from datetime import timedelta
+            order = Order.objects.filter(id=order_id, status='pending').first()
+            if order:
+                order.status = 'paid'
+                order.paid_at = timezone.now()
+                order.save(update_fields=['status', 'paid_at'])
+
+                # Generate invoice from proforma via Oblio
+                try:
+                    from .oblio_api import OblioAPI
+                    OblioAPI.create_invoice_from_proforma(order)
+                except Exception:
+                    pass
+
+                # Activate subscription if user exists
+                if order.user and hasattr(order.user, 'profile'):
+                    profile = order.user.profile
+                    today = timezone.now().date()
+                    if order.billing == 'annual':
+                        end = today + timedelta(days=365)
+                    else:
+                        end = today + timedelta(days=30)
+                    profile.subscription_start = today
+                    profile.subscription_end = end
+                    profile.save(update_fields=['subscription_start', 'subscription_end'])
+
+                # Send activation email to client
+                try:
+                    send_mail(
+                        subject='[SoundFree] Licența ta a fost activată!',
+                        message=f'Bună ziua,\n\nPlata pentru comanda {order.reference} a fost confirmată.\nLicența dumneavoastră muzicală SoundFree este acum activă.\n\nDetalii:\n- Firmă: {order.company_name}\n- Brand: {order.brand_name or "-"}\n- Adresa locație: {order.venue_address}\n- Valoare: {order.price_total} lei\n- Facturare: {order.get_billing_display()}\n\nPuteți accesa biblioteca muzicală pe www.soundfree.ro\n\nMulțumim!\nEchipa SoundFree',
+                        from_email=settings.DEFAULT_FROM_EMAIL,
+                        recipient_list=[order.company_email],
+                        fail_silently=True,
+                    )
+                except Exception:
+                    pass
+
+        elif action == 'cancel' and order_id:
+            Order.objects.filter(id=order_id, status='pending').update(status='cancelled')
+
+        return redirect('music:backend_orders')
+
+    orders = Order.objects.all()
+    pending_count = orders.filter(status='pending').count()
+    return render(request, 'backend/orders.html', {
+        'orders': orders,
+        'pending_count': pending_count,
+    })
+
+
 def api_user_playlists(request):
     """API: returns server-side playlists for the logged-in user"""
     if not request.user.is_authenticated:
