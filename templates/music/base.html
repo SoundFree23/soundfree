@@ -640,7 +640,7 @@
     <a href="{% url 'music:home' %}">{{ t.nav_home }}</a>
     <a href="{% url 'music:browse' %}">{{ t.tab_search }}</a>
     <a href="{% url 'music:library' %}">{{ t.nav_library }}</a>
-    <a href="{% url 'music:pricing' %}">{{ t.nav_pricing }}</a>
+    <a href="{% url 'music:purchase' %}">{{ t.nav_pricing }}</a>
   </div>
   <div style="display:flex;align-items:center;gap:0.5rem;">
     <div class="lang-switcher">
@@ -691,7 +691,7 @@ function colorizeGenreCards() {
   <a href="{% url 'music:home' %}">{{ t.nav_home }}</a>
   <a href="{% url 'music:browse' %}">{{ t.tab_search }}</a>
   <a href="{% url 'music:library' %}">{{ t.nav_library }}</a>
-  <a href="{% url 'music:pricing' %}">{{ t.nav_pricing }}</a>
+  <a href="{% url 'music:purchase' %}">{{ t.nav_pricing }}</a>
   {% if user.is_authenticated %}
   <a href="{% url 'music:user_logout' %}">{{ t.logout_btn }}</a>
   {% else %}
@@ -746,7 +746,7 @@ function colorizeGenreCards() {
     <svg fill="currentColor" viewBox="0 0 24 24"><path d="M4 6H2v14a2 2 0 0 0 2 2h14v-2H4V6zm16-4H8a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zm-1 9h-4v4h-2v-4H9V9h4V5h2v4h4v2z"/></svg>
     <span>{{ t.tab_library }}</span>
   </a>
-  <a href="{% url 'music:pricing' %}" class="tab-item" data-tab="pricing">
+  <a href="{% url 'music:purchase' %}" class="tab-item" data-tab="pricing">
     <svg fill="currentColor" viewBox="0 0 24 24"><path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4a2 2 0 0 0-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58s1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41s-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/></svg>
     <span>{{ t.tab_pricing }}</span>
   </a>

@@ -16,7 +16,7 @@
   .step.done .step-num { background: #22c55e; color: #fff; border-color: #22c55e; }
   .step-label { font-size: 0.8rem; color: var(--text3); font-weight: 600; }
   .step.active .step-label { color: var(--text); }
-  .step-line { width: 80px; height: 2px; background: var(--border); margin: 0 0.75rem; margin-top: -0.5rem; }
+  .step-line { width: 60px; height: 2px; background: var(--border); margin: 0 0.75rem; margin-top: -0.5rem; }
   .step-line.done { background: #22c55e; }
 
   .panel { display: none; }
@@ -45,16 +45,21 @@
   .bank-row .value { color: var(--text); font-weight: 600; user-select: all; }
 
   .btn-row { display: flex; gap: 1rem; margin-top: 2rem; }
-  .btn-back { flex: 0 0 auto; padding: 0.8rem 1.5rem; border-radius: 10px; font-size: 0.9rem; font-weight: 600; border: 1px solid var(--border); background: transparent; color: var(--text2); cursor: pointer; font-family: inherit; text-decoration: none; display: flex; align-items: center; }
+  .btn-back { flex: 0 0 auto; padding: 0.8rem 1.5rem; border-radius: 10px; font-size: 0.9rem; font-weight: 600; border: 1px solid var(--border); background: transparent; color: var(--text2); cursor: pointer; font-family: inherit; }
   .btn-back:hover { border-color: var(--accent); }
   .btn-next { flex: 1; padding: 0.8rem; border-radius: 10px; font-size: 0.95rem; font-weight: 700; border: none; background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; cursor: pointer; font-family: inherit; }
   .btn-next:hover { opacity: 0.9; }
   .btn-next:disabled { opacity: 0.4; cursor: not-allowed; }
 
-  .selected-plan { background: var(--bg3); border: 1px solid var(--accent); border-radius: 12px; padding: 1rem 1.5rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; }
-  .selected-plan .plan-info { font-size: 0.9rem; color: var(--text2); }
-  .selected-plan .plan-info strong { color: var(--text); }
-  .selected-plan .plan-price { font-size: 1.2rem; font-weight: 800; color: var(--accent); }
+  .config-pills { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .config-pill { padding: 0.5rem 1rem; border-radius: 10px; border: 1px solid var(--border); background: var(--card); color: var(--text2); font-size: 0.85rem; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+  .config-pill:hover { border-color: var(--accent); color: var(--text); }
+  .config-pill.active { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; border-color: transparent; font-weight: 600; }
+
+  .billing-toggle { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
+  .billing-opt { flex: 1; text-align: center; padding: 0.75rem; border-radius: 10px; border: 1px solid var(--border); background: var(--card); color: var(--text2); font-size: 0.9rem; cursor: pointer; transition: all 0.2s; }
+  .billing-opt.active { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; border-color: transparent; font-weight: 600; }
+  .billing-opt .save { font-size: 0.7rem; display: block; opacity: 0.8; }
 </style>
 
 <div class="purchase-page">
@@ -65,25 +70,68 @@
   <div class="steps">
     <div class="step active" id="step-ind-1">
       <div class="step-num">1</div>
-      <div class="step-label">{{ t.step_company }}</div>
+      <div class="step-label">{{ t.step_plan }}</div>
     </div>
     <div class="step-line" id="line-1"></div>
     <div class="step" id="step-ind-2">
       <div class="step-num">2</div>
+      <div class="step-label">{{ t.step_company }}</div>
+    </div>
+    <div class="step-line" id="line-2"></div>
+    <div class="step" id="step-ind-3">
+      <div class="step-num">3</div>
       <div class="step-label">{{ t.step_confirm }}</div>
     </div>
   </div>
 
-  <!-- Selected plan summary -->
-  <div class="selected-plan">
-    <div class="plan-info">
-      <strong id="sel-biz">Cafenea</strong> · <span id="sel-size">101-250 m²</span> · <span id="sel-billing">Anual</span>
+  <!-- STEP 1: Select plan -->
+  <div class="panel active" id="panel-1">
+    <div class="form-group">
+      <div class="form-label">{{ t.config_business }}</div>
+      <div class="config-pills" id="p-biz-pills">
+        <div class="config-pill active" data-biz="cafenea">{{ t.biz_cafenea }}</div>
+        <div class="config-pill" data-biz="restaurant">{{ t.biz_restaurant }}</div>
+        <div class="config-pill" data-biz="bar">{{ t.biz_bar }}</div>
+        <div class="config-pill" data-biz="club">{{ t.biz_club }}</div>
+        <div class="config-pill" data-biz="hotel">{{ t.biz_hotel }}</div>
+        <div class="config-pill" data-biz="salon">{{ t.biz_salon }}</div>
+        <div class="config-pill" data-biz="retail">{{ t.biz_retail }}</div>
+        <div class="config-pill" data-biz="birou">{{ t.biz_birou }}</div>
+        <div class="config-pill" data-biz="cabinet">{{ t.biz_cabinet }}</div>
+        <div class="config-pill" data-biz="gym">{{ t.biz_gym }}</div>
+      </div>
     </div>
-    <div class="plan-price" id="sel-price">682 lei/an</div>
+    <div class="form-group">
+      <div class="form-label">{{ t.config_size }}</div>
+      <div class="config-pills" id="p-size-pills">
+        <div class="config-pill active" data-size="0">{{ t.config_size_1 }}</div>
+        <div class="config-pill" data-size="1">{{ t.config_size_2 }}</div>
+        <div class="config-pill" data-size="2">{{ t.config_size_3 }}</div>
+        <div class="config-pill" data-size="3">{{ t.config_size_4 }}</div>
+        <div class="config-pill" data-size="4">{{ t.config_size_5 }}</div>
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="form-label">{{ t.purchase_billing }}</div>
+      <div class="billing-toggle">
+        <div class="billing-opt" data-billing="monthly">{{ t.billing_monthly }}</div>
+        <div class="billing-opt active" data-billing="annual">{{ t.billing_annual }} <span class="save">-20%</span></div>
+      </div>
+    </div>
+
+    <div class="price-card">
+      <h3>{{ t.purchase_summary }}</h3>
+      <div class="price-row"><span id="sum-label">Cafenea</span><span id="sum-monthly">60 lei/{{ t.purchase_mo }}</span></div>
+      <div class="price-row total"><span>{{ t.purchase_total }}</span><span id="sum-total">576 lei/{{ t.purchase_yr }}</span></div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-next" id="btn-to-step2">{{ t.purchase_next }} →</button>
+    </div>
   </div>
 
-  <!-- STEP 1: Company details -->
-  <div class="panel active" id="panel-1">
+  <!-- STEP 2: Company details -->
+  <div class="panel" id="panel-2">
     <form id="company-form">
       <div class="form-row">
         <div class="form-group">
@@ -126,23 +174,23 @@
     </form>
 
     <div class="btn-row">
-      <a href="{% url 'music:pricing' %}" class="btn-back" data-no-spa>← {{ t.purchase_back }}</a>
-      <button class="btn-next" id="btn-to-confirm">{{ t.purchase_next }} →</button>
+      <button class="btn-back" id="btn-back-1">← {{ t.purchase_back }}</button>
+      <button class="btn-next" id="btn-to-step3">{{ t.purchase_next }} →</button>
     </div>
   </div>
 
-  <!-- STEP 2: Confirm & Pay -->
-  <div class="panel" id="panel-2">
+  <!-- STEP 3: Confirm & Pay -->
+  <div class="panel" id="panel-3">
     <div class="price-card">
       <h3>{{ t.purchase_order_summary }}</h3>
-      <div class="price-row"><span>{{ t.config_business }}</span><span id="conf-biz">Cafenea</span></div>
-      <div class="price-row"><span>{{ t.config_size }}</span><span id="conf-size">101-250 mp</span></div>
-      <div class="price-row"><span>{{ t.purchase_billing }}</span><span id="conf-billing">Anual</span></div>
+      <div class="price-row"><span>{{ t.config_business }}</span><span id="conf-biz">-</span></div>
+      <div class="price-row"><span>{{ t.config_size }}</span><span id="conf-size">-</span></div>
+      <div class="price-row"><span>{{ t.purchase_billing }}</span><span id="conf-billing">-</span></div>
       <div class="price-row"><span>{{ t.purchase_company_name }}</span><span id="conf-company">-</span></div>
       <div class="price-row"><span>{{ t.purchase_brand_name }}</span><span id="conf-brand">-</span></div>
       <div class="price-row"><span>{{ t.purchase_venue_address }}</span><span id="conf-venue">-</span></div>
       <div class="price-row"><span>{{ t.purchase_cui }}</span><span id="conf-cui">-</span></div>
-      <div class="price-row total"><span>{{ t.purchase_total }}</span><span id="conf-total">682 lei</span></div>
+      <div class="price-row total"><span>{{ t.purchase_total }}</span><span id="conf-total">-</span></div>
     </div>
 
     <div class="bank-card">
@@ -156,22 +204,20 @@
     </div>
 
     <div class="btn-row">
-      <button class="btn-back" id="btn-back-form">← {{ t.purchase_back }}</button>
+      <button class="btn-back" id="btn-back-2">← {{ t.purchase_back }}</button>
       <button class="btn-next" id="btn-submit">{{ t.purchase_submit }}</button>
     </div>
   </div>
 </div>
 
 <script>
-  var params = new URLSearchParams(window.location.search);
-  var sel = {
-    biz: params.get('biz') || 'cafenea',
-    size: parseInt(params.get('size') || '1'),
-    billing: params.get('billing') || 'annual',
-    price: parseInt(params.get('price') || '71'),
-    total: parseInt(params.get('total') || '682')
+  var basePrice = 71;
+  var bizMultipliers = {
+    cafenea: 1.0, restaurant: 1.35, bar: 1.7, club: 2.85,
+    hotel: 2.0, salon: 0.5, retail: 0.5, birou: 0.85,
+    cabinet: 0.5, gym: 1.35
   };
-
+  var sizeMultipliers = [0.85, 1.0, 1.15, 1.35, 1.5];
   var bizLabels = {
     cafenea:'Cafenea', restaurant:'Restaurant', bar:'Bar', club:'Club',
     hotel:'Hotel', salon:'Salon', retail:'Retail', birou:'Birou',
@@ -179,47 +225,78 @@
   };
   var sizeLabels = ['1-100 m²','101-250 m²','251-500 m²','501-1000 m²','> 1000 m²'];
 
-  // Fill selected plan bar
-  document.getElementById('sel-biz').textContent = bizLabels[sel.biz] || sel.biz;
-  document.getElementById('sel-size').textContent = sizeLabels[sel.size] || '';
-  document.getElementById('sel-billing').textContent = sel.billing === 'annual' ? '{{ t.billing_annual }}' : '{{ t.billing_monthly }}';
-  document.getElementById('sel-price').textContent = sel.total + ' lei' + (sel.billing === 'annual' ? '/{{ t.purchase_yr }}' : '/{{ t.purchase_mo }}');
+  var sel = { biz: 'cafenea', size: 0, billing: 'annual' };
+
+  function calcPrice() {
+    return Math.round(basePrice * bizMultipliers[sel.biz] * sizeMultipliers[sel.size]);
+  }
+  function getTotal() {
+    var m = calcPrice();
+    return sel.billing === 'annual' ? Math.round(m * 12 * 0.8) : m;
+  }
+  function updateSummary() {
+    var m = calcPrice();
+    var mo = '{{ t.purchase_mo }}';
+    var yr = '{{ t.purchase_yr }}';
+    document.getElementById('sum-label').textContent = bizLabels[sel.biz];
+    document.getElementById('sum-monthly').textContent = m + ' lei/' + mo;
+    document.getElementById('sum-total').textContent = getTotal() + ' lei/' + (sel.billing === 'annual' ? yr : mo);
+  }
 
   function goStep(n) {
     document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('active'); });
     document.getElementById('panel-' + n).classList.add('active');
-    var steps = [1, 2];
-    steps.forEach(function(s) {
+    for (var s = 1; s <= 3; s++) {
       var ind = document.getElementById('step-ind-' + s);
       ind.classList.remove('active', 'done');
       if (s < n) ind.classList.add('done');
       if (s === n) ind.classList.add('active');
-    });
-    var line = document.getElementById('line-1');
-    if (line) line.classList.toggle('done', n > 1);
-    window.scrollTo({top: 0, behavior: 'smooth'});
+    }
+    document.getElementById('line-1').classList.toggle('done', n > 1);
+    document.getElementById('line-2').classList.toggle('done', n > 2);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  // Go to confirm
-  document.getElementById('btn-to-confirm').addEventListener('click', function() {
+  // Step 1 pill handlers
+  document.querySelectorAll('#p-biz-pills .config-pill').forEach(function(p) {
+    p.addEventListener('click', function() {
+      document.querySelector('#p-biz-pills .active').classList.remove('active');
+      p.classList.add('active'); sel.biz = p.dataset.biz; updateSummary();
+    });
+  });
+  document.querySelectorAll('#p-size-pills .config-pill').forEach(function(p) {
+    p.addEventListener('click', function() {
+      document.querySelector('#p-size-pills .active').classList.remove('active');
+      p.classList.add('active'); sel.size = parseInt(p.dataset.size); updateSummary();
+    });
+  });
+  document.querySelectorAll('.billing-opt').forEach(function(p) {
+    p.addEventListener('click', function() {
+      document.querySelector('.billing-opt.active').classList.remove('active');
+      p.classList.add('active'); sel.billing = p.dataset.billing; updateSummary();
+    });
+  });
+
+  // Navigation
+  document.getElementById('btn-to-step2').addEventListener('click', function() { goStep(2); });
+  document.getElementById('btn-back-1').addEventListener('click', function() { goStep(1); });
+  document.getElementById('btn-to-step3').addEventListener('click', function() {
     var fields = ['f-company', 'f-cui', 'f-address', 'f-venue-address', 'f-email', 'f-phone'];
     for (var i = 0; i < fields.length; i++) {
       var el = document.getElementById(fields[i]);
       if (!el.value.trim()) { el.focus(); return; }
     }
-    document.getElementById('conf-biz').textContent = bizLabels[sel.biz] || sel.biz;
-    document.getElementById('conf-size').textContent = sizeLabels[sel.size] || '';
+    document.getElementById('conf-biz').textContent = bizLabels[sel.biz];
+    document.getElementById('conf-size').textContent = sizeLabels[sel.size];
     document.getElementById('conf-billing').textContent = sel.billing === 'annual' ? '{{ t.billing_annual }}' : '{{ t.billing_monthly }}';
     document.getElementById('conf-company').textContent = document.getElementById('f-company').value;
     document.getElementById('conf-brand').textContent = document.getElementById('f-brand').value || '-';
     document.getElementById('conf-venue').textContent = document.getElementById('f-venue-address').value;
     document.getElementById('conf-cui').textContent = document.getElementById('f-cui').value;
-    document.getElementById('conf-total').textContent = sel.total + ' lei';
-    goStep(2);
+    document.getElementById('conf-total').textContent = getTotal() + ' lei';
+    goStep(3);
   });
-
-  // Back to form
-  document.getElementById('btn-back-form').addEventListener('click', function() { goStep(1); });
+  document.getElementById('btn-back-2').addEventListener('click', function() { goStep(2); });
 
   // Submit
   document.getElementById('btn-submit').addEventListener('click', function() {
@@ -228,10 +305,10 @@
     btn.textContent = '...';
     fetch('{% url "music:purchase_submit" %}', {
       method: 'POST',
-      headers: {'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}'},
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
       body: JSON.stringify({
         plan: 'standard', billing: sel.billing, business_type: sel.biz,
-        business_size: sel.size, price_monthly: sel.price, price_total: sel.total,
+        business_size: sel.size, price_monthly: calcPrice(), price_total: getTotal(),
         company_name: document.getElementById('f-company').value,
         brand_name: document.getElementById('f-brand').value,
         company_cui: document.getElementById('f-cui').value,
@@ -242,15 +319,12 @@
         company_reg: document.getElementById('f-reg').value
       })
     }).then(function(r) { return r.json(); }).then(function(data) {
-      if (data.ok) {
-        window.location.href = data.redirect;
-      } else {
-        alert(data.error || 'Error');
-        btn.disabled = false;
-        btn.textContent = '{{ t.purchase_submit }}';
-      }
+      if (data.ok) { window.location.href = data.redirect; }
+      else { alert(data.error || 'Error'); btn.disabled = false; btn.textContent = '{{ t.purchase_submit }}'; }
     });
   });
+
+  updateSummary();
 </script>
 
 {% endblock %}
