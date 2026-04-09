@@ -200,53 +200,48 @@ def lookup_cui(request):
         import requests as req
         from datetime import date
         cui_clean = cui.replace('RO', '').replace('ro', '').strip()
-
-        # Use ANAF API v8
         payload = [{'cui': int(cui_clean), 'data': date.today().strftime('%Y-%m-%d')}]
-        resp = req.post(
-            'https://webservicesp.anaf.ro/AsynchWebApi/api/v8/ws/tva',
-            json=payload,
-            timeout=15
-        )
 
-        # If v8 fails, try v5
-        if resp.status_code != 200 or not resp.text.strip().startswith('{'):
-            resp = req.post(
-                'https://webservicesp.anaf.ro/PlatitorTvaRest/api/v5/ws/tva',
-                json=payload,
-                timeout=15
-            )
+        # Try ANAF API endpoints
+        urls = [
+            'https://webservicesp.anaf.ro/api/PlatitorTvaRest/v9/tva',
+            'https://webservicesp.anaf.ro/PlatitorTvaRest/api/v8/ws/tva',
+        ]
+        data = None
+        for url in urls:
+            try:
+                resp = req.post(url, json=payload, timeout=15)
+                if resp.status_code == 200 and resp.text.strip().startswith(('{', '[')):
+                    data = resp.json()
+                    break
+            except Exception:
+                continue
 
-        # If still fails, try demoanaf.ro
-        if resp.status_code != 200 or not resp.text.strip().startswith('{'):
-            resp = req.get(f'https://demoanaf.ro/api/company/{cui_clean}', timeout=10)
-            if resp.status_code == 200:
-                data = resp.json()
-                return JsonResponse({
-                    'ok': True,
-                    'denumire': data.get('name', '') or data.get('denumire', ''),
-                    'adresa': data.get('address', '') or data.get('adresa', ''),
-                    'nrRegCom': data.get('registration_number', ''),
-                    'cui': str(cui_clean),
-                })
+        if not data:
+            return JsonResponse({'ok': False, 'error': 'ANAF API indisponibil'})
 
-        data = resp.json()
         found = data.get('found', [])
         if found:
             f = found[0]
-            dg = f.get('date_generale', {})
-            denumire = dg.get('denumire', '') or f.get('denumire', '')
-            adresa = dg.get('adresa', '') or f.get('adresa', '')
-            return JsonResponse({
-                'ok': True,
-                'denumire': denumire,
-                'adresa': adresa,
-                'nrRegCom': dg.get('nrRegCom', '') or f.get('nrRegCom', ''),
-                'cui': str(dg.get('cui', cui_clean)),
-            })
+            # v8/v9 uses date_generale nested object
+            dg = f.get('date_generale', f)
+            denumire = dg.get('denumire', '')
+            adresa = dg.get('adresa', '')
+            if not denumire:
+                denumire = f.get('denumire', '')
+            if not adresa:
+                adresa = f.get('adresa', '')
+            if denumire:
+                return JsonResponse({
+                    'ok': True,
+                    'denumire': denumire,
+                    'adresa': adresa,
+                    'nrRegCom': dg.get('nrRegCom', '') or f.get('nrRegCom', ''),
+                    'cui': str(cui_clean),
+                })
         return JsonResponse({'ok': False, 'error': 'CUI negăsit'})
     except Exception as e:
-        return JsonResponse({'ok': False, 'error': f'Eroare căutare: {str(e)}'})
+        return JsonResponse({'ok': False, 'error': f'Eroare: {str(e)}'})
 
 
 def purchase(request):
