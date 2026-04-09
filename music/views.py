@@ -232,7 +232,7 @@ def purchase_submit(request):
     try:
         send_mail(
             subject=f'[SoundFree] Comandă nouă: {order.reference}',
-            message=f'Comandă nouă #{order.reference}\n\nFirmă: {order.company_name}\nCUI: {order.company_cui}\nPlan: {order.plan}\nPreț: {order.price_total} lei\nEmail: {order.company_email}\nTelefon: {order.company_phone}',
+            message=f'Comandă nouă #{order.reference}\n\nFirmă: {order.company_name}\nBrand: {order.brand_name}\nCUI: {order.company_cui}\nAdresa firmă: {order.company_address}\nAdresa locație: {order.venue_address}\nTip afacere: {order.business_type}\nSuprafață: {order.business_size}\nFacturare: {order.get_billing_display()}\nPreț: {order.price_total} lei\nEmail: {order.company_email}\nTelefon: {order.company_phone}',
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=['office@soundfree.ro'],
             fail_silently=True,
