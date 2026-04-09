@@ -12,6 +12,30 @@ from reportlab.pdfbase.ttfonts import TTFont
 from django.conf import settings
 
 
+# Register DejaVu font for Romanian diacritics support
+try:
+    import reportlab
+    font_dir = os.path.join(os.path.dirname(reportlab.__file__), 'fonts')
+    dejavu_path = os.path.join(font_dir, 'DejaVuSans.ttf')
+    dejavu_bold_path = os.path.join(font_dir, 'DejaVuSans-Bold.ttf')
+    if not os.path.exists(dejavu_path):
+        # Try system paths
+        for p in ['/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
+                   'C:/Windows/Fonts/arial.ttf']:
+            if os.path.exists(p):
+                dejavu_path = p
+                dejavu_bold_path = p.replace('Sans.ttf', 'Sans-Bold.ttf').replace('arial.ttf', 'arialbd.ttf')
+                break
+    if os.path.exists(dejavu_path):
+        pdfmetrics.registerFont(TTFont('DejaVu', dejavu_path))
+    if os.path.exists(dejavu_bold_path):
+        pdfmetrics.registerFont(TTFont('DejaVu-Bold', dejavu_bold_path))
+    FONT = 'DejaVu'
+    FONT_BOLD = 'DejaVu-Bold'
+except Exception:
+    FONT = 'Helvetica'
+    FONT_BOLD = 'Helvetica-Bold'
+
 GREEN = HexColor('#1db954')
 DARK = HexColor('#121212')
 DARK2 = HexColor('#1a1a1a')
@@ -97,10 +121,10 @@ def generate_license_pdf(order, profile):
     # Title
     y = height - margin - 55 * mm
     c.setFillColor(GREEN)
-    c.setFont('Helvetica-Bold', 22)
+    c.setFont(FONT_BOLD, 22)
     c.drawCentredString(width / 2, y, 'LICENȚĂ MUZICALĂ')
     y -= 8 * mm
-    c.setFont('Helvetica', 11)
+    c.setFont(FONT, 11)
     c.setFillColor(LIGHT)
     c.drawCentredString(width / 2, y, 'Certificat de licențiere pentru difuzare muzică în spații comerciale')
 
@@ -115,16 +139,16 @@ def generate_license_pdf(order, profile):
     qr_x = width - margin - qr_size - 15 * mm
     qr_y = y - qr_size + 5 * mm
     c.drawImage(qr_img, qr_x, qr_y, width=qr_size, height=qr_size)
-    c.setFont('Helvetica', 6)
+    c.setFont(FONT, 6)
     c.setFillColor(GRAY)
     c.drawCentredString(qr_x + qr_size / 2, qr_y - 4 * mm, 'Scanează pentru verificare')
 
     # License number (left side)
-    c.setFont('Helvetica', 9)
+    c.setFont(FONT, 9)
     c.setFillColor(GRAY)
     left_x = margin + 20 * mm
     c.drawString(left_x, y, 'Nr. Licență:')
-    c.setFont('Helvetica-Bold', 14)
+    c.setFont(FONT_BOLD, 14)
     c.setFillColor(WHITE)
     c.drawString(left_x, y - 7 * mm, order.reference)
 
@@ -154,14 +178,14 @@ def generate_license_pdf(order, profile):
         if not label and not value:
             y -= 4 * mm
             continue
-        c.setFont('Helvetica', 9)
+        c.setFont(FONT, 9)
         c.setFillColor(label_color)
         c.drawString(info_x, y, label)
-        c.setFont('Helvetica-Bold', 10)
+        c.setFont(FONT_BOLD, 10)
         c.setFillColor(value_color)
         # Handle long values
         if len(str(value)) > 50:
-            c.setFont('Helvetica-Bold', 8)
+            c.setFont(FONT_BOLD, 8)
         c.drawString(info_x + 55 * mm, y, str(value))
         y -= 7 * mm
 
@@ -172,7 +196,7 @@ def generate_license_pdf(order, profile):
 
     # Validity period
     y -= 12 * mm
-    c.setFont('Helvetica', 9)
+    c.setFont(FONT, 9)
     c.setFillColor(label_color)
     c.drawString(info_x, y, 'Este autorizat să difuzeze muzică din')
     y -= 6 * mm
@@ -187,13 +211,13 @@ def generate_license_pdf(order, profile):
     period_h = 12 * mm
     period_x = (width - period_w) / 2
     draw_rounded_rect(c, period_x, y - 2 * mm, period_w, period_h, 3, fill_color=HexColor('#0d3320'), stroke_color=GREEN)
-    c.setFont('Helvetica-Bold', 13)
+    c.setFont(FONT_BOLD, 13)
     c.setFillColor(GREEN)
     c.drawCentredString(width / 2, y + 1 * mm, f'{start_str}     până la     {end_str}')
 
     # Legal text
     y -= 22 * mm
-    c.setFont('Helvetica', 6.5)
+    c.setFont(FONT, 6.5)
     c.setFillColor(GRAY)
     legal_lines = [
         'Prezenta licență muzicală este acordată în mod exclusiv de către SoundFree S.R.L., titular unic al drepturilor de autor și conexe, prin care se autorizează',
@@ -207,17 +231,17 @@ def generate_license_pdf(order, profile):
 
     # Emitent section
     y -= 10 * mm
-    c.setFont('Helvetica', 10)
+    c.setFont(FONT, 10)
     c.setFillColor(LIGHT)
     c.drawCentredString(width / 2, y, 'Emitentul')
 
     y -= 8 * mm
-    c.setFont('Helvetica-Bold', 12)
+    c.setFont(FONT_BOLD, 12)
     c.setFillColor(GREEN)
     c.drawCentredString(width / 2, y, 'SOUNDFREE S.R.L.')
 
     y -= 6 * mm
-    c.setFont('Helvetica', 8)
+    c.setFont(FONT, 8)
     c.setFillColor(GRAY)
     c.drawCentredString(width / 2, y, 'CUI: 54416770 | J2026022358004')
 
@@ -225,7 +249,7 @@ def generate_license_pdf(order, profile):
     c.drawCentredString(width / 2, y, 'Iași, România | www.soundfree.ro')
 
     # Footer with SoundFree watermark pattern
-    c.setFont('Helvetica', 7)
+    c.setFont(FONT, 7)
     c.setFillColor(HexColor('#333333'))
     footer_y = margin + 8 * mm
     pattern = 'SoundFree   ·   SoundFree   ·   SoundFree   ·   SoundFree   ·   SoundFree   ·   SoundFree'
