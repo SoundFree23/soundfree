@@ -237,13 +237,9 @@
     if (sfTotal) sfTotal.textContent = (calcPrice() * 12) + ' lei';
   }
 
-  function addTap(el, fn) {
-    el.addEventListener('click', function(e) { e.stopPropagation(); fn(); });
-  }
-
   const toggle = document.getElementById('billing-toggle');
   if (toggle) {
-    addTap(toggle, function() {
+    toggle.addEventListener('click', function() {
       isAnnual = !isAnnual;
       toggle.classList.toggle('on', isAnnual);
       updatePrices();
@@ -251,7 +247,7 @@
   }
 
   document.querySelectorAll('#biz-pills .config-pill').forEach(function(pill) {
-    addTap(pill, function() {
+    pill.addEventListener('click', function() {
       document.querySelector('#biz-pills .config-pill.active')?.classList.remove('active');
       pill.classList.add('active');
       currentBiz = pill.dataset.biz;
@@ -260,7 +256,7 @@
   });
 
   document.querySelectorAll('#size-pills .config-pill').forEach(function(pill) {
-    addTap(pill, function() {
+    pill.addEventListener('click', function() {
       document.querySelector('#size-pills .config-pill.active')?.classList.remove('active');
       pill.classList.add('active');
       currentSize = parseInt(pill.dataset.size);
@@ -269,7 +265,7 @@
   });
 
   document.querySelectorAll('.faq-q').forEach(function(q) {
-    addTap(q, function() {
+    q.addEventListener('click', function() {
       q.classList.toggle('open');
       q.nextElementSibling.classList.toggle('open');
     });

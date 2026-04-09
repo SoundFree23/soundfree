@@ -303,24 +303,20 @@
   }
 
   // Pill handlers
-  function addTap(el, fn) {
-    el.addEventListener('click', function(e) { e.stopPropagation(); fn(); });
-  }
-
   document.querySelectorAll('#p-biz-pills .config-pill').forEach(function(p) {
-    addTap(p, function() {
+    p.addEventListener('click', function() {
       document.querySelector('#p-biz-pills .active')?.classList.remove('active');
       p.classList.add('active'); sel.biz = p.dataset.biz; updateSummary();
     });
   });
   document.querySelectorAll('#p-size-pills .config-pill').forEach(function(p) {
-    addTap(p, function() {
+    p.addEventListener('click', function() {
       document.querySelector('#p-size-pills .active')?.classList.remove('active');
       p.classList.add('active'); sel.size = parseInt(p.dataset.size); updateSummary();
     });
   });
   document.querySelectorAll('.billing-opt').forEach(function(p) {
-    addTap(p, function() {
+    p.addEventListener('click', function() {
       document.querySelector('.billing-opt.active')?.classList.remove('active');
       p.classList.add('active'); sel.billing = p.dataset.billing; updateSummary();
     });

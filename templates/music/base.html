@@ -1065,7 +1065,7 @@ document.addEventListener('click', (e) => {
       href.startsWith('http') || href.startsWith('//') ||
       link.hasAttribute('download') || link.getAttribute('target') === '_blank' ||
       link.hasAttribute('data-no-spa')) return;
-  if (href.includes('/lang/') || href.includes('/login') || href.includes('/logout')) return;
+  if (href.includes('/lang/') || href.includes('/login') || href.includes('/logout') || href.includes('/purchase') || href.includes('/pricing')) return;
   // Block favorites/library/playlist for non-authenticated users
   if (!isAuthenticated && (href.includes('/favorites') || href.includes('/library') || href.includes('/playlist/'))) {
     e.preventDefault();
