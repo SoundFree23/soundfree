@@ -159,6 +159,7 @@ class Order(models.Model):
         ('cancelled', 'Anulată'),
     ]
     PLAN_CHOICES = [
+        ('standard', 'Standard'),
         ('starter', 'Starter'),
         ('business', 'Business'),
         ('enterprise', 'Enterprise'),
@@ -182,6 +183,7 @@ class Order(models.Model):
     brand_name = models.CharField(max_length=200, blank=True, verbose_name="Nume brand / locație")
     company_cui = models.CharField(max_length=20, verbose_name="CUI")
     company_address = models.TextField(verbose_name="Adresa firmei")
+    venue_address = models.TextField(blank=True, verbose_name="Adresa locației")
     company_email = models.EmailField(verbose_name="Email firmă")
     company_phone = models.CharField(max_length=30, verbose_name="Telefon firmă")
     company_reg = models.CharField(max_length=30, blank=True, verbose_name="Nr. Reg. Comerț")

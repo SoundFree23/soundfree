@@ -222,6 +222,7 @@ def purchase_submit(request):
         brand_name=data.get('brand_name', ''),
         company_cui=data.get('company_cui', ''),
         company_address=data.get('company_address', ''),
+        venue_address=data.get('venue_address', ''),
         company_email=data.get('company_email', ''),
         company_phone=data.get('company_phone', ''),
         company_reg=data.get('company_reg', ''),

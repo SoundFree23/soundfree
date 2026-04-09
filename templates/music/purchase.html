@@ -125,14 +125,6 @@
       </div>
     </div>
     <div class="form-group">
-      <div class="form-label">{{ t.purchase_plan }}</div>
-      <div class="config-pills" id="p-plan-pills">
-        <div class="config-pill" data-plan="starter">🏪 Starter — 1 {{ t.purchase_location }}</div>
-        <div class="config-pill active" data-plan="business">🏢 Business — {{ t.purchase_up_to }} 5 {{ t.purchase_locations }}</div>
-        <div class="config-pill" data-plan="enterprise">🏨 Enterprise — {{ t.purchase_unlimited }}</div>
-      </div>
-    </div>
-    <div class="form-group">
       <div class="form-label">{{ t.purchase_billing }}</div>
       <div class="billing-toggle">
         <div class="billing-opt" data-billing="monthly">{{ t.billing_monthly }}</div>
@@ -178,6 +170,10 @@
         <div class="form-label">{{ t.purchase_address }} *</div>
         <input class="form-input" type="text" id="f-address" required placeholder="Str. Exemplu nr. 1, Oraș, Județ">
       </div>
+      <div class="form-group">
+        <div class="form-label">{{ t.purchase_venue_address }} *</div>
+        <input class="form-input" type="text" id="f-venue-address" required placeholder="{{ t.purchase_venue_address_ph }}">
+      </div>
       <div class="form-row">
         <div class="form-group">
           <div class="form-label">{{ t.purchase_email }} *</div>
@@ -200,12 +196,12 @@
   <div class="panel" id="panel-3">
     <div class="price-card">
       <h3>{{ t.purchase_order_summary }}</h3>
-      <div class="price-row"><span>{{ t.purchase_plan }}</span><span id="conf-plan">Business</span></div>
       <div class="price-row"><span>{{ t.config_business }}</span><span id="conf-biz">Cafenea</span></div>
       <div class="price-row"><span>{{ t.config_size }}</span><span id="conf-size">101-250 mp</span></div>
       <div class="price-row"><span>{{ t.purchase_billing }}</span><span id="conf-billing">Anual</span></div>
       <div class="price-row"><span>{{ t.purchase_company_name }}</span><span id="conf-company">-</span></div>
       <div class="price-row"><span>{{ t.purchase_brand_name }}</span><span id="conf-brand">-</span></div>
+      <div class="price-row"><span>{{ t.purchase_venue_address }}</span><span id="conf-venue">-</span></div>
       <div class="price-row"><span>{{ t.purchase_cui }}</span><span id="conf-cui">-</span></div>
       <div class="price-row total"><span>{{ t.purchase_total }}</span><span id="conf-total">948 lei</span></div>
     </div>
@@ -228,7 +224,7 @@
 </div>
 
 <script>
-  const basePrices = { starter: 59, business: 99, enterprise: 169 };
+  const basePrice = 59;
   const bizMultipliers = {
     cafenea: 1.0, restaurant: 1.35, bar: 1.7, club: 2.85,
     hotel: 2.0, salon: 0.5, retail: 0.5, birou: 0.85,
@@ -242,16 +238,10 @@
   };
   const sizeLabels = ['< 100 mp','101-250 mp','251-500 mp','501-1000 mp','> 1000 mp'];
 
-  let sel = { biz:'cafenea', size:1, plan:'business', billing:'annual' };
-
-  // Read plan from URL
-  const params = new URLSearchParams(window.location.search);
-  if (params.get('plan') && basePrices[params.get('plan')]) {
-    sel.plan = params.get('plan');
-  }
+  let sel = { biz:'cafenea', size:1, billing:'annual' };
 
   function calcPrice() {
-    let p = basePrices[sel.plan] * bizMultipliers[sel.biz] * sizeMultipliers[sel.size];
+    let p = basePrice * bizMultipliers[sel.biz] * sizeMultipliers[sel.size];
     return Math.round(p);
   }
 
@@ -262,7 +252,7 @@
     const mo = '{{ t.purchase_mo }}';
     const yr = '{{ t.purchase_yr }}';
 
-    document.getElementById('sum-plan-label').textContent = sel.plan.charAt(0).toUpperCase() + sel.plan.slice(1);
+    document.getElementById('sum-plan-label').textContent = bizLabels[sel.biz];
     document.getElementById('sum-price-monthly').textContent = monthly + ' lei/' + mo;
 
     if (isAnnual) {
@@ -281,18 +271,18 @@
   function goStep(n) {
     if (n === 3) {
       // Validate step 2
-      var fields = ['f-company','f-cui','f-address','f-email','f-phone'];
+      var fields = ['f-company','f-cui','f-address','f-venue-address','f-email','f-phone'];
       for (var i=0; i<fields.length; i++) {
         var el = document.getElementById(fields[i]);
         if (!el.value.trim()) { el.focus(); return; }
       }
       // Fill confirmation
-      document.getElementById('conf-plan').textContent = sel.plan.charAt(0).toUpperCase() + sel.plan.slice(1);
       document.getElementById('conf-biz').textContent = bizLabels[sel.biz];
       document.getElementById('conf-size').textContent = sizeLabels[sel.size];
       document.getElementById('conf-billing').textContent = sel.billing === 'annual' ? '{{ t.billing_annual }}' : '{{ t.billing_monthly }}';
       document.getElementById('conf-company').textContent = document.getElementById('f-company').value;
       document.getElementById('conf-brand').textContent = document.getElementById('f-brand').value || '-';
+      document.getElementById('conf-venue').textContent = document.getElementById('f-venue-address').value;
       document.getElementById('conf-cui').textContent = document.getElementById('f-cui').value;
       document.getElementById('conf-total').textContent = getTotal() + ' lei';
     }
@@ -326,24 +316,12 @@
       p.classList.add('active'); sel.size = parseInt(p.dataset.size); updateSummary();
     });
   });
-  document.querySelectorAll('#p-plan-pills .config-pill').forEach(p => {
-    p.addEventListener('click', () => {
-      document.querySelector('#p-plan-pills .active')?.classList.remove('active');
-      p.classList.add('active'); sel.plan = p.dataset.plan; updateSummary();
-    });
-  });
   document.querySelectorAll('.billing-opt').forEach(p => {
     p.addEventListener('click', () => {
       document.querySelector('.billing-opt.active')?.classList.remove('active');
       p.classList.add('active'); sel.billing = p.dataset.billing; updateSummary();
     });
   });
-
-  // Set active plan pill from URL
-  if (sel.plan !== 'business') {
-    document.querySelector('#p-plan-pills .active')?.classList.remove('active');
-    document.querySelector('#p-plan-pills [data-plan="'+sel.plan+'"]')?.classList.add('active');
-  }
 
   // Submit
   document.getElementById('btn-submit').addEventListener('click', function() {
@@ -353,12 +331,13 @@
       method: 'POST',
       headers: {'Content-Type':'application/json', 'X-CSRFToken':'{{ csrf_token }}'},
       body: JSON.stringify({
-        plan: sel.plan, billing: sel.billing, business_type: sel.biz,
+        plan: 'standard', billing: sel.billing, business_type: sel.biz,
         business_size: sel.size, price_monthly: calcPrice(), price_total: getTotal(),
         company_name: document.getElementById('f-company').value,
         brand_name: document.getElementById('f-brand').value,
         company_cui: document.getElementById('f-cui').value,
         company_address: document.getElementById('f-address').value,
+        venue_address: document.getElementById('f-venue-address').value,
         company_email: document.getElementById('f-email').value,
         company_phone: document.getElementById('f-phone').value,
         company_reg: document.getElementById('f-reg').value

@@ -29,12 +29,12 @@
   <div class="confirm-card">
     <h3>{{ t.purchase_order_summary }}</h3>
     <div class="confirm-row"><span>{{ t.confirm_ref }}</span><span class="val">{{ order.reference }}</span></div>
-    <div class="confirm-row"><span>{{ t.purchase_plan }}</span><span class="val">{{ order.get_plan_display }}</span></div>
     <div class="confirm-row"><span>{{ t.config_business }}</span><span class="val">{{ order.business_type }}</span></div>
     <div class="confirm-row"><span>{{ t.config_size }}</span><span class="val">{{ order.business_size }}</span></div>
     <div class="confirm-row"><span>{{ t.purchase_billing }}</span><span class="val">{{ order.get_billing_display }}</span></div>
     <div class="confirm-row"><span>{{ t.purchase_company_name }}</span><span class="val">{{ order.company_name }}</span></div>
     {% if order.brand_name %}<div class="confirm-row"><span>{{ t.purchase_brand_name }}</span><span class="val">{{ order.brand_name }}</span></div>{% endif %}
+    {% if order.venue_address %}<div class="confirm-row"><span>{{ t.purchase_venue_address }}</span><span class="val">{{ order.venue_address }}</span></div>{% endif %}
     <div class="confirm-row"><span>{{ t.purchase_cui }}</span><span class="val">{{ order.company_cui }}</span></div>
     <div class="confirm-row total"><span>{{ t.purchase_total }}</span><span>{{ order.price_total }} lei</span></div>
   </div>

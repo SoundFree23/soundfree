@@ -117,39 +117,19 @@
 </div>
 
 <div class="container">
-  <div class="plans-grid">
+  <div class="plans-grid" style="max-width:500px;margin:0 auto;">
 
-    <div class="plan-card">
-      <div class="plan-name">{{ t.plan_starter_name }}</div>
+    <div class="plan-card popular">
+      <div class="popular-badge">{{ t.single_plan_badge }}</div>
+      <div class="plan-name">{{ t.single_plan_name }}</div>
       <div class="plan-price">
-        <div class="price-amount" id="price-starter">47</div>
+        <div class="price-amount" id="price-single">59</div>
         <div class="price-period">&nbsp;{{ t.per_month }}</div>
       </div>
       <div class="price-annual" id="annual-note-1"></div>
-      <div class="plan-desc">{{ t.plan_starter_desc }}</div>
+      <div class="plan-desc">{{ t.single_plan_desc }}</div>
       <ul class="plan-features">
         <li><span class="check">✓</span> {{ t.feature_1loc }}</li>
-        <li><span class="check">✓</span> {{ t.feature_library }}</li>
-        <li><span class="check">✓</span> {{ t.feature_player }}</li>
-        <li><span class="check">✓</span> {{ t.feature_cert }}</li>
-        <li><span class="check">✓</span> {{ t.feature_update_m }}</li>
-        <li><span class="x">✗</span> <span style="color:var(--text3)">{{ t.feature_no_dl }}</span></li>
-        <li><span class="x">✗</span> <span style="color:var(--text3)">{{ t.feature_no_support }}</span></li>
-      </ul>
-      <a href="{% url 'music:purchase' %}?plan=starter" class="plan-btn plan-btn-outline">{{ t.choose_plan }}</a>
-    </div>
-
-    <div class="plan-card popular">
-      <div class="popular-badge">{{ t.popular_badge }}</div>
-      <div class="plan-name">{{ t.plan_business_name }}</div>
-      <div class="plan-price">
-        <div class="price-amount" id="price-business">79</div>
-        <div class="price-period">&nbsp;{{ t.per_month }}</div>
-      </div>
-      <div class="price-annual" id="annual-note-2"></div>
-      <div class="plan-desc">{{ t.plan_business_desc }}</div>
-      <ul class="plan-features">
-        <li><span class="check">✓</span> {{ t.feature_5loc }}</li>
         <li><span class="check">✓</span> {{ t.feature_library }}</li>
         <li><span class="check">✓</span> {{ t.feature_player_dl }}</li>
         <li><span class="check">✓</span> {{ t.feature_cert }}</li>
@@ -157,27 +137,7 @@
         <li><span class="check">✓</span> {{ t.feature_playlist }}</li>
         <li><span class="check">✓</span> {{ t.feature_support_email }}</li>
       </ul>
-      <a href="{% url 'music:purchase' %}?plan=business" class="plan-btn plan-btn-primary">{{ t.choose_plan }}</a>
-    </div>
-
-    <div class="plan-card">
-      <div class="plan-name">{{ t.plan_enterprise_name }}</div>
-      <div class="plan-price">
-        <div class="price-amount" id="price-enterprise">135</div>
-        <div class="price-period">&nbsp;{{ t.per_month }}</div>
-      </div>
-      <div class="price-annual" id="annual-note-3"></div>
-      <div class="plan-desc">{{ t.plan_enterprise_desc }}</div>
-      <ul class="plan-features">
-        <li><span class="check">✓</span> {{ t.feature_unloc }}</li>
-        <li><span class="check">✓</span> {{ t.feature_exclusive }}</li>
-        <li><span class="check">✓</span> {{ t.feature_player_dl }}</li>
-        <li><span class="check">✓</span> {{ t.feature_cert_loc }}</li>
-        <li><span class="check">✓</span> {{ t.feature_brand }}</li>
-        <li><span class="check">✓</span> {{ t.feature_api }}</li>
-        <li><span class="check">✓</span> {{ t.feature_support_phone }}</li>
-      </ul>
-      <a href="{% url 'music:purchase' %}?plan=enterprise" class="plan-btn plan-btn-outline">{{ t.choose_plan }}</a>
+      <a href="{% url 'music:purchase' %}" class="plan-btn plan-btn-primary">{{ t.choose_plan }}</a>
     </div>
 
   </div>
@@ -233,7 +193,7 @@
 
 <script>
   // --- Pricing configuration ---
-  const basePrices = { starter: 59, business: 99, enterprise: 169 };
+  const basePrice = 59;
 
   const bizMultipliers = {
     cafenea: 1.0, restaurant: 1.35, bar: 1.7, club: 2.85,
@@ -247,47 +207,34 @@
   let currentSize = 1;
   let isAnnual = true;
 
-  const priceEls = {
-    starter: document.getElementById('price-starter'),
-    business: document.getElementById('price-business'),
-    enterprise: document.getElementById('price-enterprise')
-  };
+  const priceEl = document.getElementById('price-single');
 
-  function calcPrice(base) {
-    let price = base * bizMultipliers[currentBiz] * sizeMultipliers[currentSize];
+  function calcPrice() {
+    let price = basePrice * bizMultipliers[currentBiz] * sizeMultipliers[currentSize];
     if (isAnnual) price = Math.round(price * 0.8);
     else price = Math.round(price);
     return price;
   }
 
   function updatePrices() {
-    const prices = {
-      starter: calcPrice(basePrices.starter),
-      business: calcPrice(basePrices.business),
-      enterprise: calcPrice(basePrices.enterprise)
-    };
+    const price = calcPrice();
+    if (priceEl) priceEl.textContent = price;
 
-    Object.keys(prices).forEach(plan => {
-      if (priceEls[plan]) priceEls[plan].textContent = prices[plan];
-    });
-
-    ['starter', 'business', 'enterprise'].forEach((plan, i) => {
-      const note = document.getElementById('annual-note-' + (i + 1));
-      if (note) {
-        if (isAnnual) {
-          note.textContent = (prices[plan] * 12) + ' lei/an';
-          note.style.color = '#22c55e';
-        } else {
-          note.textContent = '';
-        }
+    const note = document.getElementById('annual-note-1');
+    if (note) {
+      if (isAnnual) {
+        note.textContent = (price * 12) + ' lei/an';
+        note.style.color = '#22c55e';
+      } else {
+        note.textContent = '';
       }
-    });
+    }
 
-    const annualStarter = prices.starter * 12;
+    const annualCost = isAnnual ? price * 12 : price * 12;
     const sfCost = document.getElementById('compare-sf-cost');
     const sfTotal = document.getElementById('compare-sf-total');
-    if (sfCost) sfCost.textContent = annualStarter + ' lei/an';
-    if (sfTotal) sfTotal.textContent = annualStarter + ' lei';
+    if (sfCost) sfCost.textContent = (calcPrice() * 12) + ' lei/an';
+    if (sfTotal) sfTotal.textContent = (calcPrice() * 12) + ' lei';
   }
 
   const toggle = document.getElementById('billing-toggle');
