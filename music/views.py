@@ -1,3 +1,4 @@
+import os
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -571,15 +572,34 @@ def backend_orders(request):
                     profile.subscription_end = end
                     profile.save(update_fields=['subscription_start', 'subscription_end'])
 
-                # Send activation email to client
+                # Generate license PDF and send activation email
                 try:
-                    send_mail(
+                    from .pdf_generator import generate_license_pdf
+                    from django.core.mail import EmailMessage
+                    profile = order.user.profile if order.user and hasattr(order.user, 'profile') else None
+
+                    # Generate PDF
+                    pdf_buf = None
+                    if profile:
+                        pdf_buf = generate_license_pdf(order, profile)
+                        # Save PDF to media
+                        pdf_dir = os.path.join(settings.MEDIA_ROOT, 'licenses')
+                        os.makedirs(pdf_dir, exist_ok=True)
+                        pdf_path = os.path.join(pdf_dir, f'{order.reference}.pdf')
+                        with open(pdf_path, 'wb') as f:
+                            f.write(pdf_buf.getvalue())
+                        pdf_buf.seek(0)
+
+                    # Send email with PDF attached
+                    email = EmailMessage(
                         subject='[SoundFree] Licența ta a fost activată!',
-                        message=f'Bună ziua,\n\nPlata pentru comanda {order.reference} a fost confirmată.\nLicența dumneavoastră muzicală SoundFree este acum activă.\n\nDetalii:\n- Firmă: {order.company_name}\n- Brand: {order.brand_name or "-"}\n- Adresa locație: {order.venue_address}\n- Valoare: {order.price_total} lei\n- Facturare: {order.get_billing_display()}\n\nPuteți accesa biblioteca muzicală pe www.soundfree.ro\n\nMulțumim!\nEchipa SoundFree',
+                        body=f'Bună ziua,\n\nPlata pentru comanda {order.reference} a fost confirmată.\nLicența dumneavoastră muzicală SoundFree este acum activă.\n\nDetalii:\n- Firmă: {order.company_name}\n- Brand: {order.brand_name or "-"}\n- Adresa locație: {order.venue_address}\n- Valoare: {order.price_total} lei\n- Facturare: {order.get_billing_display()}\n\nÎn atașament veți găsi Licența Muzicală SoundFree.\nPuteți accesa biblioteca muzicală pe www.soundfree.ro\n\nMulțumim!\nEchipa SoundFree',
                         from_email=settings.DEFAULT_FROM_EMAIL,
-                        recipient_list=[order.company_email],
-                        fail_silently=True,
+                        to=[order.company_email],
                     )
+                    if pdf_buf:
+                        email.attach(f'Licenta_SoundFree_{order.reference}.pdf', pdf_buf.getvalue(), 'application/pdf')
+                    email.send(fail_silently=True)
                 except Exception:
                     pass
 
@@ -594,6 +614,31 @@ def backend_orders(request):
         'orders': orders,
         'pending_count': pending_count,
     })
+
+
+@login_required(login_url='/backend/login/')
+@user_passes_test(is_staff, login_url='/backend/login/')
+def download_license(request, order_id):
+    from django.http import HttpResponse, Http404
+    order = get_object_or_404(Order, id=order_id, status='paid')
+
+    # Try saved file first
+    pdf_path = os.path.join(settings.MEDIA_ROOT, 'licenses', f'{order.reference}.pdf')
+    if os.path.exists(pdf_path):
+        with open(pdf_path, 'rb') as f:
+            response = HttpResponse(f.read(), content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="Licenta_SoundFree_{order.reference}.pdf"'
+            return response
+
+    # Generate on the fly if not saved
+    if order.user and hasattr(order.user, 'profile'):
+        from .pdf_generator import generate_license_pdf
+        pdf_buf = generate_license_pdf(order, order.user.profile)
+        response = HttpResponse(pdf_buf.getvalue(), content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="Licenta_SoundFree_{order.reference}.pdf"'
+        return response
+
+    raise Http404("Licenta nu poate fi generata")
 
 
 def api_user_playlists(request):
