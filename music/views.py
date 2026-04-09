@@ -575,6 +575,7 @@ def backend_orders(request):
         if action == 'confirm_payment' and order_id:
             from django.utils import timezone
             from datetime import timedelta
+            import string, random
             order = Order.objects.filter(id=order_id, status='pending').first()
             if order:
                 order.status = 'paid'
@@ -588,15 +589,46 @@ def backend_orders(request):
                 except Exception:
                     pass
 
-                # Activate subscription if user exists
-                if order.user and hasattr(order.user, 'profile'):
-                    profile = order.user.profile
+                # Auto-create user account if not exists
+                generated_password = None
+                user = order.user
+                if not user:
+                    # Check if user with this email already exists
+                    existing = User.objects.filter(email=order.company_email).first()
+                    if existing:
+                        user = existing
+                    else:
+                        # Generate username from email
+                        base_username = order.company_email.split('@')[0].replace('.', '_').replace('-', '_')[:20]
+                        username = base_username
+                        while User.objects.filter(username=username).exists():
+                            username = base_username + str(random.randint(10, 99))
+                        # Generate random password
+                        generated_password = ''.join(random.choices(string.ascii_letters + string.digits, k=8))
+                        user = User.objects.create_user(
+                            username=username,
+                            email=order.company_email,
+                            password=generated_password,
+                            first_name=order.company_name[:30],
+                        )
+                    order.user = user
+                    order.save(update_fields=['user'])
+
+                # Activate subscription
+                if hasattr(user, 'profile'):
+                    profile = user.profile
                     today = timezone.now().date()
                     if order.billing == 'annual':
                         end = today + timedelta(days=365)
                     else:
                         end = today + timedelta(days=30)
-                    profile.subscription_start = today
+                    # Extend if already active
+                    if profile.subscription_end and profile.subscription_end > today:
+                        if order.billing == 'annual':
+                            end = profile.subscription_end + timedelta(days=365)
+                        else:
+                            end = profile.subscription_end + timedelta(days=30)
+                    profile.subscription_start = profile.subscription_start or today
                     profile.subscription_end = end
                     profile.save(update_fields=['subscription_start', 'subscription_end'])
 
@@ -604,13 +636,12 @@ def backend_orders(request):
                 try:
                     from .pdf_generator import generate_license_pdf
                     from django.core.mail import EmailMessage
-                    profile = order.user.profile if order.user and hasattr(order.user, 'profile') else None
+                    profile = user.profile if hasattr(user, 'profile') else None
 
                     # Generate PDF
                     pdf_buf = None
                     if profile:
                         pdf_buf = generate_license_pdf(order, profile)
-                        # Save PDF to media
                         pdf_dir = os.path.join(settings.MEDIA_ROOT, 'licenses')
                         os.makedirs(pdf_dir, exist_ok=True)
                         pdf_path = os.path.join(pdf_dir, f'{order.reference}.pdf')
@@ -618,10 +649,18 @@ def backend_orders(request):
                             f.write(pdf_buf.getvalue())
                         pdf_buf.seek(0)
 
-                    # Send email with PDF attached
+                    # Build email body
+                    body = f'Bună ziua,\n\nPlata pentru comanda {order.reference} a fost confirmată.\nLicența dumneavoastră muzicală SoundFree este acum activă.\n\nDetalii licență:\n- Firmă: {order.company_name}\n- Brand: {order.brand_name or "-"}\n- Adresa locație: {order.venue_address}\n- Valoare: {order.price_total} lei\n- Facturare: {order.get_billing_display()}\n- Valabilitate: {profile.subscription_start.strftime("%d.%m.%Y") if profile and profile.subscription_start else "-"} — {profile.subscription_end.strftime("%d.%m.%Y") if profile and profile.subscription_end else "-"}\n'
+                    body += f'\n--- Datele contului dumneavoastră ---\nAccesați: www.soundfree.ro\nUtilizator: {user.username}\n'
+                    if generated_password:
+                        body += f'Parola: {generated_password}\n'
+                    else:
+                        body += f'Parola: (cea existentă, neschimbată)\n'
+                    body += f'\nÎn atașament veți găsi Licența Muzicală SoundFree.\n\n♫ SoundFree\nMuzică licențiată pentru afacerea ta\nwww.soundfree.ro | office@soundfree.ro | 0740 149 975'
+
                     email = EmailMessage(
                         subject='[SoundFree] Licența ta a fost activată!',
-                        body=f'Bună ziua,\n\nPlata pentru comanda {order.reference} a fost confirmată.\nLicența dumneavoastră muzicală SoundFree este acum activă.\n\nDetalii:\n- Firmă: {order.company_name}\n- Brand: {order.brand_name or "-"}\n- Adresa locație: {order.venue_address}\n- Valoare: {order.price_total} lei\n- Facturare: {order.get_billing_display()}\n\nÎn atașament veți găsi Licența Muzicală SoundFree.\nPuteți accesa biblioteca muzicală pe www.soundfree.ro\n\nMulțumim!\n\n♫ SoundFree\nMuzică licențiată pentru afacerea ta\nwww.soundfree.ro | office@soundfree.ro | 0740 149 975',
+                        body=body,
                         from_email=settings.DEFAULT_FROM_EMAIL,
                         to=[order.company_email],
                     )

@@ -66,6 +66,7 @@
             </form>
             {% elif order.status == 'paid' %}
               <a href="{% url 'music:download_license' order.id %}" class="btn btn-outline btn-sm" title="Descarca licenta" style="text-decoration:none;">📄 Licență</a>
+              {% if order.user %}<div style="font-size:0.7rem;color:var(--text3);margin-top:0.3rem;">👤 {{ order.user.username }}</div>{% endif %}
             {% else %}
               <span style="color:var(--text3);font-size:0.8rem;">Anulata</span>
             {% endif %}
