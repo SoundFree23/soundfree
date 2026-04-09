@@ -109,6 +109,7 @@
       {% csrf_token %}
       <input type="text" name="name" placeholder="{{ t.contact_name_ph }}" required>
       <input type="email" name="email" placeholder="{{ t.contact_email_ph }}" required>
+      <input type="tel" name="phone" placeholder="{{ t.contact_phone_ph }}">
       <input type="text" name="business" placeholder="{{ t.contact_business_ph }}">
       <textarea name="message" placeholder="{{ t.contact_message_ph }}" required></textarea>
       <button type="submit">{{ t.contact_send }}</button>

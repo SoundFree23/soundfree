@@ -164,12 +164,14 @@ from django.conf import settings
 def contact_submit(request):
     name = request.POST.get('name', '')
     email = request.POST.get('email', '')
+    phone = request.POST.get('phone', '')
     business = request.POST.get('business', '')
     message = request.POST.get('message', '')
     try:
         ContactMessage.objects.create(
             name=name,
             email=email,
+            phone=phone,
             business=business,
             message=message,
         )
@@ -178,7 +180,7 @@ def contact_submit(request):
     try:
         send_mail(
             subject=f'[SoundFree] Contact: {name}',
-            message=f'Nume: {name}\nEmail: {email}\nTip locatie: {business}\n\nMesaj:\n{message}',
+            message=f'Nume: {name}\nEmail: {email}\nTelefon: {phone}\nTip locatie: {business}\n\nMesaj:\n{message}',
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=['office@soundfree.ro'],
             fail_silently=True,

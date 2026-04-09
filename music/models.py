@@ -93,6 +93,7 @@ class Playlist(models.Model):
 class ContactMessage(models.Model):
     name = models.CharField(max_length=200, verbose_name="Nume")
     email = models.EmailField(verbose_name="Email")
+    phone = models.CharField(max_length=30, blank=True, verbose_name="Telefon")
     business = models.CharField(max_length=200, blank=True, verbose_name="Tip locație")
     message = models.TextField(verbose_name="Mesaj")
     is_read = models.BooleanField(default=False, verbose_name="Citit")
