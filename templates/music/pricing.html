@@ -20,7 +20,7 @@
   .config-label { font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text3); margin-bottom: 0.75rem; }
   .config-row { margin-bottom: 1.5rem; }
   .config-pills { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-  .config-pill { padding: 0.5rem 1rem; border-radius: 10px; border: 1px solid var(--border); background: var(--card); color: var(--text2); font-size: 0.85rem; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+  .config-pill { padding: 0.5rem 1rem; border-radius: 10px; border: 1px solid var(--border); background: var(--card); color: var(--text2); font-size: 0.85rem; cursor: pointer; transition: all 0.2s; white-space: nowrap; -webkit-tap-highlight-color: transparent; touch-action: manipulation; user-select: none; }
   .config-pill:hover { border-color: var(--accent); color: var(--text); }
   .config-pill.active { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; border-color: transparent; font-weight: 600; }
 
@@ -237,17 +237,23 @@
     if (sfTotal) sfTotal.textContent = (calcPrice() * 12) + ' lei';
   }
 
+  function addTap(el, fn) {
+    var touched = false;
+    el.addEventListener('touchend', function(e) { e.preventDefault(); touched = true; fn(); }, {passive: false});
+    el.addEventListener('click', function() { if (!touched) fn(); touched = false; });
+  }
+
   const toggle = document.getElementById('billing-toggle');
   if (toggle) {
-    toggle.addEventListener('click', () => {
+    addTap(toggle, function() {
       isAnnual = !isAnnual;
       toggle.classList.toggle('on', isAnnual);
       updatePrices();
     });
   }
 
-  document.querySelectorAll('#biz-pills .config-pill').forEach(pill => {
-    pill.addEventListener('click', () => {
+  document.querySelectorAll('#biz-pills .config-pill').forEach(function(pill) {
+    addTap(pill, function() {
       document.querySelector('#biz-pills .config-pill.active')?.classList.remove('active');
       pill.classList.add('active');
       currentBiz = pill.dataset.biz;
@@ -255,8 +261,8 @@
     });
   });
 
-  document.querySelectorAll('#size-pills .config-pill').forEach(pill => {
-    pill.addEventListener('click', () => {
+  document.querySelectorAll('#size-pills .config-pill').forEach(function(pill) {
+    addTap(pill, function() {
       document.querySelector('#size-pills .config-pill.active')?.classList.remove('active');
       pill.classList.add('active');
       currentSize = parseInt(pill.dataset.size);
@@ -264,8 +270,8 @@
     });
   });
 
-  document.querySelectorAll('.faq-q').forEach(q => {
-    q.addEventListener('click', () => {
+  document.querySelectorAll('.faq-q').forEach(function(q) {
+    addTap(q, function() {
       q.classList.toggle('open');
       q.nextElementSibling.classList.toggle('open');
     });
