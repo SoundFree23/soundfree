@@ -155,12 +155,18 @@
         </div>
       </div>
       <div class="form-group">
-        <div class="form-label">{{ t.purchase_address }} *</div>
-        <input class="form-input" type="text" id="f-address" required placeholder="Str. Exemplu nr. 1, Oraș, Județ">
+        <div class="form-label">{{ t.purchase_venue_street }} *</div>
+        <input class="form-input" type="text" id="f-venue-street" required placeholder="{{ t.purchase_venue_street_ph }}">
       </div>
-      <div class="form-group">
-        <div class="form-label">{{ t.purchase_venue_address }} *</div>
-        <input class="form-input" type="text" id="f-venue-address" required placeholder="{{ t.purchase_venue_address_ph }}">
+      <div class="form-row">
+        <div class="form-group">
+          <div class="form-label">{{ t.purchase_venue_city }} *</div>
+          <input class="form-input" type="text" id="f-venue-city" required placeholder="{{ t.purchase_venue_city_ph }}">
+        </div>
+        <div class="form-group">
+          <div class="form-label">{{ t.purchase_venue_county }} *</div>
+          <input class="form-input" type="text" id="f-venue-county" required placeholder="{{ t.purchase_venue_county_ph }}">
+        </div>
       </div>
       <div class="form-row">
         <div class="form-group">
@@ -282,7 +288,7 @@
   document.getElementById('btn-to-step2').addEventListener('click', function() { goStep(2); });
   document.getElementById('btn-back-1').addEventListener('click', function() { goStep(1); });
   document.getElementById('btn-to-step3').addEventListener('click', function() {
-    var fields = ['f-company', 'f-cui', 'f-address', 'f-venue-address', 'f-email', 'f-phone'];
+    var fields = ['f-company', 'f-cui', 'f-venue-street', 'f-venue-city', 'f-venue-county', 'f-email', 'f-phone'];
     for (var i = 0; i < fields.length; i++) {
       var el = document.getElementById(fields[i]);
       if (!el.value.trim()) { el.focus(); return; }
@@ -292,7 +298,8 @@
     document.getElementById('conf-billing').textContent = sel.billing === 'annual' ? '{{ t.billing_annual }}' : '{{ t.billing_monthly }}';
     document.getElementById('conf-company').textContent = document.getElementById('f-company').value;
     document.getElementById('conf-brand').textContent = document.getElementById('f-brand').value || '-';
-    document.getElementById('conf-venue').textContent = document.getElementById('f-venue-address').value;
+    var venueAddr = document.getElementById('f-venue-street').value + ', ' + document.getElementById('f-venue-city').value + ', ' + document.getElementById('f-venue-county').value;
+    document.getElementById('conf-venue').textContent = venueAddr;
     document.getElementById('conf-cui').textContent = document.getElementById('f-cui').value;
     document.getElementById('conf-total').textContent = getTotal() + ' lei';
     goStep(3);
@@ -313,8 +320,8 @@
         company_name: document.getElementById('f-company').value,
         brand_name: document.getElementById('f-brand').value,
         company_cui: document.getElementById('f-cui').value,
-        company_address: document.getElementById('f-address').value,
-        venue_address: document.getElementById('f-venue-address').value,
+        company_address: '',
+        venue_address: document.getElementById('f-venue-street').value + ', ' + document.getElementById('f-venue-city').value + ', ' + document.getElementById('f-venue-county').value,
         company_email: document.getElementById('f-email').value,
         company_phone: document.getElementById('f-phone').value,
         company_reg: document.getElementById('f-reg').value
