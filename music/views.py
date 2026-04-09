@@ -191,6 +191,34 @@ def contact_submit(request):
     return JsonResponse({'ok': True})
 
 
+def lookup_cui(request):
+    """Proxy to ANAF API to get company info by CUI."""
+    cui = request.GET.get('cui', '').strip()
+    if not cui:
+        return JsonResponse({'ok': False, 'error': 'CUI lipsă'})
+    try:
+        import requests as req
+        from datetime import date
+        resp = req.post('https://webservicesp.anaf.ro/PlatitorTvaRest/api/v8/ws/tva', json=[{
+            'cui': int(cui.replace('RO', '').replace('ro', '')),
+            'data': date.today().strftime('%Y-%m-%d'),
+        }], timeout=10)
+        data = resp.json()
+        found = data.get('found', [])
+        if found:
+            f = found[0]
+            return JsonResponse({
+                'ok': True,
+                'denumire': f.get('denumire', ''),
+                'adresa': f.get('adresa', ''),
+                'nrRegCom': f.get('nrRegCom', ''),
+                'cui': f.get('cui', ''),
+            })
+        return JsonResponse({'ok': False, 'error': 'CUI negăsit'})
+    except Exception as e:
+        return JsonResponse({'ok': False, 'error': str(e)})
+
+
 def purchase(request):
     lang = request.session.get('lang', 'ro')
     from .translations import TRANSLATIONS

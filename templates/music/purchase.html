@@ -134,6 +134,14 @@
   <!-- STEP 2: Company details -->
   <div class="panel" id="panel-2">
     <form id="company-form">
+      <div class="form-group">
+        <div class="form-label">{{ t.purchase_cui }} *</div>
+        <div style="display:flex;gap:0.5rem;">
+          <input class="form-input" type="text" id="f-cui" required placeholder="12345678" style="flex:1;">
+          <button type="button" id="btn-lookup-cui" style="padding:0.5rem 1rem;border-radius:8px;border:1px solid var(--accent);background:transparent;color:var(--accent);font-size:0.85rem;cursor:pointer;white-space:nowrap;font-family:inherit;">🔍 {{ t.purchase_cui_lookup }}</button>
+        </div>
+        <div id="cui-status" style="font-size:0.8rem;margin-top:0.4rem;display:none;"></div>
+      </div>
       <div class="form-row">
         <div class="form-group">
           <div class="form-label">{{ t.purchase_company_name }} *</div>
@@ -144,10 +152,7 @@
           <input class="form-input" type="text" id="f-brand" placeholder="{{ t.purchase_brand_ph }}">
         </div>
       </div>
-      <div class="form-group">
-        <div class="form-label">{{ t.purchase_cui }} *</div>
-        <input class="form-input" type="text" id="f-cui" required placeholder="12345678">
-      </div>
+      <input type="hidden" id="f-address" value="">
       <div class="form-row">
         <div class="form-group" style="flex:2;">
           <div class="form-label">{{ t.purchase_venue_street }} *</div>
@@ -348,7 +353,7 @@
         company_name: document.getElementById('f-company').value,
         brand_name: document.getElementById('f-brand').value,
         company_cui: document.getElementById('f-cui').value,
-        company_address: '',
+        company_address: document.getElementById('f-address').value,
         venue_address: (function() {
           var p = [document.getElementById('f-venue-street').value, 'Nr. ' + document.getElementById('f-venue-nr').value];
           var b = document.getElementById('f-venue-bloc').value;
@@ -368,6 +373,33 @@
       if (data.ok) { window.location.href = data.redirect; }
       else { alert(data.error || 'Error'); btn.disabled = false; btn.textContent = '{{ t.purchase_submit }}'; }
     });
+  });
+
+  // CUI Lookup
+  document.getElementById('btn-lookup-cui').addEventListener('click', function() {
+    var cui = document.getElementById('f-cui').value.trim();
+    if (!cui) { document.getElementById('f-cui').focus(); return; }
+    var status = document.getElementById('cui-status');
+    status.style.display = 'block';
+    status.style.color = 'var(--text3)';
+    status.textContent = 'Se caută...';
+    fetch('{% url "music:lookup_cui" %}?cui=' + encodeURIComponent(cui))
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.ok) {
+          document.getElementById('f-company').value = data.denumire || '';
+          document.getElementById('f-address').value = data.adresa || '';
+          status.style.color = '#22c55e';
+          status.textContent = '✅ ' + data.denumire + ' — ' + data.adresa;
+        } else {
+          status.style.color = '#ef4444';
+          status.textContent = '❌ ' + (data.error || 'CUI negăsit');
+        }
+      })
+      .catch(function() {
+        status.style.color = '#ef4444';
+        status.textContent = '❌ Eroare la căutare';
+      });
   });
 
   updateSummary();
