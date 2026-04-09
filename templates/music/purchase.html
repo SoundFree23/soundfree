@@ -52,6 +52,7 @@
   .btn-next:disabled { opacity: 0.4; cursor: not-allowed; }
 
   .config-pills { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  button.config-pill, button.billing-opt { font-family: inherit; }
   .config-pill { padding: 0.5rem 1rem; border-radius: 10px; border: 1px solid var(--border); background: var(--card); color: var(--text2); font-size: 0.85rem; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
   .config-pill:hover { border-color: var(--accent); color: var(--text); }
   .config-pill.active { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; border-color: transparent; font-weight: 600; }
@@ -89,33 +90,33 @@
     <div class="form-group">
       <div class="form-label">{{ t.config_business }}</div>
       <div class="config-pills" id="p-biz-pills">
-        <div class="config-pill active" data-biz="cafenea">{{ t.biz_cafenea }}</div>
-        <div class="config-pill" data-biz="restaurant">{{ t.biz_restaurant }}</div>
-        <div class="config-pill" data-biz="bar">{{ t.biz_bar }}</div>
-        <div class="config-pill" data-biz="club">{{ t.biz_club }}</div>
-        <div class="config-pill" data-biz="hotel">{{ t.biz_hotel }}</div>
-        <div class="config-pill" data-biz="salon">{{ t.biz_salon }}</div>
-        <div class="config-pill" data-biz="retail">{{ t.biz_retail }}</div>
-        <div class="config-pill" data-biz="birou">{{ t.biz_birou }}</div>
-        <div class="config-pill" data-biz="cabinet">{{ t.biz_cabinet }}</div>
-        <div class="config-pill" data-biz="gym">{{ t.biz_gym }}</div>
+        <button type="button" class="config-pill active" data-biz="cafenea">{{ t.biz_cafenea }}</button>
+        <button type="button" class="config-pill" data-biz="restaurant">{{ t.biz_restaurant }}</button>
+        <button type="button" class="config-pill" data-biz="bar">{{ t.biz_bar }}</button>
+        <button type="button" class="config-pill" data-biz="club">{{ t.biz_club }}</button>
+        <button type="button" class="config-pill" data-biz="hotel">{{ t.biz_hotel }}</button>
+        <button type="button" class="config-pill" data-biz="salon">{{ t.biz_salon }}</button>
+        <button type="button" class="config-pill" data-biz="retail">{{ t.biz_retail }}</button>
+        <button type="button" class="config-pill" data-biz="birou">{{ t.biz_birou }}</button>
+        <button type="button" class="config-pill" data-biz="cabinet">{{ t.biz_cabinet }}</button>
+        <button type="button" class="config-pill" data-biz="gym">{{ t.biz_gym }}</button>
       </div>
     </div>
     <div class="form-group">
       <div class="form-label">{{ t.config_size }}</div>
       <div class="config-pills" id="p-size-pills">
-        <div class="config-pill active" data-size="0">{{ t.config_size_1 }}</div>
-        <div class="config-pill" data-size="1">{{ t.config_size_2 }}</div>
-        <div class="config-pill" data-size="2">{{ t.config_size_3 }}</div>
-        <div class="config-pill" data-size="3">{{ t.config_size_4 }}</div>
-        <div class="config-pill" data-size="4">{{ t.config_size_5 }}</div>
+        <button type="button" class="config-pill active" data-size="0">{{ t.config_size_1 }}</button>
+        <button type="button" class="config-pill" data-size="1">{{ t.config_size_2 }}</button>
+        <button type="button" class="config-pill" data-size="2">{{ t.config_size_3 }}</button>
+        <button type="button" class="config-pill" data-size="3">{{ t.config_size_4 }}</button>
+        <button type="button" class="config-pill" data-size="4">{{ t.config_size_5 }}</button>
       </div>
     </div>
     <div class="form-group">
       <div class="form-label">{{ t.purchase_billing }}</div>
       <div class="billing-toggle">
-        <div class="billing-opt" data-billing="monthly">{{ t.billing_monthly }}</div>
-        <div class="billing-opt active" data-billing="annual">{{ t.billing_annual }} <span class="save">-20%</span></div>
+        <button type="button" class="billing-opt" data-billing="monthly">{{ t.billing_monthly }}</button>
+        <button type="button" class="billing-opt active" data-billing="annual">{{ t.billing_annual }} <span class="save">-20%</span></button>
       </div>
     </div>
 

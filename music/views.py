@@ -228,11 +228,21 @@ def purchase_submit(request):
         company_reg=data.get('company_reg', ''),
     )
 
+    # Generate proforma invoice via Oblio
+    try:
+        from .oblio_api import OblioAPI
+        result = OblioAPI.create_proforma(order)
+        if result and result.get('seriesName'):
+            order.oblio_invoice = f"{result.get('seriesName')}{result.get('number', '')}"
+            order.save(update_fields=['oblio_invoice'])
+    except Exception:
+        pass
+
     # Send notification email to admin
     try:
         send_mail(
             subject=f'[SoundFree] Comandă nouă: {order.reference}',
-            message=f'Comandă nouă #{order.reference}\n\nFirmă: {order.company_name}\nBrand: {order.brand_name}\nCUI: {order.company_cui}\nAdresa firmă: {order.company_address}\nAdresa locație: {order.venue_address}\nTip afacere: {order.business_type}\nSuprafață: {order.business_size}\nFacturare: {order.get_billing_display()}\nPreț: {order.price_total} lei\nEmail: {order.company_email}\nTelefon: {order.company_phone}',
+            message=f'Comandă nouă #{order.reference}\n\nFirmă: {order.company_name}\nBrand: {order.brand_name}\nCUI: {order.company_cui}\nAdresa firmă: {order.company_address}\nAdresa locație: {order.venue_address}\nTip afacere: {order.business_type}\nSuprafață: {order.business_size}\nFacturare: {order.get_billing_display()}\nPreț: {order.price_total} lei\nEmail: {order.company_email}\nTelefon: {order.company_phone}\nFactură Oblio: {order.oblio_invoice or "N/A"}',
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=['office@soundfree.ro'],
             fail_silently=True,

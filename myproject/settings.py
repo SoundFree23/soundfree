@@ -120,6 +120,12 @@ DEFAULT_FROM_EMAIL = 'oprearaz@yahoo.com'
 
 LOGIN_URL = '/login/'
 
+# Oblio API
+OBLIO_EMAIL = os.environ.get('OBLIO_EMAIL', 'oprearaz@yahoo.com')
+OBLIO_SECRET = os.environ.get('OBLIO_SECRET', 'e1843087eaba977ef8dcde2203054b6c2a3d3e16')
+OBLIO_CIF = '54416770'
+OBLIO_SERIES = os.environ.get('OBLIO_SERIES', 'Concept23')
+
 # Logging
 LOGGING = {
     'version': 1,
