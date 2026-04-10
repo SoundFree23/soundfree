@@ -729,6 +729,25 @@ def backend_orders(request):
         elif action == 'delete' and order_id:
             Order.objects.filter(id=order_id).delete()
 
+        elif action == 'create_manual':
+            Order.objects.create(
+                plan=request.POST.get('plan', 'standard'),
+                billing=request.POST.get('billing', 'annual'),
+                business_type=request.POST.get('business_type', 'cafenea'),
+                business_size=request.POST.get('business_size', '< 100 mp'),
+                price_monthly=int(request.POST.get('price_monthly', 0) or 0),
+                price_total=int(request.POST.get('price_total', 0) or 0),
+                company_name=request.POST.get('company_name', '').strip(),
+                brand_name=request.POST.get('brand_name', '').strip(),
+                company_cui=request.POST.get('company_cui', '').strip(),
+                company_address=request.POST.get('company_address', '').strip(),
+                venue_address=request.POST.get('venue_address', '').strip(),
+                company_email=request.POST.get('company_email', '').strip(),
+                company_phone=request.POST.get('company_phone', '').strip(),
+                company_reg=request.POST.get('company_reg', '').strip(),
+                payment_type=request.POST.get('payment_type', 'normal'),
+            )
+
         return redirect('music:backend_orders')
 
     orders = Order.objects.all()

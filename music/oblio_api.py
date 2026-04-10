@@ -43,7 +43,7 @@ class OblioAPI:
                 {
                     'name': f'Licență muzicală SoundFree - {order.business_type} ({order.business_size})',
                     'code': order.reference,
-                    'description': f'Brand: {order.brand_name or "-"} | Adresa locație: {order.venue_address or "-"} | Facturare: {order.get_billing_display()}',
+                    'description': f'Brand: {order.brand_name or "-"} | Adresa locație: {order.venue_address or "-"} | Facturare: {order.get_billing_display()}' + (' | BARTER' if getattr(order, 'payment_type', 'normal') == 'barter' else ''),
                     'price': order.price_total,
                     'measuringUnit': 'buc',
                     'currency': 'RON',
