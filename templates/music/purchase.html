@@ -166,6 +166,13 @@
         </div>
       </div>
       <input type="hidden" id="f-address" value="">
+      <div style="margin-bottom:1.25rem;">
+        <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;font-size:0.85rem;color:var(--text2);">
+          <input type="checkbox" id="f-same-address" style="width:18px;height:18px;accent-color:var(--accent);cursor:pointer;">
+          {{ t.purchase_same_address }}
+        </label>
+      </div>
+      <div id="venue-fields">
       <div class="form-row">
         <div class="form-group" style="flex:2;">
           <div class="form-label">{{ t.purchase_venue_street }} *</div>
@@ -203,6 +210,7 @@
           <div class="form-label">{{ t.purchase_venue_county }} *</div>
           <input class="form-input" type="text" id="f-venue-county" required placeholder="{{ t.purchase_venue_county_ph }}">
         </div>
+      </div>
       </div>
       <div class="form-row">
         <div class="form-group">
@@ -324,7 +332,10 @@
   document.getElementById('btn-to-step2').addEventListener('click', function() { goStep(2); });
   document.getElementById('btn-back-1').addEventListener('click', function() { goStep(1); });
   document.getElementById('btn-to-step3').addEventListener('click', function() {
-    var fields = ['f-company', 'f-cui', 'f-venue-street', 'f-venue-nr', 'f-venue-city', 'f-venue-county', 'f-email', 'f-phone'];
+    var sameAddr = document.getElementById('f-same-address').checked;
+    var fields = sameAddr
+      ? ['f-company', 'f-cui', 'f-email', 'f-phone']
+      : ['f-company', 'f-cui', 'f-venue-street', 'f-venue-nr', 'f-venue-city', 'f-venue-county', 'f-email', 'f-phone'];
     for (var i = 0; i < fields.length; i++) {
       var el = document.getElementById(fields[i]);
       if (!el.value.trim()) { el.focus(); return; }
@@ -386,6 +397,39 @@
       if (data.ok) { window.location.href = data.redirect; }
       else { alert(data.error || 'Error'); btn.disabled = false; btn.textContent = '{{ t.purchase_submit }}'; }
     });
+  });
+
+  // Same address checkbox
+  document.getElementById('f-same-address').addEventListener('change', function() {
+    var venueFields = document.getElementById('venue-fields');
+    if (this.checked) {
+      // Parse address from ANAF lookup and fill venue fields
+      var addr = document.getElementById('f-address').value;
+      if (addr) {
+        // Try to auto-fill from the full address string
+        document.getElementById('f-venue-street').value = addr;
+        document.getElementById('f-venue-nr').value = '-';
+        document.getElementById('f-venue-bloc').value = '';
+        document.getElementById('f-venue-scara').value = '';
+        document.getElementById('f-venue-etaj').value = '';
+        document.getElementById('f-venue-ap').value = '';
+        // Try to extract city and county from address
+        var parts = addr.split(',').map(function(s) { return s.trim(); });
+        if (parts.length >= 3) {
+          document.getElementById('f-venue-county').value = parts[parts.length - 1] || '';
+          document.getElementById('f-venue-city').value = parts[parts.length - 2] || '';
+          document.getElementById('f-venue-street').value = parts.slice(0, parts.length - 2).join(', ');
+        }
+      }
+      venueFields.style.display = 'none';
+    } else {
+      venueFields.style.display = 'block';
+      // Clear fields so user can fill manually
+      document.getElementById('f-venue-street').value = '';
+      document.getElementById('f-venue-nr').value = '';
+      document.getElementById('f-venue-city').value = '';
+      document.getElementById('f-venue-county').value = '';
+    }
   });
 
   // CUI Lookup
