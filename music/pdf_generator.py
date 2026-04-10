@@ -291,18 +291,18 @@ def generate_license_pdf(order, profile):
     # LEGAL TEXT
     # ═══════════════════════════════════════════
     y -= 14 * mm
-    c.setFont(FONT, 7)
-    c.setFillColor(HexColor('#777777'))
+    c.setFont(FONT, 8.5)
+    c.setFillColor(HexColor('#aaaaaa'))
     legal = (
         'Prezenta licență muzicală este acordată în mod exclusiv de către SoundFree S.R.L., titular unic al drepturilor de autor și conexe, '
         'prin care se autorizează redarea repertoriului propriu SoundFree. Repertoriul este exclus oficial de la gestiunea colectivă la UCMR-ADA, CREDIDAM și UPFR. '
         'SoundFree S.R.L. exercitând gestiunea individuală a drepturilor sale și refuzând orice reprezentare sau colectare de remunerații de către orice '
         'organizație de gestiune colectivă. Licența este valabilă doar pentru locația și perioada specificate mai sus.'
     )
-    legal_lines = _wrap_text(c, legal, FONT, 7, usable)
+    legal_lines = _wrap_text(c, legal, FONT, 8.5, usable)
     for line in legal_lines:
         c.drawString(left, y, line)
-        y -= 3.5 * mm
+        y -= 4 * mm
 
     # ═══════════════════════════════════════════
     # EMITENT
