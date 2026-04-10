@@ -128,7 +128,7 @@ def playlist_detail(request, pl_id):
 
 
 def pricing(request):
-    return render(request, 'music/pricing.html')
+    return redirect('music:purchase')
 
 
 def privacy(request):
@@ -266,7 +266,7 @@ def purchase_submit(request):
 
     order = Order.objects.create(
         user=request.user if request.user.is_authenticated else None,
-        plan=data.get('plan', 'business'),
+        plan=data.get('plan', 'standard'),
         billing=data.get('billing', 'annual'),
         business_type=data.get('business_type', 'cafenea'),
         business_size=size_label,
@@ -628,6 +628,8 @@ def backend_orders(request):
                             existing = eo.user
                             break
                     if existing:
+                        user = existing
+                    else:
                         # Generate username from email
                         base_username = order.company_email.split('@')[0].replace('.', '_').replace('-', '_')[:20]
                         username = base_username
@@ -644,7 +646,8 @@ def backend_orders(request):
                     order.user = user
                     order.save(update_fields=['user'])
 
-                # Activate subscription
+                # Ensure profile exists and activate subscription
+                UserProfile.objects.get_or_create(user=user)
                 if hasattr(user, 'profile'):
                     profile = user.profile
                     today = timezone.now().date()

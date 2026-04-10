@@ -60,7 +60,7 @@ TRANSLATIONS = {
         'cta_title_1': 'Gata să treci la',
         'cta_title_2': 'muzică fără griji?',
         'cta_desc': 'Alătură-te afacerilor din România care au ales muzica inteligentă.',
-        'cta_btn': 'Începe Acum — 7 zile gratuit',
+        'cta_btn': 'Începe Acum',
 
         # LIBRARY
         'lib_title': '🎵 Biblioteca Muzicală',
@@ -95,7 +95,7 @@ TRANSLATIONS = {
         'plan_enterprise_desc': 'Pentru lanțuri de magazine, hoteluri, mall-uri sau franciză.',
         'popular_badge': '⭐ Cel mai popular',
         'per_month': 'lei/lună',
-        'try_free': 'Încearcă 7 zile gratuit',
+        'try_free': 'Achiziționează licența',
         'choose_plan': 'Alege planul',
         'contact_us': 'Contactează-ne',
         'feature_1loc': '1 locație / punct de lucru',
@@ -157,7 +157,7 @@ TRANSLATIONS = {
         'faq_q2': 'Ce se întâmplă dacă vine un inspector de la UCMR-ADA?',
         'faq_a2': 'Dacă difuzezi exclusiv muzica din biblioteca SoundFree.ro, îți furnizăm un certificat de utilizare care confirmă că melodiile folosite provin dintr-un repertoriu propriu, licențiat integral. Recomandăm să păstrezi certificatul la îndemână pentru orice verificare.',
         'faq_q3': 'Pot folosi muzica la mai multe locații cu un singur abonament?',
-        'faq_a3': 'Depinde de planul ales. Planul Starter acoperă 1 locație, Business până la 5, iar Enterprise oferă locații nelimitate. Fiecare locație primește propriul certificat.',
+        'faq_a3': 'Fiecare licență acoperă o singură locație. Dacă aveți mai multe locații, trebuie să achiziționați câte o licență separată pentru fiecare punct de lucru. Fiecare locație primește propriul certificat de licență.',
         'faq_q4': 'Câte melodii sunt disponibile și cât de des se adaugă altele noi?',
         'faq_a4': 'Biblioteca crește continuu. În funcție de planul tău, adăugăm muzică săptămânal sau lunar. Tipurile de muzică acoperă toate stilurile potrivite pentru spații comerciale.',
         'faq_q5': 'Pot anula oricând?',
@@ -491,7 +491,7 @@ TRANSLATIONS = {
         'cta_title_1': 'Ready for',
         'cta_title_2': 'worry-free music?',
         'cta_desc': 'Join businesses in Romania that chose smart music.',
-        'cta_btn': 'Start Now — 7 days free',
+        'cta_btn': 'Start Now',
 
         # LIBRARY
         'lib_title': '🎵 Music Library',
@@ -526,7 +526,7 @@ TRANSLATIONS = {
         'plan_enterprise_desc': 'For retail chains, hotels, malls or franchise businesses.',
         'popular_badge': '⭐ Most popular',
         'per_month': 'RON/month',
-        'try_free': 'Try 7 days free',
+        'try_free': 'Get your license',
         'choose_plan': 'Choose plan',
         'contact_us': 'Contact us',
         'feature_1loc': '1 location / branch',
@@ -588,7 +588,7 @@ TRANSLATIONS = {
         'faq_q2': 'What happens if a UCMR-ADA inspector visits?',
         'faq_a2': 'If you exclusively play music from the SoundFree.ro library, we provide a usage certificate confirming that the tracks come from our own fully licensed catalog. We recommend keeping the certificate readily available for any inspection.',
         'faq_q3': 'Can I use the music at multiple locations with one subscription?',
-        'faq_a3': 'It depends on your plan. Starter covers 1 location, Business up to 5, and Enterprise offers unlimited locations. Each location gets its own certificate.',
+        'faq_a3': 'Each license covers a single location. If you have multiple venues, you need to purchase a separate license for each one. Every location receives its own license certificate.',
         'faq_q4': 'How many tracks are available and how often are new ones added?',
         'faq_a4': 'The library grows continuously. Depending on your plan, we add music weekly or monthly, covering all styles suitable for commercial spaces.',
         'faq_q5': 'Can I cancel anytime?',
