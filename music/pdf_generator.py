@@ -272,14 +272,14 @@ def generate_license_pdf(order, profile):
     c.line(left, y, right, y)
     y -= 10 * mm
 
-    c.setFont(FONT, 8)
+    c.setFont(FONT, 9)
     c.setFillColor(GRAY)
     c.drawCentredString(width / 2, y, 'Este autorizat să difuzeze muzică din repertoriul SoundFree pentru perioada:')
 
     start_str = profile.subscription_start.strftime('%d-%m-%Y') if profile.subscription_start else '-'
     end_str = profile.subscription_end.strftime('%d-%m-%Y') if profile.subscription_end else '-'
 
-    y -= 13 * mm
+    y -= 16 * mm
     box_h = 15 * mm
     draw_rounded_rect(c, left, y, usable, box_h, 5,
                        fill_color=HexColor('#0d3320'), stroke_color=GREEN)
@@ -290,39 +290,39 @@ def generate_license_pdf(order, profile):
     # ═══════════════════════════════════════════
     # LEGAL TEXT
     # ═══════════════════════════════════════════
-    y -= 12 * mm
-    c.setFont(FONT, 5.5)
-    c.setFillColor(HexColor('#666666'))
+    y -= 14 * mm
+    c.setFont(FONT, 7)
+    c.setFillColor(HexColor('#777777'))
     legal = (
         'Prezenta licență muzicală este acordată în mod exclusiv de către SoundFree S.R.L., titular unic al drepturilor de autor și conexe, '
         'prin care se autorizează redarea repertoriului propriu SoundFree. Repertoriul este exclus oficial de la gestiunea colectivă la UCMR-ADA, CREDIDAM și UPFR. '
         'SoundFree S.R.L. exercitând gestiunea individuală a drepturilor sale și refuzând orice reprezentare sau colectare de remunerații de către orice '
         'organizație de gestiune colectivă. Licența este valabilă doar pentru locația și perioada specificate mai sus.'
     )
-    legal_lines = _wrap_text(c, legal, FONT, 5.5, usable)
+    legal_lines = _wrap_text(c, legal, FONT, 7, usable)
     for line in legal_lines:
         c.drawString(left, y, line)
-        y -= 3 * mm
+        y -= 3.5 * mm
 
     # ═══════════════════════════════════════════
     # EMITENT
     # ═══════════════════════════════════════════
     y -= 6 * mm
-    c.setFont(FONT, 8)
+    c.setFont(FONT, 10)
     c.setFillColor(LIGHT)
     c.drawCentredString(width / 2, y, 'Emitentul')
 
-    y -= 7 * mm
-    c.setFont(FONT_BOLD, 13)
+    y -= 8 * mm
+    c.setFont(FONT_BOLD, 14)
     c.setFillColor(GREEN)
     c.drawCentredString(width / 2, y, 'SOUNDFREE S.R.L.')
 
-    y -= 5.5 * mm
-    c.setFont(FONT, 7)
+    y -= 6 * mm
+    c.setFont(FONT, 9)
     c.setFillColor(GRAY)
     c.drawCentredString(width / 2, y, 'CUI: 54416770 | J2026022358004')
 
-    y -= 4.5 * mm
+    y -= 5 * mm
     c.drawCentredString(width / 2, y, 'Iași, România | www.soundfree.ro')
 
     # ── Footer watermark ──
