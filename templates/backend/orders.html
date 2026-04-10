@@ -70,6 +70,13 @@
             {% else %}
               <span style="color:var(--text3);font-size:0.8rem;">Anulata</span>
             {% endif %}
+            <form method="post" style="display:inline;margin-top:0.25rem;">
+              {% csrf_token %}
+              <input type="hidden" name="order_id" value="{{ order.id }}">
+              <button type="submit" name="action" value="delete" class="btn btn-danger btn-sm" title="Sterge comanda" onclick="return confirm('Ești sigur că vrei să ștergi comanda {{ order.reference }}?\n\nAceastă acțiune este permanentă!')">
+                🗑️ Șterge
+              </button>
+            </form>
           </div>
         </td>
       </tr>

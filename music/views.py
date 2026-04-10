@@ -706,6 +706,9 @@ def backend_orders(request):
         elif action == 'cancel' and order_id:
             Order.objects.filter(id=order_id, status='pending').update(status='cancelled')
 
+        elif action == 'delete' and order_id:
+            Order.objects.filter(id=order_id).delete()
+
         return redirect('music:backend_orders')
 
     orders = Order.objects.all()
