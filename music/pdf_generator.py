@@ -435,7 +435,7 @@ def generate_license_pdf(order, profile):
     # LEGAL TEXT
     # ═══════════════════════════════════════════
     y -= 14 * mm
-    c.setFont(FONT, 7)
+    c.setFont(FONT, 8.5)
     c.setFillColor(GRAY)
     legal = (
         'Prezenta licenta muzicala este acordata in mod exclusiv de catre SoundFree S.R.L. (CUI 54416770), '
@@ -447,49 +447,49 @@ def generate_license_pdf(order, profile):
         'Licenta este valabila doar pentru locatia si perioada specificate. '
         'Reproducerea neautorizata atrage raspundere legala.'
     )
-    legal_lines = _wrap_text(c, legal, FONT, 7, usable)
+    legal_lines = _wrap_text(c, legal, FONT, 8.5, usable)
     for line in legal_lines:
         c.drawString(left, y, line)
-        y -= 3.3 * mm
+        y -= 4 * mm
 
     # ═══════════════════════════════════════════
     # SEPARATOR
     # ═══════════════════════════════════════════
-    y -= 5 * mm
+    y -= 6 * mm
     c.setStrokeColor(HexColor('#e0e0e0'))
     c.setLineWidth(0.5)
     c.line(left + 30 * mm, y, right - 30 * mm, y)
 
     # ═══════════════════════════════════════════
-    # EMITENT / FOOTER
+    # EMITENT / FOOTER - positioned near bottom
     # ═══════════════════════════════════════════
-    y -= 10 * mm
+    footer_y = 38 * mm
 
     # Logo: ♫ SoundFree
-    c.setFont(FONT, 14)
+    c.setFont(FONT, 16)
     c.setFillColor(GREEN)
-    nw = c.stringWidth('\u266b', FONT, 14)
-    sw = c.stringWidth('Sound', FONT_BOLD, 16)
-    fw = c.stringWidth('Free', FONT_BOLD, 16)
+    nw = c.stringWidth('\u266b', FONT, 16)
+    sw = c.stringWidth('Sound', FONT_BOLD, 20)
+    fw = c.stringWidth('Free', FONT_BOLD, 20)
     lw = nw + 2 + sw + fw
     fx = (width - lw) / 2
-    c.drawString(fx, y, '\u266b')
-    c.setFont(FONT_BOLD, 16)
+    c.drawString(fx, footer_y, '\u266b')
+    c.setFont(FONT_BOLD, 20)
     c.setFillColor(BLACK)
-    c.drawString(fx + nw + 2, y, 'Sound')
+    c.drawString(fx + nw + 2, footer_y, 'Sound')
     c.setFillColor(GREEN)
-    c.drawString(fx + nw + 2 + sw, y, 'Free')
+    c.drawString(fx + nw + 2 + sw, footer_y, 'Free')
 
-    y -= 6 * mm
-    c.setFont(FONT, 8)
+    footer_y -= 7 * mm
+    c.setFont(FONT, 9)
     c.setFillColor(GRAY)
-    c.drawCentredString(width / 2, y, 'CUI: 54416770')
+    c.drawCentredString(width / 2, footer_y, 'CUI: 54416770')
 
-    y -= 4.5 * mm
-    c.drawCentredString(width / 2, y, 'Nr. inregistrare: J2026022358004')
+    footer_y -= 5 * mm
+    c.drawCentredString(width / 2, footer_y, 'Nr. inregistrare: J2026022358004')
 
-    y -= 4.5 * mm
-    c.drawCentredString(width / 2, y, 'www.soundfree.ro')
+    footer_y -= 5 * mm
+    c.drawCentredString(width / 2, footer_y, 'www.soundfree.ro')
 
     c.save()
     buf.seek(0)
