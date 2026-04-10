@@ -95,85 +95,96 @@ def generate_license_pdf(order, profile):
     width, height = A4
     c = canvas.Canvas(buf, pagesize=A4)
 
-    # Background
-    c.setFillColor(DARK)
+    # Background - dark but not pure black
+    c.setFillColor(DARK2)
     c.rect(0, 0, width, height, fill=1, stroke=0)
 
-    # Border
-    margin = 15 * mm
-    c.setStrokeColor(GREEN)
-    c.setLineWidth(2)
-    c.roundRect(margin, margin, width - 2 * margin, height - 2 * margin, 10)
+    # Content area with lighter background
+    margin = 12 * mm
+    content_x = margin
+    content_y = margin
+    content_w = width - 2 * margin
+    content_h = height - 2 * margin
 
-    # Inner border
+    # Inner content background - slightly lighter
+    draw_rounded_rect(c, content_x, content_y, content_w, content_h, 8, fill_color=HexColor('#181818'))
+
+    # Green border
+    c.setStrokeColor(GREEN)
+    c.setLineWidth(1.5)
+    c.roundRect(content_x, content_y, content_w, content_h, 8)
+
+    # Inner subtle border
+    inner_pad = 4
     c.setStrokeColor(DARK3)
     c.setLineWidth(0.5)
-    c.roundRect(margin + 5, margin + 5, width - 2 * margin - 10, height - 2 * margin - 10, 8)
+    c.roundRect(content_x + inner_pad, content_y + inner_pad,
+                content_w - 2 * inner_pad, content_h - 2 * inner_pad, 6)
+
+    # Content margins within the bordered area
+    cx_left = content_x + 14 * mm
+    cx_right = content_x + content_w - 14 * mm
 
     # Logo text
-    logo_y = height - margin - 38 * mm
-    # Music note
+    logo_y = height - margin - 28 * mm
     c.setFont(FONT, 28)
     c.setFillColor(GREEN)
     note_w = c.stringWidth('\u266b', FONT, 28)
     total_logo_w = note_w + 5 + c.stringWidth('Sound', FONT_BOLD, 30) + c.stringWidth('Free', FONT_BOLD, 30)
     logo_x = (width - total_logo_w) / 2
     c.drawString(logo_x, logo_y, '\u266b')
-    # "Sound" in white
     c.setFont(FONT_BOLD, 30)
     c.setFillColor(WHITE)
     sound_x = logo_x + note_w + 5
     c.drawString(sound_x, logo_y, 'Sound')
-    # "Free" in green
     c.setFillColor(GREEN)
     free_x = sound_x + c.stringWidth('Sound', FONT_BOLD, 30)
     c.drawString(free_x, logo_y, 'Free')
 
     # Title
-    y = height - margin - 55 * mm
+    y = logo_y - 18 * mm
     c.setFillColor(GREEN)
     c.setFont(FONT_BOLD, 22)
     c.drawCentredString(width / 2, y, 'LICENȚĂ MUZICALĂ')
     y -= 8 * mm
-    c.setFont(FONT, 11)
+    c.setFont(FONT, 10)
     c.setFillColor(LIGHT)
     c.drawCentredString(width / 2, y, 'Certificat de licențiere pentru difuzare muzică în spații comerciale')
 
     # License number + QR code
-    y -= 15 * mm
+    y -= 14 * mm
 
     # QR Code (right side)
     verify_url = f'https://www.soundfree.ro/verify/{profile.verification_token}/'
     qr_buf = generate_qr(verify_url)
     qr_img = ImageReader(qr_buf)
-    qr_size = 30 * mm
-    qr_x = width - margin - qr_size - 15 * mm
+    qr_size = 28 * mm
+    qr_x = cx_right - qr_size
     qr_y = y - qr_size + 5 * mm
     c.drawImage(qr_img, qr_x, qr_y, width=qr_size, height=qr_size)
     c.setFont(FONT, 6)
     c.setFillColor(GRAY)
-    c.drawCentredString(qr_x + qr_size / 2, qr_y - 4 * mm, 'Scanează pentru verificare')
+    c.drawCentredString(qr_x + qr_size / 2, qr_y - 3.5 * mm, 'Scanează pentru verificare')
 
     # License number (left side)
     c.setFont(FONT, 9)
     c.setFillColor(GRAY)
-    left_x = margin + 20 * mm
-    c.drawString(left_x, y, 'Nr. Licență:')
+    c.drawString(cx_left, y, 'Nr. Licență:')
     c.setFont(FONT_BOLD, 14)
     c.setFillColor(WHITE)
-    c.drawString(left_x, y - 7 * mm, order.reference)
+    c.drawString(cx_left, y - 7 * mm, order.reference)
 
     # Separator
-    y -= 20 * mm
+    y -= 18 * mm
     c.setStrokeColor(DARK3)
-    c.setLineWidth(1)
-    c.line(margin + 15 * mm, y, width - margin - 15 * mm, y)
+    c.setLineWidth(0.8)
+    c.line(cx_left, y, cx_right, y)
 
     # Company info section
-    y -= 12 * mm
-    info_x = margin + 20 * mm
+    y -= 10 * mm
     label_color = GRAY
     value_color = WHITE
+    value_x = cx_left + 52 * mm
 
     rows = [
         ('SoundFree licențiază:', order.company_name),
@@ -187,47 +198,50 @@ def generate_license_pdf(order, profile):
 
     for label, value in rows:
         if not label and not value:
-            y -= 4 * mm
+            y -= 3 * mm
             continue
         c.setFont(FONT, 9)
         c.setFillColor(label_color)
-        c.drawString(info_x, y, label)
+        c.drawString(cx_left, y, label)
         c.setFont(FONT_BOLD, 10)
         c.setFillColor(value_color)
-        # Handle long values
-        if len(str(value)) > 50:
-            c.setFont(FONT_BOLD, 8)
-        c.drawString(info_x + 55 * mm, y, str(value))
+        val_str = str(value)
+        if len(val_str) > 50:
+            c.setFont(FONT_BOLD, 7.5)
+        elif len(val_str) > 40:
+            c.setFont(FONT_BOLD, 8.5)
+        c.drawString(value_x, y, val_str)
         y -= 7 * mm
 
     # Separator
-    y -= 5 * mm
+    y -= 4 * mm
     c.setStrokeColor(DARK3)
-    c.line(margin + 15 * mm, y, width - margin - 15 * mm, y)
+    c.setLineWidth(0.8)
+    c.line(cx_left, y, cx_right, y)
 
     # Validity period
-    y -= 12 * mm
+    y -= 10 * mm
     c.setFont(FONT, 9)
     c.setFillColor(label_color)
-    c.drawString(info_x, y, 'Este autorizat să difuzeze muzică din')
-    y -= 6 * mm
-    c.drawString(info_x, y, 'repertoriul SoundFree pentru perioada:')
+    c.drawCentredString(width / 2, y, 'Este autorizat să difuzeze muzică din')
+    y -= 5 * mm
+    c.drawCentredString(width / 2, y, 'repertoriul SoundFree pentru perioada:')
 
     start_str = profile.subscription_start.strftime('%d-%m-%Y') if profile.subscription_start else '-'
     end_str = profile.subscription_end.strftime('%d-%m-%Y') if profile.subscription_end else '-'
 
     y -= 10 * mm
     # Green period box
-    period_w = 120 * mm
-    period_h = 12 * mm
+    period_w = 130 * mm
+    period_h = 13 * mm
     period_x = (width - period_w) / 2
-    draw_rounded_rect(c, period_x, y - 2 * mm, period_w, period_h, 3, fill_color=HexColor('#0d3320'), stroke_color=GREEN)
-    c.setFont(FONT_BOLD, 13)
+    draw_rounded_rect(c, period_x, y - 2 * mm, period_w, period_h, 4, fill_color=HexColor('#0d3320'), stroke_color=GREEN)
+    c.setFont(FONT_BOLD, 14)
     c.setFillColor(GREEN)
-    c.drawCentredString(width / 2, y + 1 * mm, f'{start_str}     până la     {end_str}')
+    c.drawCentredString(width / 2, y + 1.5 * mm, f'{start_str}     până la     {end_str}')
 
     # Legal text
-    y -= 22 * mm
+    y -= 18 * mm
     c.setFont(FONT, 6.5)
     c.setFillColor(GRAY)
     legal_lines = [
@@ -241,13 +255,13 @@ def generate_license_pdf(order, profile):
         y -= 4 * mm
 
     # Emitent section
-    y -= 10 * mm
+    y -= 8 * mm
     c.setFont(FONT, 10)
     c.setFillColor(LIGHT)
     c.drawCentredString(width / 2, y, 'Emitentul')
 
-    y -= 8 * mm
-    c.setFont(FONT_BOLD, 12)
+    y -= 7 * mm
+    c.setFont(FONT_BOLD, 13)
     c.setFillColor(GREEN)
     c.drawCentredString(width / 2, y, 'SOUNDFREE S.R.L.')
 
@@ -262,7 +276,7 @@ def generate_license_pdf(order, profile):
     # Footer with SoundFree watermark pattern
     c.setFont(FONT, 7)
     c.setFillColor(HexColor('#333333'))
-    footer_y = margin + 8 * mm
+    footer_y = margin + 6 * mm
     pattern = 'SoundFree   ·   SoundFree   ·   SoundFree   ·   SoundFree   ·   SoundFree   ·   SoundFree'
     c.drawCentredString(width / 2, footer_y, pattern)
 
