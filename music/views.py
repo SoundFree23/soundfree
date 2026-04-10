@@ -630,8 +630,12 @@ def backend_orders(request):
                     if existing:
                         user = existing
                     else:
-                        # Generate username from email
-                        base_username = order.company_email.split('@')[0].replace('.', '_').replace('-', '_')[:20]
+                        # Generate username from brand name
+                        import re
+                        brand = order.brand_name or order.company_name
+                        base_username = re.sub(r'[^a-zA-Z0-9]', '', brand.lower().replace(' ', ''))[:20]
+                        if not base_username:
+                            base_username = order.company_email.split('@')[0].replace('.', '_').replace('-', '_')[:20]
                         username = base_username
                         while User.objects.filter(username=username).exists():
                             username = base_username + str(random.randint(10, 99))
