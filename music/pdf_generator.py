@@ -36,12 +36,12 @@ except Exception:
     FONT = 'Helvetica'
     FONT_BOLD = 'Helvetica-Bold'
 
-GREEN = HexColor('#1db954')
-DARK_GREEN = HexColor('#166534')
-LIGHT_GREEN = HexColor('#dcfce7')
-BLACK = HexColor('#1a1a1a')
-GRAY = HexColor('#666666')
-LIGHT_GRAY = HexColor('#999999')
+GREEN = HexColor('#00A86B')
+DARK_GREEN = HexColor('#006B45')
+LIGHT_GREEN = HexColor('#e0f5eb')
+BLACK = HexColor('#222222')
+GRAY = HexColor('#444444')
+LIGHT_GRAY = HexColor('#888888')
 WHITE = white
 
 BIZ_LABELS = {
@@ -62,7 +62,7 @@ def generate_qr(url, size=150):
     qr = qrcode.QRCode(version=1, box_size=10, border=2)
     qr.add_data(url)
     qr.make(fit=True)
-    img = qr.make_image(fill_color='#1db954', back_color='#ffffff')
+    img = qr.make_image(fill_color='#00A86B', back_color='#ffffff')
     buf = io.BytesIO()
     img.save(buf, format='PNG')
     buf.seek(0)
@@ -190,6 +190,11 @@ def generate_license_pdf(order, profile):
     qr_size = 28 * mm
     qr_x = right - qr_size
     qr_y = y - qr_size + 8 * mm
+    # QR border (thin gray)
+    qr_pad = 1.5 * mm
+    c.setStrokeColor(HexColor('#cccccc'))
+    c.setLineWidth(0.5)
+    c.rect(qr_x - qr_pad, qr_y - qr_pad, qr_size + 2 * qr_pad, qr_size + 2 * qr_pad, fill=0, stroke=1)
     c.drawImage(qr_img, qr_x, qr_y, width=qr_size, height=qr_size)
 
     # Music notes decoration line
@@ -317,7 +322,7 @@ def generate_license_pdf(order, profile):
     draw_rounded_rect(c, left - 5 * mm, y, usable + 10 * mm, ribbon_h, 5,
                        fill_color=DARK_GREEN)
     # Ribbon fold effects (darker triangles on edges)
-    c.setFillColor(HexColor('#0f4c25'))
+    c.setFillColor(HexColor('#005535'))
     # Left fold
     p = c.beginPath()
     p.moveTo(left - 5 * mm, y + ribbon_h)
