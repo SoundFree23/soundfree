@@ -675,13 +675,17 @@ def backend_orders(request):
                         end = today + timedelta(days=365)
                     else:
                         end = today + timedelta(days=30)
-                    # Extend if already active
+                    # Extend if already active (but don't double-extend for same order)
                     if profile.subscription_end and profile.subscription_end > today:
                         if order.billing == 'annual':
                             end = profile.subscription_end + timedelta(days=365)
                         else:
                             end = profile.subscription_end + timedelta(days=30)
                     profile.subscription_start = profile.subscription_start or today
+                    # Safety: cap end date to max 5 years from today
+                    max_end = today + timedelta(days=365 * 5)
+                    if end > max_end:
+                        end = today + timedelta(days=365 if order.billing == 'annual' else 30)
                     profile.subscription_end = end
                     profile.save(update_fields=['subscription_start', 'subscription_end'])
 
