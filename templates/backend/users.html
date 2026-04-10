@@ -62,6 +62,7 @@
         <thead>
           <tr>
             <th>Username</th>
+            <th>Parolă</th>
             <th>Email</th>
             <th>Abonament</th>
             <th>Status</th>
@@ -74,6 +75,14 @@
             <td style="font-weight:600;">
               {{ u.username }}
               {% if u.profile.notes %}<br><span style="color:var(--text3);font-size:0.7rem;font-weight:400;">{{ u.profile.notes }}</span>{% endif %}
+            </td>
+            <td style="font-size:0.85rem;">
+              {% if u.profile.plain_password %}
+                <code style="background:var(--bg3);padding:0.2rem 0.4rem;border-radius:4px;color:var(--accent);font-size:0.8rem;">{{ u.profile.plain_password }}</code>
+              {% else %}
+                <span style="color:var(--text3);font-size:0.75rem;">necunoscută</span>
+              {% endif %}
+              <button type="button" class="btn btn-outline" style="font-size:0.6rem;padding:0.15rem 0.35rem;margin-left:0.3rem;" onclick="openPasswordModal({{ u.id }}, '{{ u.username }}')">✏️</button>
             </td>
             <td style="color:var(--text2);font-size:0.85rem;">{{ u.email|default:"-" }}</td>
             <td style="font-size:0.8rem;">
@@ -126,7 +135,7 @@
           </tr>
           {% empty %}
           <tr>
-            <td colspan="5" style="text-align:center;color:var(--text3);padding:2rem;">Niciun utilizator creat.</td>
+            <td colspan="6" style="text-align:center;color:var(--text3);padding:2rem;">Niciun utilizator creat.</td>
           </tr>
           {% endfor %}
         </tbody>
@@ -182,6 +191,19 @@ document.getElementById('edit-modal').addEventListener('click', function(e) {
   if (e.target === this) closeEditModal();
 });
 
+// Password Modal
+function openPasswordModal(userId, username) {
+  document.getElementById('pw-user-id').value = userId;
+  document.getElementById('pw-username').textContent = username;
+  document.getElementById('password-modal').style.display = 'flex';
+}
+function closePasswordModal() {
+  document.getElementById('password-modal').style.display = 'none';
+}
+document.getElementById('password-modal').addEventListener('click', function(e) {
+  if (e.target === this) closePasswordModal();
+});
+
 // QR Code Modal
 function openQrModal(username, token) {
   var verifyUrl = window.location.origin + '/verify/' + token + '/';
@@ -206,6 +228,26 @@ function copyQrLink() {
   });
 }
 </script>
+
+<!-- Modal schimbare parolă -->
+<div id="password-modal" style="display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);align-items:center;justify-content:center;">
+  <div style="background:#1a1a2e;border:1px solid var(--border);border-radius:16px;padding:2rem;width:90%;max-width:400px;margin:auto;">
+    <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:1.5rem;">🔑 Schimbă parola — <span id="pw-username"></span></h3>
+    <form method="post">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="change_password">
+      <input type="hidden" name="user_id" id="pw-user-id">
+      <div class="form-group" style="margin-bottom:1.5rem;">
+        <label class="form-label">Parolă nouă</label>
+        <input type="text" name="new_password" class="form-input" placeholder="Introdu parola nouă" required>
+      </div>
+      <div style="display:flex;gap:0.75rem;">
+        <button type="submit" class="btn btn-primary" style="flex:1;">💾 Salvează</button>
+        <button type="button" class="btn btn-outline" onclick="closePasswordModal()">Anulează</button>
+      </div>
+    </form>
+  </div>
+</div>
 
 <!-- Modal QR Code -->
 <div id="qr-modal" style="display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);align-items:center;justify-content:center;">

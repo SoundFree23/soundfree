@@ -488,6 +488,7 @@ def backend_users(request):
                 else:
                     new_user = User.objects.create_user(username=username, password=password, email=email, is_staff=False)
                     profile = get_or_create_profile(new_user)
+                    profile.plain_password = password
                     if sub_start:
                         profile.subscription_start = datetime.strptime(sub_start, '%Y-%m-%d').date()
                     if sub_end:
@@ -514,6 +515,18 @@ def backend_users(request):
         elif action == 'delete':
             user_id = request.POST.get('user_id')
             User.objects.filter(id=user_id, is_staff=False).delete()
+            return redirect('music:backend_users')
+        elif action == 'change_password':
+            user_id = request.POST.get('user_id')
+            new_password = request.POST.get('new_password', '').strip()
+            u = User.objects.filter(id=user_id, is_staff=False).first()
+            if u and new_password:
+                u.set_password(new_password)
+                u.save()
+                profile = get_or_create_profile(u)
+                profile.plain_password = new_password
+                profile.save(update_fields=['plain_password'])
+                messages.success(request, f'✅ Parola pentru {u.username} a fost schimbată!')
             return redirect('music:backend_users')
         elif action == 'toggle':
             user_id = request.POST.get('user_id')
@@ -652,6 +665,9 @@ def backend_orders(request):
 
                 # Ensure profile exists and activate subscription
                 UserProfile.objects.get_or_create(user=user)
+                if generated_password and hasattr(user, 'profile'):
+                    user.profile.plain_password = generated_password
+                    user.profile.save(update_fields=['plain_password'])
                 if hasattr(user, 'profile'):
                     profile = user.profile
                     today = timezone.now().date()
