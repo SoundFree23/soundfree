@@ -265,7 +265,7 @@ def purchase_submit(request):
     size_label = size_labels[size_idx] if 0 <= size_idx < len(size_labels) else '101-250 mp'
 
     order = Order.objects.create(
-        user=request.user if request.user.is_authenticated else None,
+        user=request.user if request.user.is_authenticated and not request.user.is_staff else None,
         plan=data.get('plan', 'standard'),
         billing=data.get('billing', 'annual'),
         business_type=data.get('business_type', 'cafenea'),
