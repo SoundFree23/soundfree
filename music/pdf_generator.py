@@ -392,15 +392,16 @@ def generate_license_pdf(order, profile):
     y = box_top - box_h - 10 * mm
 
     # "LICENTA VALABILA" badge
-    c.setFont(FONT_BOLD, 8)
+    c.setFont(FONT_BOLD, 11)
     lv_text = 'LICENTA VALABILA'
-    lv_w = c.stringWidth(lv_text, FONT_BOLD, 8)
-    lv_pad = 4 * mm
-    draw_rounded_rect(c, (width - lv_w) / 2 - lv_pad, y + 1 * mm,
-                       lv_w + 2 * lv_pad, 5.5 * mm, 3,
-                       fill_color=LIGHT_GREEN, stroke_color=GREEN, line_width=0.5)
+    lv_w = c.stringWidth(lv_text, FONT_BOLD, 11)
+    lv_pad = 6 * mm
+    badge_h = 7 * mm
+    draw_rounded_rect(c, (width - lv_w) / 2 - lv_pad, y,
+                       lv_w + 2 * lv_pad, badge_h, 3.5,
+                       fill_color=LIGHT_GREEN, stroke_color=GREEN, line_width=0.7)
     c.setFillColor(DARK_GREEN)
-    c.drawCentredString(width / 2, y + 2.5 * mm, lv_text)
+    c.drawCentredString(width / 2, y + 2 * mm, lv_text)
 
     # Green ribbon
     y -= 7 * mm
