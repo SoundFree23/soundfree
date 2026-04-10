@@ -435,18 +435,22 @@ def generate_license_pdf(order, profile):
     # LEGAL TEXT
     # ═══════════════════════════════════════════
     y -= 14 * mm
-    c.setFont(FONT, 7.5)
+    c.setFont(FONT, 7)
     c.setFillColor(GRAY)
     legal = (
-        'Prezenta licenta muzicala in mod exclusiv este eliberata de catre SoundFree S.R.L, titular unic al dreptului de '
-        'autor si utilizator avizat pentru exploatarea repertoriului sau. '
-        'Reproducerea neautorizata atrage raspundere legala in baza legii L8/1996 si UNIACOR/2060520503084. '
-        'Licenta valabila doar pentru locatia si spatiul specificate.'
+        'Prezenta licenta muzicala este acordata in mod exclusiv de catre SoundFree S.R.L. (CUI 54416770), '
+        'titular unic al drepturilor de autor si conexe, prin care se autorizeaza redarea repertoriului propriu SoundFree. '
+        'Repertoriul este compus si licentiat integral de echipa SoundFree, fara drepturi terte. '
+        'In temeiul Legii nr. 8/1996 privind dreptul de autor si drepturile conexe, '
+        'SoundFree S.R.L. exercita gestiunea individuala a drepturilor sale si refuza orice reprezentare sau '
+        'colectare de remuneratii de catre orice organizatie de gestiune colectiva (UCMR-ADA, CREDIDAM, UPFR). '
+        'Licenta este valabila doar pentru locatia si perioada specificate. '
+        'Reproducerea neautorizata atrage raspundere legala.'
     )
-    legal_lines = _wrap_text(c, legal, FONT, 7.5, usable)
+    legal_lines = _wrap_text(c, legal, FONT, 7, usable)
     for line in legal_lines:
         c.drawString(left, y, line)
-        y -= 3.5 * mm
+        y -= 3.3 * mm
 
     # ═══════════════════════════════════════════
     # SEPARATOR
