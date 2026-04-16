@@ -242,22 +242,30 @@ def generate_license_pdf(order, profile):
     c.setFillColor(GREEN)
     c.drawString(lx + note_w + 3 + sound_w, y, 'Free')
 
-    # Title
+    # Title (with elegant letter-spacing)
     y -= 12 * mm
     c.setFillColor(GREEN)
     c.setFont(FONT_BOLD, 24)
-    c.drawCentredString(width / 2, y, 'LICENTA MUZICALA')
+    c.setCharSpace(3)
+    c.drawCentredString(width / 2, y, 'LICENȚĂ MUZICALĂ')
+    c.setCharSpace(0)
 
     y -= 7 * mm
     c.setFont(FONT, 9)
     c.setFillColor(GRAY)
-    c.drawCentredString(width / 2, y, 'Certificat de licentiere pentru difuzare muzica in spatii comerciale')
+    c.drawCentredString(width / 2, y, 'Certificat de licențiere pentru difuzare muzică în spații comerciale')
 
-    # Green separator line
+    # Green separator line with musical note ornament in center
     y -= 6 * mm
     c.setStrokeColor(GREEN)
-    c.setLineWidth(1.5)
-    c.line(left, y, right, y)
+    c.setLineWidth(1.2)
+    mid = width / 2
+    gap = 7 * mm
+    c.line(left, y, mid - gap, y)
+    c.line(mid + gap, y, right, y)
+    c.setFont(FONT, 12)
+    c.setFillColor(GREEN)
+    c.drawCentredString(mid, y - 2.5, '\u266b')
 
     # ═══════════════════════════════════════════
     # LICENSE NUMBER + QR CODE
@@ -267,8 +275,8 @@ def generate_license_pdf(order, profile):
     # License number
     c.setFont(FONT, 9)
     c.setFillColor(GRAY)
-    c.drawString(left, y, 'Nr. Licenta:')
-    nr_x = left + c.stringWidth('Nr. Licenta: ', FONT, 9)
+    c.drawString(left, y, 'Nr. Licență:')
+    nr_x = left + c.stringWidth('Nr. Licență: ', FONT, 9)
     c.setFont(FONT_BOLD, 14)
     c.setFillColor(BLACK)
     c.drawString(nr_x, y, order.reference)
@@ -311,12 +319,12 @@ def generate_license_pdf(order, profile):
     col_y = box_top - 5 * mm
     c.setFont(FONT_BOLD, 10)
     c.setFillColor(GREEN)
-    c.drawString(left + 3 * mm, col_y, 'Titular licenta')
+    c.drawString(left + 3 * mm, col_y, 'Titular licență')
 
     col_y -= 5 * mm
     c.setFont(FONT, 8)
     c.setFillColor(GRAY)
-    c.drawString(left + 3 * mm, col_y, 'Nume firma:')
+    c.drawString(left + 3 * mm, col_y, 'Nume firmă:')
     col_y -= 5 * mm
     c.setFont(FONT_BOLD, 11)
     c.setFillColor(BLACK)
@@ -338,7 +346,7 @@ def generate_license_pdf(order, profile):
     col_y = box_top - 5 * mm
     c.setFont(FONT_BOLD, 10)
     c.setFillColor(GREEN)
-    c.drawString(mid_x + 3 * mm, col_y, 'Client licentiat')
+    c.drawString(mid_x + 3 * mm, col_y, 'Client licențiat')
 
     col_y -= 5 * mm
     c.setFont(FONT, 8)
@@ -366,7 +374,7 @@ def generate_license_pdf(order, profile):
     addr_y = box_top - 38 * mm - 5 * mm
     c.setFont(FONT, 8)
     c.setFillColor(GRAY)
-    c.drawString(left + 3 * mm, addr_y, 'Adresa:')
+    c.drawString(left + 3 * mm, addr_y, 'Adresă:')
     addr_y -= 5 * mm
     c.setFont(FONT_BOLD, 9)
     c.setFillColor(BLACK)
@@ -380,7 +388,7 @@ def generate_license_pdf(order, profile):
     addr_y -= 1 * mm
     c.setFont(FONT, 8)
     c.setFillColor(GRAY)
-    c.drawString(left + 3 * mm, addr_y, 'Suprafata:')
+    c.drawString(left + 3 * mm, addr_y, 'Suprafață:')
     addr_y -= 5 * mm
     c.setFont(FONT_BOLD, 10)
     c.setFillColor(BLACK)
@@ -439,14 +447,14 @@ def generate_license_pdf(order, profile):
     c.setFont(FONT, 8.5)
     c.setFillColor(GRAY)
     legal = (
-        'Prezenta licenta muzicala este acordata in mod exclusiv de catre SoundFree S.R.L. (CUI 54416770), '
-        'titular unic al drepturilor de autor si conexe, prin care se autorizeaza redarea repertoriului propriu SoundFree. '
-        'Repertoriul este compus si licentiat integral de echipa SoundFree, fara drepturi terte. '
-        'In temeiul Legii nr. 8/1996 privind dreptul de autor si drepturile conexe, '
-        'SoundFree S.R.L. exercita gestiunea individuala a drepturilor sale si refuza orice reprezentare sau '
-        'colectare de remuneratii de catre orice organizatie de gestiune colectiva (UCMR-ADA, CREDIDAM, UPFR). '
-        'Licenta este valabila doar pentru locatia si perioada specificate. '
-        'Reproducerea neautorizata atrage raspundere legala.'
+        'Prezenta licență muzicală este acordată în mod exclusiv de către SoundFree S.R.L. (CUI 54416770), '
+        'titular unic al drepturilor de autor și conexe, prin care se autorizează redarea repertoriului propriu SoundFree. '
+        'Repertoriul este compus și licențiat integral de echipa SoundFree, fără drepturi terțe. '
+        'În temeiul Legii nr. 8/1996 privind dreptul de autor și drepturile conexe, '
+        'SoundFree S.R.L. exercită gestiunea individuală a drepturilor sale și refuză orice reprezentare sau '
+        'colectare de remunerații de către orice organizație de gestiune colectivă (UCMR-ADA, CREDIDAM, UPFR). '
+        'Licența este valabilă doar pentru locația și perioada specificate. '
+        'Reproducerea neautorizată atrage răspundere legală.'
     )
     legal_lines = _wrap_text(c, legal, FONT, 8.5, usable)
     for line in legal_lines:
@@ -457,9 +465,23 @@ def generate_license_pdf(order, profile):
     # SEPARATOR
     # ═══════════════════════════════════════════
     y -= 6 * mm
-    c.setStrokeColor(HexColor('#e0e0e0'))
+    c.setStrokeColor(HexColor('#d4d4d4'))
     c.setLineWidth(0.5)
-    c.line(left + 30 * mm, y, right - 30 * mm, y)
+    mid = width / 2
+    gap = 4 * mm
+    c.line(left + 30 * mm, y, mid - gap, y)
+    c.line(mid + gap, y, right - 30 * mm, y)
+    # Small diamond ornament
+    c.setFillColor(GREEN)
+    c.setStrokeColor(GREEN)
+    d = 1.3 * mm
+    p = c.beginPath()
+    p.moveTo(mid, y + d)
+    p.lineTo(mid + d, y)
+    p.lineTo(mid, y - d)
+    p.lineTo(mid - d, y)
+    p.close()
+    c.drawPath(p, fill=1, stroke=0)
 
     # ═══════════════════════════════════════════
     # EMITENT / FOOTER - positioned near bottom
@@ -487,7 +509,7 @@ def generate_license_pdf(order, profile):
     c.drawCentredString(width / 2, footer_y, 'CUI: 54416770')
 
     footer_y -= 5 * mm
-    c.drawCentredString(width / 2, footer_y, 'Nr. inregistrare: J2026022358004')
+    c.drawCentredString(width / 2, footer_y, 'Nr. înregistrare: J2026022358004')
 
     footer_y -= 5 * mm
     c.drawCentredString(width / 2, footer_y, 'www.soundfree.ro')
