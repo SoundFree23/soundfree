@@ -343,7 +343,7 @@ def generate_license_pdf(order, profile):
     col_y -= 5 * mm
     c.setFont(FONT, 8)
     c.setFillColor(GRAY)
-    c.drawString(mid_x + 3 * mm, col_y, 'Nume client:')
+    c.drawString(mid_x + 3 * mm, col_y, 'Nume afacere:')
     col_y -= 5 * mm
     c.setFont(FONT_BOLD, 11)
     c.setFillColor(BLACK)
