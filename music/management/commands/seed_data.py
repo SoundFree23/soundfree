@@ -38,34 +38,6 @@ class Command(BaseCommand):
             moods[slug] = m
             self.stdout.write(f'Mood: {name}')
 
-        # Melodii demo (fără fișiere audio — pentru preview UI)
-        songs_data = [
-            ('Morning Breeze', 'SoundFree Studio', 'ambient', 'relaxant', 72, 214, True),
-            ('Coffee Shop Tales', 'SoundFree Studio', 'cafe-music', 'relaxant', 88, 187, True),
-            ('Urban Flow', 'SoundFree Studio', 'electronic-chill', 'energic', 110, 243, True),
-            ('Gentle Strings', 'SoundFree Studio', 'classical-modern', 'romantic', 65, 198, True),
-            ('Summer Vibes', 'SoundFree Studio', 'pop-instrumental', 'vesel', 120, 221, True),
-            ('Late Night Jazz', 'SoundFree Studio', 'jazz-lounge', 'misterios', 95, 312, True),
-            ('Forest Rain', 'SoundFree Studio', 'ambient', 'relaxant', 60, 278, False),
-            ('Acoustic Sunrise', 'SoundFree Studio', 'acoustic', 'vesel', 85, 195, False),
-            ('Business Class', 'SoundFree Studio', 'electronic-chill', 'profesional', 105, 256, False),
-            ('Sweet Harmony', 'SoundFree Studio', 'pop-instrumental', 'romantic', 118, 204, False),
-            ('Deep Blue', 'SoundFree Studio', 'ambient', 'misterios', 70, 334, False),
-            ('Retail Rush', 'SoundFree Studio', 'upbeat-retail', 'energic', 125, 183, False),
-        ]
+        # Melodiile demo au fost eliminate — doar genurile și mood-urile se mai seed-uiesc.
 
-        for title, artist, genre_slug, mood_slug, bpm, duration, featured in songs_data:
-            if not Song.objects.filter(title=title).exists():
-                Song.objects.create(
-                    title=title,
-                    artist=artist,
-                    genre=genres.get(genre_slug),
-                    mood=moods.get(mood_slug),
-                    bpm=bpm,
-                    duration=duration,
-                    is_featured=featured,
-                    is_active=True,
-                )
-                self.stdout.write(f'Song: {title}')
-
-        self.stdout.write(self.style.SUCCESS('\n✅ Date demo adăugate cu succes!'))
+        self.stdout.write(self.style.SUCCESS('\n✅ Genuri și mood-uri demo adăugate cu succes!'))
