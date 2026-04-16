@@ -356,7 +356,7 @@ def generate_license_pdf(order, profile):
     col_y -= 1 * mm
     c.setFont(FONT, 8)
     c.setFillColor(GRAY)
-    c.drawString(mid_x + 3 * mm, col_y, 'Colectie:')
+    c.drawString(mid_x + 3 * mm, col_y, 'Domeniul de activitate:')
     col_y -= 5 * mm
     c.setFont(FONT_BOLD, 10)
     c.setFillColor(BLACK)
@@ -393,7 +393,7 @@ def generate_license_pdf(order, profile):
 
     # "LICENTA VALABILA" badge
     c.setFont(FONT_BOLD, 11)
-    lv_text = 'LICENTA VALABILA'
+    lv_text = 'LICENȚĂ VALABILĂ'
     lv_w = c.stringWidth(lv_text, FONT_BOLD, 11)
     lv_pad = 6 * mm
     badge_h = 7 * mm
@@ -430,7 +430,7 @@ def generate_license_pdf(order, profile):
 
     c.setFont(FONT_BOLD, 16)
     c.setFillColor(WHITE)
-    c.drawCentredString(width / 2, y + 4 * mm, f'{start_str}      pana la      {end_str}')
+    c.drawCentredString(width / 2, y + 4 * mm, f'{start_str}      până la      {end_str}')
 
     # ═══════════════════════════════════════════
     # LEGAL TEXT
