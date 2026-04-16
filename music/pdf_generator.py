@@ -243,20 +243,11 @@ def generate_license_pdf(order, profile):
     c.setFillColor(GREEN)
     c.drawString(lx + note_w + logo_gap + sound_w, y, 'Free')
 
-    # Title (with elegant letter-spacing via TextObject)
+    # Title
     y -= 12 * mm
     c.setFillColor(GREEN)
-    title_text = 'LICENȚĂ MUZICALĂ'
-    title_size = 24
-    char_space = 3
-    # Measure width including char spacing
-    title_w = c.stringWidth(title_text, FONT_BOLD, title_size) + char_space * (len(title_text) - 1)
-    t = c.beginText((width - title_w) / 2, y)
-    t.setFont(FONT_BOLD, title_size)
-    t.setFillColor(GREEN)
-    t.setCharSpace(char_space)
-    t.textOut(title_text)
-    c.drawText(t)
+    c.setFont(FONT_BOLD, 26)
+    c.drawCentredString(width / 2, y, 'LICENȚĂ MUZICALĂ')
 
     y -= 7 * mm
     c.setFont(FONT, 9)
@@ -313,15 +304,15 @@ def generate_license_pdf(order, profile):
     mid_x = left + usable / 2
     col_max_w = usable / 2 - 8 * mm
 
-    # Elegant rounded box border (very subtle)
-    draw_rounded_rect(c, left, box_top - box_h, usable, box_h, 3,
-                       stroke_color=HexColor('#e0e0e0'), line_width=0.5)
-
-    # Subtle internal dividers (lighter than the border)
-    c.setStrokeColor(HexColor('#ececec'))
+    # Clean horizontal dividers only (no outer box)
+    c.setStrokeColor(HexColor('#d0d0d0'))
     c.setLineWidth(0.4)
-    c.line(mid_x, box_top - 2 * mm, mid_x, box_top - 36 * mm)
-    c.line(left + 3 * mm, box_top - 38 * mm, right - 3 * mm, box_top - 38 * mm)
+    # Line below column headers
+    c.line(left, box_top - 8 * mm, right, box_top - 8 * mm)
+    # Line separating columns from address
+    c.line(left, box_top - 38 * mm, right, box_top - 38 * mm)
+    # Line below address/surface section
+    c.line(left, box_top - box_h, right, box_top - box_h)
 
     # ── LEFT: Titular licenta ──
     col_y = box_top - 5 * mm
@@ -419,11 +410,16 @@ def generate_license_pdf(order, profile):
     c.setFillColor(DARK_GREEN)
     c.drawCentredString(width / 2, y + 2.8 * mm, lv_text)
 
-    # Clean green ribbon (rounded rectangle, no fold effects)
+    # Clean green ribbon (rectangle, very slight rounding)
     y -= 3 * mm + 14 * mm
     ribbon_h = 14 * mm
-    draw_rounded_rect(c, left, y, usable, ribbon_h, 5,
+    draw_rounded_rect(c, left, y, usable, ribbon_h, 2,
                        fill_color=DARK_GREEN)
+    # Darker accents on left and right ends (subtle ribbon feel)
+    accent_w = 6 * mm
+    c.setFillColor(HexColor('#004D32'))
+    c.rect(left, y, accent_w, ribbon_h, fill=1, stroke=0)
+    c.rect(right - accent_w, y, accent_w, ribbon_h, fill=1, stroke=0)
 
     # Dates
     start_str = profile.subscription_start.strftime('%d-%m-%Y') if profile.subscription_start else '-'
@@ -508,13 +504,10 @@ def generate_license_pdf(order, profile):
     footer_y -= 7 * mm
     c.setFont(FONT, 9)
     c.setFillColor(GRAY)
-    c.drawCentredString(width / 2, footer_y, 'CUI: 54416770')
+    c.drawCentredString(width / 2, footer_y, 'CUI: 54416770   |   J2026022358004')
 
     footer_y -= 5 * mm
-    c.drawCentredString(width / 2, footer_y, 'Nr. înregistrare: J2026022358004')
-
-    footer_y -= 5 * mm
-    c.drawCentredString(width / 2, footer_y, 'www.soundfree.ro')
+    c.drawCentredString(width / 2, footer_y, 'Iași, România   |   www.soundfree.ro')
 
     c.save()
     buf.seek(0)
