@@ -312,15 +312,15 @@ def generate_license_pdf(order, profile):
     mid_x = left + usable / 2
     col_max_w = usable / 2 - 8 * mm
 
-    # Box border
-    c.setStrokeColor(HexColor('#cccccc'))
-    c.setLineWidth(0.5)
-    c.rect(left, box_top - box_h, usable, box_h, fill=0, stroke=1)
+    # Elegant rounded box border (very subtle)
+    draw_rounded_rect(c, left, box_top - box_h, usable, box_h, 3,
+                       stroke_color=HexColor('#e0e0e0'), line_width=0.5)
 
-    # Vertical divider (top section only)
-    c.line(mid_x, box_top, mid_x, box_top - 38 * mm)
-    # Horizontal divider
-    c.line(left, box_top - 38 * mm, right, box_top - 38 * mm)
+    # Subtle internal dividers (lighter than the border)
+    c.setStrokeColor(HexColor('#ececec'))
+    c.setLineWidth(0.4)
+    c.line(mid_x, box_top - 2 * mm, mid_x, box_top - 36 * mm)
+    c.line(left + 3 * mm, box_top - 38 * mm, right - 3 * mm, box_top - 38 * mm)
 
     # ── LEFT: Titular licenta ──
     col_y = box_top - 5 * mm
@@ -406,46 +406,47 @@ def generate_license_pdf(order, profile):
     # ═══════════════════════════════════════════
     y = box_top - box_h - 10 * mm
 
-    # "LICENTA VALABILA" badge
+    # "LICENȚĂ VALABILĂ" elegant badge
     c.setFont(FONT_BOLD, 11)
     lv_text = 'LICENȚĂ VALABILĂ'
     lv_w = c.stringWidth(lv_text, FONT_BOLD, 11)
-    lv_pad = 6 * mm
-    badge_h = 7 * mm
+    lv_pad = 9 * mm
+    badge_h = 8.5 * mm
     draw_rounded_rect(c, (width - lv_w) / 2 - lv_pad, y,
-                       lv_w + 2 * lv_pad, badge_h, 3.5,
-                       fill_color=LIGHT_GREEN, stroke_color=GREEN, line_width=0.7)
+                       lv_w + 2 * lv_pad, badge_h, 4.2,
+                       fill_color=LIGHT_GREEN, stroke_color=GREEN, line_width=0.8)
     c.setFillColor(DARK_GREEN)
-    c.drawCentredString(width / 2, y + 2 * mm, lv_text)
+    c.drawCentredString(width / 2, y + 2.8 * mm, lv_text)
 
-    # Green ribbon (positioned BELOW the badge, with 3mm gap)
-    y -= 3 * mm + 15 * mm
-    ribbon_h = 15 * mm
-    draw_rounded_rect(c, left - 5 * mm, y, usable + 10 * mm, ribbon_h, 4,
+    # Clean green ribbon (rounded rectangle, no fold effects)
+    y -= 3 * mm + 14 * mm
+    ribbon_h = 14 * mm
+    draw_rounded_rect(c, left, y, usable, ribbon_h, 5,
                        fill_color=DARK_GREEN)
-
-    # Ribbon fold effects
-    c.setFillColor(HexColor('#004D32'))
-    p = c.beginPath()
-    p.moveTo(left - 5 * mm, y + ribbon_h)
-    p.lineTo(left - 5 * mm + 4 * mm, y + ribbon_h)
-    p.lineTo(left - 5 * mm, y + ribbon_h - 4 * mm)
-    p.close()
-    c.drawPath(p, fill=1, stroke=0)
-    p = c.beginPath()
-    p.moveTo(right + 5 * mm, y + ribbon_h)
-    p.lineTo(right + 5 * mm - 4 * mm, y + ribbon_h)
-    p.lineTo(right + 5 * mm, y + ribbon_h - 4 * mm)
-    p.close()
-    c.drawPath(p, fill=1, stroke=0)
 
     # Dates
     start_str = profile.subscription_start.strftime('%d-%m-%Y') if profile.subscription_start else '-'
     end_str = profile.subscription_end.strftime('%d-%m-%Y') if profile.subscription_end else '-'
 
-    c.setFont(FONT_BOLD, 16)
+    # Start date (bold)
+    c.setFont(FONT_BOLD, 15)
     c.setFillColor(WHITE)
-    c.drawCentredString(width / 2, y + 4 * mm, f'{start_str}      până la      {end_str}')
+    # "până la" smaller and lighter
+    pana_w = c.stringWidth('până la', FONT, 11)
+    start_w = c.stringWidth(start_str, FONT_BOLD, 15)
+    end_w = c.stringWidth(end_str, FONT_BOLD, 15)
+    gap = 8 * mm
+    total_w = start_w + gap + pana_w + gap + end_w
+    text_x = (width - total_w) / 2
+    text_y = y + ribbon_h / 2 - 2 * mm
+
+    c.drawString(text_x, text_y, start_str)
+    c.setFont(FONT, 11)
+    c.setFillColor(HexColor('#d4e8dc'))
+    c.drawString(text_x + start_w + gap, text_y + 0.5 * mm, 'până la')
+    c.setFont(FONT_BOLD, 15)
+    c.setFillColor(WHITE)
+    c.drawString(text_x + start_w + gap + pana_w + gap, text_y, end_str)
 
     # ═══════════════════════════════════════════
     # LEGAL TEXT
@@ -493,9 +494,15 @@ def generate_license_pdf(order, profile):
     # ═══════════════════════════════════════════
     # EMITENT / FOOTER - positioned near bottom
     # ═══════════════════════════════════════════
-    footer_y = 38 * mm
+    footer_y = 42 * mm
+
+    # "Emitentul" label (small, gray, above logo)
+    c.setFont(FONT, 8.5)
+    c.setFillColor(GRAY)
+    c.drawCentredString(width / 2, footer_y, 'Emitentul')
 
     # Logo: ♫ SoundFree
+    footer_y -= 7 * mm
     c.setFont(FONT, 16)
     c.setFillColor(GREEN)
     nw = c.stringWidth('\u266b', FONT, 16)
