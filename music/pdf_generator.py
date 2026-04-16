@@ -403,8 +403,8 @@ def generate_license_pdf(order, profile):
     c.setFillColor(DARK_GREEN)
     c.drawCentredString(width / 2, y + 2 * mm, lv_text)
 
-    # Green ribbon
-    y -= 7 * mm
+    # Green ribbon (positioned BELOW the badge, with 3mm gap)
+    y -= 3 * mm + 15 * mm
     ribbon_h = 15 * mm
     draw_rounded_rect(c, left - 5 * mm, y, usable + 10 * mm, ribbon_h, 4,
                        fill_color=DARK_GREEN)
