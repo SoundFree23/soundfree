@@ -233,14 +233,15 @@ def generate_license_pdf(order, profile):
     note_w = c.stringWidth('\u266b', FONT, 20)
     sound_w = c.stringWidth('Sound', FONT_BOLD, 22)
     free_w = c.stringWidth('Free', FONT_BOLD, 22)
-    logo_w = note_w + 3 + sound_w + free_w
+    logo_gap = 2.2 * mm
+    logo_w = note_w + logo_gap + sound_w + free_w
     lx = (width - logo_w) / 2
     c.drawString(lx, y, '\u266b')
     c.setFont(FONT_BOLD, 22)
     c.setFillColor(BLACK)
-    c.drawString(lx + note_w + 3, y, 'Sound')
+    c.drawString(lx + note_w + logo_gap, y, 'Sound')
     c.setFillColor(GREEN)
-    c.drawString(lx + note_w + 3 + sound_w, y, 'Free')
+    c.drawString(lx + note_w + logo_gap + sound_w, y, 'Free')
 
     # Title (with elegant letter-spacing via TextObject)
     y -= 12 * mm
@@ -404,7 +405,7 @@ def generate_license_pdf(order, profile):
     # ═══════════════════════════════════════════
     # VALIDITY PERIOD - Green ribbon
     # ═══════════════════════════════════════════
-    y = box_top - box_h - 10 * mm
+    y = box_top - box_h - 14 * mm
 
     # "LICENȚĂ VALABILĂ" elegant badge
     c.setFont(FONT_BOLD, 11)
@@ -428,25 +429,11 @@ def generate_license_pdf(order, profile):
     start_str = profile.subscription_start.strftime('%d-%m-%Y') if profile.subscription_start else '-'
     end_str = profile.subscription_end.strftime('%d-%m-%Y') if profile.subscription_end else '-'
 
-    # Start date (bold)
+    # Dates text (single centered string, same font for reliable spacing)
     c.setFont(FONT_BOLD, 15)
     c.setFillColor(WHITE)
-    # "până la" smaller and lighter
-    pana_w = c.stringWidth('până la', FONT, 11)
-    start_w = c.stringWidth(start_str, FONT_BOLD, 15)
-    end_w = c.stringWidth(end_str, FONT_BOLD, 15)
-    gap = 8 * mm
-    total_w = start_w + gap + pana_w + gap + end_w
-    text_x = (width - total_w) / 2
     text_y = y + ribbon_h / 2 - 2 * mm
-
-    c.drawString(text_x, text_y, start_str)
-    c.setFont(FONT, 11)
-    c.setFillColor(HexColor('#d4e8dc'))
-    c.drawString(text_x + start_w + gap, text_y + 0.5 * mm, 'până la')
-    c.setFont(FONT_BOLD, 15)
-    c.setFillColor(WHITE)
-    c.drawString(text_x + start_w + gap + pana_w + gap, text_y, end_str)
+    c.drawCentredString(width / 2, text_y, f'{start_str}    până la    {end_str}')
 
     # ═══════════════════════════════════════════
     # LEGAL TEXT
@@ -508,14 +495,15 @@ def generate_license_pdf(order, profile):
     nw = c.stringWidth('\u266b', FONT, 16)
     sw = c.stringWidth('Sound', FONT_BOLD, 20)
     fw = c.stringWidth('Free', FONT_BOLD, 20)
-    lw = nw + 2 + sw + fw
+    note_gap = 2 * mm
+    lw = nw + note_gap + sw + fw
     fx = (width - lw) / 2
     c.drawString(fx, footer_y, '\u266b')
     c.setFont(FONT_BOLD, 20)
     c.setFillColor(BLACK)
-    c.drawString(fx + nw + 2, footer_y, 'Sound')
+    c.drawString(fx + nw + note_gap, footer_y, 'Sound')
     c.setFillColor(GREEN)
-    c.drawString(fx + nw + 2 + sw, footer_y, 'Free')
+    c.drawString(fx + nw + note_gap + sw, footer_y, 'Free')
 
     footer_y -= 7 * mm
     c.setFont(FONT, 9)
