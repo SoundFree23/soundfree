@@ -242,13 +242,20 @@ def generate_license_pdf(order, profile):
     c.setFillColor(GREEN)
     c.drawString(lx + note_w + 3 + sound_w, y, 'Free')
 
-    # Title (with elegant letter-spacing)
+    # Title (with elegant letter-spacing via TextObject)
     y -= 12 * mm
     c.setFillColor(GREEN)
-    c.setFont(FONT_BOLD, 24)
-    c.setCharSpace(3)
-    c.drawCentredString(width / 2, y, 'LICENȚĂ MUZICALĂ')
-    c.setCharSpace(0)
+    title_text = 'LICENȚĂ MUZICALĂ'
+    title_size = 24
+    char_space = 3
+    # Measure width including char spacing
+    title_w = c.stringWidth(title_text, FONT_BOLD, title_size) + char_space * (len(title_text) - 1)
+    t = c.beginText((width - title_w) / 2, y)
+    t.setFont(FONT_BOLD, title_size)
+    t.setFillColor(GREEN)
+    t.setCharSpace(char_space)
+    t.textOut(title_text)
+    c.drawText(t)
 
     y -= 7 * mm
     c.setFont(FONT, 9)
