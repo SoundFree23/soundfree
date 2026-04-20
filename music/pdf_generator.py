@@ -2,7 +2,6 @@ import io
 import os
 import qrcode
 from pypdf import PdfReader, PdfWriter
-from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm
 from reportlab.lib.colors import HexColor, white
 from reportlab.pdfgen import canvas
@@ -85,22 +84,28 @@ def _wrap_text(c, text, font, size, max_width):
     return lines or [str(text)]
 
 
-def _build_overlay(order, profile):
-    """Build an overlay PDF with only the dynamic fields; merged over the template."""
+def _build_overlay(order, profile, page_w, page_h):
+    """Build an overlay PDF with only dynamic fields, matching the template's page size."""
     buf = io.BytesIO()
-    width, height = A4
-    c = canvas.Canvas(buf, pagesize=A4)
+    c = canvas.Canvas(buf, pagesize=(page_w, page_h))
 
-    left = 25 * mm
-    right = width - 25 * mm
+    def y_pct(pct_from_top):
+        return page_h * (1 - pct_from_top / 100.0)
+
+    def x_pct(pct_from_left):
+        return page_w * pct_from_left / 100.0
+
+    # Horizontal layout (percentages relative to page width)
+    left = x_pct(8)
+    right = x_pct(92)
     usable = right - left
     mid_x = left + usable / 2
     col_max_w = usable / 2 - 8 * mm
 
-    # ── Nr. Licență (right of "Nr. Licență:" label) ──
+    # ── Nr. Licență (value after "Nr. Licență:" label) ──
     c.setFont(FONT_BOLD, 14)
     c.setFillColor(BLACK)
-    c.drawString(58 * mm, 216 * mm, order.reference)
+    c.drawString(x_pct(22), y_pct(28), order.reference)
 
     # ── QR code (top-right empty square in template) ──
     verify_url = f'https://www.soundfree.ro/verify/{profile.verification_token}/'
@@ -108,27 +113,27 @@ def _build_overlay(order, profile):
     qr_img = ImageReader(qr_buf)
     qr_size = 26 * mm
     qr_x = right - qr_size
-    qr_y = 197 * mm
+    qr_y = y_pct(36) - qr_size + 2 * mm
     c.drawImage(qr_img, qr_x, qr_y, width=qr_size, height=qr_size)
 
-    # ── Titular licență: company name ──
+    # ── Titular licență: company name (under "Titular licență" heading) ──
     c.setFont(FONT_BOLD, 11)
     c.setFillColor(BLACK)
     comp_lines = _wrap_text(c, order.company_name, FONT_BOLD, 11, col_max_w)
-    yc = 175 * mm
+    yc = y_pct(43)
     for line in comp_lines[:2]:
         c.drawString(left + 3 * mm, yc, line)
         yc -= 4.5 * mm
 
     # ── Cod registru value (below "Cod registru:" label) ──
     c.setFont(FONT_BOLD, 10)
-    c.drawString(left + 3 * mm, 156 * mm, str(order.company_cui))
+    c.drawString(left + 3 * mm, y_pct(48), str(order.company_cui))
 
-    # ── Client licențiat: brand name ──
+    # ── Client licențiat: brand name (under "Client licențiat" heading) ──
     brand = order.brand_name or order.company_name
     c.setFont(FONT_BOLD, 11)
     brand_lines = _wrap_text(c, brand, FONT_BOLD, 11, col_max_w)
-    yc = 175 * mm
+    yc = y_pct(43)
     for line in brand_lines[:2]:
         c.drawString(mid_x + 3 * mm, yc, line)
         yc -= 4.5 * mm
@@ -136,34 +141,35 @@ def _build_overlay(order, profile):
     # ── Domeniu activitate value ──
     c.setFont(FONT_BOLD, 10)
     biz_label = BIZ_LABELS.get(order.business_type, order.business_type)
-    c.drawString(mid_x + 3 * mm, 156 * mm, biz_label)
+    c.drawString(mid_x + 3 * mm, y_pct(48), biz_label)
 
     # ── Adresă value ──
     addr_text = order.venue_address or order.company_address or '-'
     c.setFont(FONT_BOLD, 9)
     addr_lines = _wrap_text(c, addr_text, FONT_BOLD, 9, usable - 8 * mm)
-    ya = 139 * mm
+    ya = y_pct(53)
     for line in addr_lines[:2]:
         c.drawString(left + 3 * mm, ya, line)
         ya -= 4 * mm
 
     # ── Suprafață value ──
     c.setFont(FONT_BOLD, 10)
-    c.drawString(left + 3 * mm, 119 * mm, str(order.business_size))
+    c.drawString(left + 3 * mm, y_pct(60), str(order.business_size))
 
-    # ── Dates on the green ribbon (white text) ──
+    # ── Dates on the green ribbon (white text, centered) ──
     start_str = profile.subscription_start.strftime('%d-%m-%Y') if profile.subscription_start else '-'
     end_str = profile.subscription_end.strftime('%d-%m-%Y') if profile.subscription_end else '-'
     c.setFont(FONT_BOLD, 15)
     c.setFillColor(WHITE)
-    c.drawCentredString(width / 2, 89 * mm, f'{start_str}    până la    {end_str}')
+    c.drawCentredString(page_w / 2, y_pct(70), f'{start_str}    până la    {end_str}')
 
-    # ── Correct CUI line in footer (template shows a wrong value) ──
+    # ── Correct CUI line in footer (template has an incorrect value) ──
     c.setFillColor(WHITE)
-    c.rect(50 * mm, 19 * mm, 110 * mm, 5 * mm, fill=1, stroke=0)
+    cui_cover_h = 5 * mm
+    c.rect(x_pct(30), y_pct(91.5) - 1 * mm, x_pct(40), cui_cover_h, fill=1, stroke=0)
     c.setFont(FONT, 9)
     c.setFillColor(GRAY)
-    c.drawCentredString(width / 2, 20.5 * mm, 'CUI: 54416770   |   J2026022358004')
+    c.drawCentredString(page_w / 2, y_pct(91.5), 'CUI: 54416770   |   J2026022358004')
 
     c.save()
     buf.seek(0)
@@ -177,14 +183,20 @@ def generate_license_pdf(order, profile):
             'Copy the template PDF to this location before generating licenses.'
         )
 
-    overlay_buf = _build_overlay(order, profile)
-
+    # Read template and get its actual page dimensions
     template_reader = PdfReader(TEMPLATE_PATH)
+    template_page = template_reader.pages[0]
+    page_w = float(template_page.mediabox.width)
+    page_h = float(template_page.mediabox.height)
+
+    # Build overlay matching the template's exact dimensions
+    overlay_buf = _build_overlay(order, profile, page_w, page_h)
     overlay_reader = PdfReader(overlay_buf)
 
-    writer = PdfWriter()
-    template_page = template_reader.pages[0]
+    # Overlay the dynamic fields on top of the template
     template_page.merge_page(overlay_reader.pages[0])
+
+    writer = PdfWriter()
     writer.add_page(template_page)
 
     final_buf = io.BytesIO()
