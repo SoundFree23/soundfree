@@ -111,29 +111,29 @@ def _build_overlay(order, profile, page_w, page_h):
     verify_url = f'https://www.soundfree.ro/verify/{profile.verification_token}/'
     qr_buf = generate_qr(verify_url)
     qr_img = ImageReader(qr_buf)
-    qr_size = 26 * mm
-    qr_x = right - qr_size
-    qr_y = y_pct(36) - qr_size + 2 * mm
+    qr_size = 24 * mm
+    qr_x = right - qr_size - 2 * mm
+    qr_y = y_pct(36) - qr_size
     c.drawImage(qr_img, qr_x, qr_y, width=qr_size, height=qr_size)
 
     # ── Titular licență: company name (under "Titular licență" heading) ──
     c.setFont(FONT_BOLD, 11)
     c.setFillColor(BLACK)
     comp_lines = _wrap_text(c, order.company_name, FONT_BOLD, 11, col_max_w)
-    yc = y_pct(43)
+    yc = y_pct(44)
     for line in comp_lines[:2]:
         c.drawString(left + 3 * mm, yc, line)
         yc -= 4.5 * mm
 
     # ── Cod registru value (below "Cod registru:" label) ──
     c.setFont(FONT_BOLD, 10)
-    c.drawString(left + 3 * mm, y_pct(48), str(order.company_cui))
+    c.drawString(left + 3 * mm, y_pct(50), str(order.company_cui))
 
     # ── Client licențiat: brand name (under "Client licențiat" heading) ──
     brand = order.brand_name or order.company_name
     c.setFont(FONT_BOLD, 11)
     brand_lines = _wrap_text(c, brand, FONT_BOLD, 11, col_max_w)
-    yc = y_pct(43)
+    yc = y_pct(44)
     for line in brand_lines[:2]:
         c.drawString(mid_x + 3 * mm, yc, line)
         yc -= 4.5 * mm
@@ -141,20 +141,20 @@ def _build_overlay(order, profile, page_w, page_h):
     # ── Domeniu activitate value ──
     c.setFont(FONT_BOLD, 10)
     biz_label = BIZ_LABELS.get(order.business_type, order.business_type)
-    c.drawString(mid_x + 3 * mm, y_pct(48), biz_label)
+    c.drawString(mid_x + 3 * mm, y_pct(50), biz_label)
 
     # ── Adresă value ──
     addr_text = order.venue_address or order.company_address or '-'
     c.setFont(FONT_BOLD, 9)
     addr_lines = _wrap_text(c, addr_text, FONT_BOLD, 9, usable - 8 * mm)
-    ya = y_pct(53)
+    ya = y_pct(57)
     for line in addr_lines[:2]:
         c.drawString(left + 3 * mm, ya, line)
         ya -= 4 * mm
 
     # ── Suprafață value ──
     c.setFont(FONT_BOLD, 10)
-    c.drawString(left + 3 * mm, y_pct(60), str(order.business_size))
+    c.drawString(left + 3 * mm, y_pct(64), str(order.business_size))
 
     # ── Dates on the green ribbon (white text, centered) ──
     start_str = profile.subscription_start.strftime('%d-%m-%Y') if profile.subscription_start else '-'
@@ -164,12 +164,12 @@ def _build_overlay(order, profile, page_w, page_h):
     c.drawCentredString(page_w / 2, y_pct(70), f'{start_str}    până la    {end_str}')
 
     # ── Correct CUI line in footer (template has an incorrect value) ──
+    y_cui = y_pct(87.7)
     c.setFillColor(WHITE)
-    cui_cover_h = 5 * mm
-    c.rect(x_pct(30), y_pct(91.5) - 1 * mm, x_pct(40), cui_cover_h, fill=1, stroke=0)
+    c.rect(x_pct(30), y_cui - 2 * mm, x_pct(40), 6 * mm, fill=1, stroke=0)
     c.setFont(FONT, 9)
     c.setFillColor(GRAY)
-    c.drawCentredString(page_w / 2, y_pct(91.5), 'CUI: 54416770   |   J2026022358004')
+    c.drawCentredString(page_w / 2, y_cui, 'CUI: 54416770   |   J2026022358004')
 
     c.save()
     buf.seek(0)
