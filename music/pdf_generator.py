@@ -116,24 +116,24 @@ def _build_overlay(order, profile, page_w, page_h):
     qr_y = y_pct(36) - qr_size
     c.drawImage(qr_img, qr_x, qr_y, width=qr_size, height=qr_size)
 
-    # ── Titular licență: company name (under "Titular licență" heading) ──
+    # ── Titular licență: company name (between heading ~34% and "Cod registru" label ~42%) ──
     c.setFont(FONT_BOLD, 11)
     c.setFillColor(BLACK)
     comp_lines = _wrap_text(c, order.company_name, FONT_BOLD, 11, col_max_w)
-    yc = y_pct(44)
+    yc = y_pct(38.5)
     for line in comp_lines[:2]:
         c.drawString(left + 3 * mm, yc, line)
         yc -= 4.5 * mm
 
-    # ── Cod registru value (below "Cod registru:" label) ──
+    # ── Cod registru value (between "Cod registru" label ~42% and "Adresă" label ~48%) ──
     c.setFont(FONT_BOLD, 10)
-    c.drawString(left + 3 * mm, y_pct(50), str(order.company_cui))
+    c.drawString(left + 3 * mm, y_pct(45.5), str(order.company_cui))
 
-    # ── Client licențiat: brand name (under "Client licențiat" heading) ──
+    # ── Client licențiat: brand name (between heading ~34% and "Domeniu activitate" ~42%) ──
     brand = order.brand_name or order.company_name
     c.setFont(FONT_BOLD, 11)
     brand_lines = _wrap_text(c, brand, FONT_BOLD, 11, col_max_w)
-    yc = y_pct(44)
+    yc = y_pct(38.5)
     for line in brand_lines[:2]:
         c.drawString(mid_x + 3 * mm, yc, line)
         yc -= 4.5 * mm
@@ -141,32 +141,32 @@ def _build_overlay(order, profile, page_w, page_h):
     # ── Domeniu activitate value ──
     c.setFont(FONT_BOLD, 10)
     biz_label = BIZ_LABELS.get(order.business_type, order.business_type)
-    c.drawString(mid_x + 3 * mm, y_pct(50), biz_label)
+    c.drawString(mid_x + 3 * mm, y_pct(45.5), biz_label)
 
-    # ── Adresă value ──
+    # ── Adresă value (between "Adresă" label ~48% and "Suprafață" label ~54%) ──
     addr_text = order.venue_address or order.company_address or '-'
     c.setFont(FONT_BOLD, 9)
     addr_lines = _wrap_text(c, addr_text, FONT_BOLD, 9, usable - 8 * mm)
-    ya = y_pct(57)
+    ya = y_pct(51.5)
     for line in addr_lines[:2]:
         c.drawString(left + 3 * mm, ya, line)
         ya -= 4 * mm
 
-    # ── Suprafață value ──
+    # ── Suprafață value (between "Suprafață" label ~54% and ribbon start ~60%) ──
     c.setFont(FONT_BOLD, 10)
-    c.drawString(left + 3 * mm, y_pct(64), str(order.business_size))
+    c.drawString(left + 3 * mm, y_pct(57.5), str(order.business_size))
 
     # ── Dates on the green ribbon (white text, centered) ──
     start_str = profile.subscription_start.strftime('%d-%m-%Y') if profile.subscription_start else '-'
     end_str = profile.subscription_end.strftime('%d-%m-%Y') if profile.subscription_end else '-'
     c.setFont(FONT_BOLD, 15)
     c.setFillColor(WHITE)
-    c.drawCentredString(page_w / 2, y_pct(70), f'{start_str}    până la    {end_str}')
+    c.drawCentredString(page_w / 2, y_pct(66.5), f'{start_str}    până la    {end_str}')
 
-    # ── Correct CUI line in footer (template has an incorrect value) ──
-    y_cui = y_pct(87.7)
+    # ── Correct CUI line in footer (covers template's incorrect value at ~90%) ──
+    y_cui = y_pct(90)
     c.setFillColor(WHITE)
-    c.rect(x_pct(30), y_cui - 2 * mm, x_pct(40), 6 * mm, fill=1, stroke=0)
+    c.rect(x_pct(20), y_cui - 3 * mm, x_pct(60), 8 * mm, fill=1, stroke=0)
     c.setFont(FONT, 9)
     c.setFillColor(GRAY)
     c.drawCentredString(page_w / 2, y_cui, 'CUI: 54416770   |   J2026022358004')
