@@ -280,6 +280,8 @@ def purchase_submit(request):
         company_email=data.get('company_email', ''),
         company_phone=data.get('company_phone', ''),
         company_reg=data.get('company_reg', ''),
+        company_representative=data.get('company_representative', ''),
+        company_representative_role=data.get('company_representative_role', ''),
     )
 
     # Generate proforma invoice via Oblio
@@ -294,9 +296,22 @@ def purchase_submit(request):
 
     # Send notification email to admin
     try:
+        business_labels = {
+            'cafenea': 'Cafenea / Cofetărie',
+            'restaurant': 'Restaurant / Pizzerie',
+            'bar': 'Bar / Pub',
+            'club': 'Club / Discotecă',
+            'hotel': 'Hotel / Pensiune',
+            'salon': 'Salon / Spa',
+            'retail': 'Magazine / Retail',
+            'birou': 'Birou / Coworking',
+            'cabinet': 'Cabinet / Clinică',
+            'gym': 'Gym / Fitness',
+        }
+        business_label = business_labels.get(order.business_type, order.business_type)
         send_mail(
             subject=f'[SoundFree] Comandă nouă: {order.reference}',
-            message=f'Comandă nouă #{order.reference}\n\nFirmă: {order.company_name}\nBrand: {order.brand_name}\nCUI: {order.company_cui}\nAdresa firmă: {order.company_address}\nAdresa locație: {order.venue_address}\nTip afacere: {order.business_type}\nSuprafață: {order.business_size}\nFacturare: {order.get_billing_display()}\nPreț: {order.price_total} lei\nEmail: {order.company_email}\nTelefon: {order.company_phone}\nFactură Oblio: {order.oblio_invoice or "N/A"}',
+            message=f'Comandă nouă #{order.reference}\n\nFirmă: {order.company_name}\nBrand: {order.brand_name}\nCUI: {order.company_cui}\nReprezentat de: {order.company_representative}\nFuncția: {order.company_representative_role}\nAdresa firmă: {order.company_address}\nAdresa locație: {order.venue_address}\nTip afacere: {business_label}\nSuprafață: {order.business_size}\nFacturare: {order.get_billing_display()}\nPreț: {order.price_total} lei\nEmail: {order.company_email}\nTelefon: {order.company_phone}\nFactură Oblio: {order.oblio_invoice or "N/A"}',
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=['office@soundfree.ro'],
             fail_silently=True,

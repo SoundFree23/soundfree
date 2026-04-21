@@ -222,6 +222,16 @@
           <input class="form-input" type="tel" id="f-phone" required placeholder="07xx xxx xxx">
         </div>
       </div>
+      <div class="form-row">
+        <div class="form-group">
+          <div class="form-label">{{ t.purchase_representative }} *</div>
+          <input class="form-input" type="text" id="f-representative" required placeholder="{{ t.purchase_representative_ph }}">
+        </div>
+        <div class="form-group">
+          <div class="form-label">{{ t.purchase_role }} *</div>
+          <input class="form-input" type="text" id="f-role" required placeholder="{{ t.purchase_role_ph }}">
+        </div>
+      </div>
     </form>
 
     <div style="display:flex;flex-direction:column;gap:0.75rem;margin-top:1.5rem;padding:1.25rem;background:var(--bg3);border-radius:10px;border:1px solid var(--border);">
@@ -355,8 +365,8 @@
 
     var sameAddr = document.getElementById('f-same-address').checked;
     var fields = sameAddr
-      ? ['f-company', 'f-brand', 'f-cui', 'f-email', 'f-phone']
-      : ['f-company', 'f-brand', 'f-cui', 'f-venue-street', 'f-venue-nr', 'f-venue-city', 'f-venue-county', 'f-email', 'f-phone'];
+      ? ['f-company', 'f-brand', 'f-cui', 'f-email', 'f-phone', 'f-representative', 'f-role']
+      : ['f-company', 'f-brand', 'f-cui', 'f-venue-street', 'f-venue-nr', 'f-venue-city', 'f-venue-county', 'f-email', 'f-phone', 'f-representative', 'f-role'];
     for (var i = 0; i < fields.length; i++) {
       var el = document.getElementById(fields[i]);
       if (!el.value.trim()) { el.focus(); return; }
@@ -370,14 +380,14 @@
     var vNr = document.getElementById('f-venue-nr').value;
     var vParts = [vStreet];
     if (vNr && vNr !== '-') vParts.push('Nr. ' + vNr);
-    var bloc = document.getElementById('f-venue-bloc').value;
-    var scara = document.getElementById('f-venue-scara').value;
-    var etaj = document.getElementById('f-venue-etaj').value;
-    var ap = document.getElementById('f-venue-ap').value;
-    if (bloc) vParts.push(bloc);
-    if (scara) vParts.push(scara);
-    if (etaj) vParts.push(etaj);
-    if (ap) vParts.push(ap);
+    var bloc = document.getElementById('f-venue-bloc').value.trim();
+    var scara = document.getElementById('f-venue-scara').value.trim();
+    var etaj = document.getElementById('f-venue-etaj').value.trim();
+    var ap = document.getElementById('f-venue-ap').value.trim();
+    if (bloc) vParts.push(/^bl\.?/i.test(bloc) ? bloc : 'Bl. ' + bloc);
+    if (scara) vParts.push(/^sc\.?/i.test(scara) ? scara : 'Sc. ' + scara);
+    if (etaj) vParts.push(/^(et\.?|parter)/i.test(etaj) ? etaj : 'Et. ' + etaj);
+    if (ap) vParts.push(/^ap\.?/i.test(ap) ? ap : 'Ap. ' + ap);
     vParts.push(document.getElementById('f-venue-city').value);
     vParts.push(document.getElementById('f-venue-county').value);
     document.getElementById('conf-venue').textContent = vParts.join(', ');
@@ -407,17 +417,22 @@
           var nr = document.getElementById('f-venue-nr').value;
           var p = [street];
           if (nr && nr !== '-') p.push('Nr. ' + nr);
-          var b = document.getElementById('f-venue-bloc').value;
-          var s = document.getElementById('f-venue-scara').value;
-          var e = document.getElementById('f-venue-etaj').value;
-          var a = document.getElementById('f-venue-ap').value;
-          if (b) p.push(b); if (s) p.push(s); if (e) p.push(e); if (a) p.push(a);
+          var b = document.getElementById('f-venue-bloc').value.trim();
+          var s = document.getElementById('f-venue-scara').value.trim();
+          var e = document.getElementById('f-venue-etaj').value.trim();
+          var a = document.getElementById('f-venue-ap').value.trim();
+          if (b) p.push(/^bl\.?/i.test(b) ? b : 'Bl. ' + b);
+          if (s) p.push(/^sc\.?/i.test(s) ? s : 'Sc. ' + s);
+          if (e) p.push(/^(et\.?|parter)/i.test(e) ? e : 'Et. ' + e);
+          if (a) p.push(/^ap\.?/i.test(a) ? a : 'Ap. ' + a);
           p.push(document.getElementById('f-venue-city').value);
           p.push(document.getElementById('f-venue-county').value);
           return p.join(', ');
         })(),
         company_email: document.getElementById('f-email').value,
         company_phone: document.getElementById('f-phone').value,
+        company_representative: document.getElementById('f-representative').value,
+        company_representative_role: document.getElementById('f-role').value,
         company_reg: ''
       })
     }).then(function(r) { return r.json(); }).then(function(data) {

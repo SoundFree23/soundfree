@@ -192,6 +192,8 @@ class Order(models.Model):
     company_email = models.EmailField(verbose_name="Email firmă")
     company_phone = models.CharField(max_length=30, verbose_name="Telefon firmă")
     company_reg = models.CharField(max_length=30, blank=True, verbose_name="Nr. Reg. Comerț")
+    company_representative = models.CharField(max_length=200, blank=True, verbose_name="Reprezentat de")
+    company_representative_role = models.CharField(max_length=100, blank=True, verbose_name="Funcția")
 
     payment_type = models.CharField(max_length=10, choices=PAYMENT_TYPE_CHOICES, default='normal', verbose_name="Tip plată")
     status = models.CharField(max_length=15, choices=STATUS_CHOICES, default='pending', verbose_name="Status")
