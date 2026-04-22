@@ -1,4 +1,5 @@
 {% extends 'music/base.html' %}
+{% load static %}
 
 {% block title %}{{ t.purchase_title }} — SoundFree.ro{% endblock %}
 
@@ -30,6 +31,14 @@
     outline: none; box-sizing: border-box; transition: border-color 0.2s;
   }
   .form-input:focus { border-color: var(--accent); }
+  select.form-input {
+    appearance: none; -webkit-appearance: none; -moz-appearance: none;
+    padding-right: 2.5rem; cursor: pointer;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'><path d='M1 1.5L6 6.5L11 1.5' stroke='%23888' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+    background-repeat: no-repeat; background-position: right 1rem center;
+  }
+  select.form-input:disabled { opacity: 0.5; cursor: not-allowed; }
+  select.form-input option { background: var(--bg3); color: var(--text); }
   .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
   @media (max-width: 600px) {
     .form-row { grid-template-columns: 1fr !important; }
@@ -203,12 +212,16 @@
       </div>
       <div class="form-row">
         <div class="form-group">
-          <div class="form-label">{{ t.purchase_venue_city }} *</div>
-          <input class="form-input" type="text" id="f-venue-city" required placeholder="{{ t.purchase_venue_city_ph }}">
+          <div class="form-label">{{ t.purchase_venue_county }} *</div>
+          <select class="form-input" id="f-venue-county" required>
+            <option value="">{{ t.purchase_venue_county_ph }}</option>
+          </select>
         </div>
         <div class="form-group">
-          <div class="form-label">{{ t.purchase_venue_county }} *</div>
-          <input class="form-input" type="text" id="f-venue-county" required placeholder="{{ t.purchase_venue_county_ph }}">
+          <div class="form-label">{{ t.purchase_venue_city }} *</div>
+          <select class="form-input" id="f-venue-city" required disabled>
+            <option value="">{{ t.purchase_venue_city_ph }}</option>
+          </select>
         </div>
       </div>
       </div>
@@ -299,6 +312,73 @@
   var sizeLabels = ['1-100 m²','101-250 m²','251-500 m²','501-1000 m²','> 1000 m²'];
 
   var sel = { biz: 'cafenea', size: 0, billing: 'annual' };
+
+  // Romania counties + localities (cascading dropdowns)
+  var romaniaData = null;
+  var countyPh = '{{ t.purchase_venue_county_ph|escapejs }}';
+  var cityPh = '{{ t.purchase_venue_city_ph|escapejs }}';
+  var romaniaLoaded = fetch('{% static "romania_judete.json" %}')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      romaniaData = data;
+      var countySel = document.getElementById('f-venue-county');
+      var keys = Object.keys(data).sort(function(a, b) {
+        return data[a].nume.localeCompare(data[b].nume, 'ro');
+      });
+      for (var i = 0; i < keys.length; i++) {
+        var k = keys[i];
+        var opt = document.createElement('option');
+        opt.value = data[k].nume;
+        opt.setAttribute('data-auto', k);
+        opt.textContent = data[k].nume;
+        countySel.appendChild(opt);
+      }
+    });
+
+  function populateCities(countyAuto, preselect) {
+    var citySel = document.getElementById('f-venue-city');
+    citySel.innerHTML = '<option value="">' + cityPh + '</option>';
+    if (!countyAuto || !romaniaData || !romaniaData[countyAuto]) {
+      citySel.disabled = true;
+      return;
+    }
+    var loc = romaniaData[countyAuto].loc;
+    for (var i = 0; i < loc.length; i++) {
+      var opt = document.createElement('option');
+      opt.value = loc[i];
+      opt.textContent = loc[i];
+      if (preselect && loc[i].toLowerCase() === preselect.toLowerCase()) {
+        opt.selected = true;
+      }
+      citySel.appendChild(opt);
+    }
+    citySel.disabled = false;
+  }
+
+  document.getElementById('f-venue-county').addEventListener('change', function() {
+    var opt = this.options[this.selectedIndex];
+    populateCities(opt ? opt.getAttribute('data-auto') : '');
+  });
+
+  // Normalize text: strip diacritics, lowercase, trim
+  function normalizeRo(s) {
+    return (s || '').toString().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+  }
+
+  // Find county by free-text (e.g. "Jud. Iași", "IS", "Iasi") → returns auto code
+  function findCountyAuto(text) {
+    if (!romaniaData || !text) return '';
+    var n = normalizeRo(text.replace(/^jud\.?\s*/i, '').replace(/^sector\s+/i, 'bucuresti'));
+    // Direct auto code match
+    var upper = text.trim().toUpperCase();
+    if (romaniaData[upper]) return upper;
+    // Name match
+    var keys = Object.keys(romaniaData);
+    for (var i = 0; i < keys.length; i++) {
+      if (normalizeRo(romaniaData[keys[i]].nume) === n) return keys[i];
+    }
+    return '';
+  }
 
   function calcPrice() {
     return Math.round(basePrice * bizMultipliers[sel.biz] * sizeMultipliers[sel.size]);
@@ -458,9 +538,17 @@
         // Try to extract city and county from address
         var parts = addr.split(',').map(function(s) { return s.trim(); });
         if (parts.length >= 3) {
-          document.getElementById('f-venue-county').value = parts[parts.length - 1] || '';
-          document.getElementById('f-venue-city').value = parts[parts.length - 2] || '';
+          var rawCounty = parts[parts.length - 1] || '';
+          var rawCity = parts[parts.length - 2] || '';
           document.getElementById('f-venue-street').value = parts.slice(0, parts.length - 2).join(', ');
+          romaniaLoaded.then(function() {
+            var auto = findCountyAuto(rawCounty);
+            var countySel = document.getElementById('f-venue-county');
+            if (auto) {
+              countySel.value = romaniaData[auto].nume;
+              populateCities(auto, rawCity);
+            }
+          });
         }
       }
       venueFields.style.display = 'none';
@@ -469,8 +557,10 @@
       // Clear fields so user can fill manually
       document.getElementById('f-venue-street').value = '';
       document.getElementById('f-venue-nr').value = '';
-      document.getElementById('f-venue-city').value = '';
       document.getElementById('f-venue-county').value = '';
+      var citySel = document.getElementById('f-venue-city');
+      citySel.innerHTML = '<option value="">' + cityPh + '</option>';
+      citySel.disabled = true;
     }
   });
 
