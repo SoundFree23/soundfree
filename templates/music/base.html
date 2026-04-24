@@ -1121,6 +1121,10 @@ updateTabs(window.location.pathname);
 
 // ── SPA Navigation ──
 function navigateTo(url) {
+  const currentPath = window.location.pathname;
+  const newPath = url.split('?')[0].split('#')[0];
+  const samePathQueryChange = currentPath === newPath;
+  const savedScroll = samePathQueryChange ? window.scrollY : 0;
   fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
     .then(r => r.text())
     .then(html => {
@@ -1139,7 +1143,8 @@ function navigateTo(url) {
         oldScript.parentNode.replaceChild(newScript, oldScript);
       });
       initAllPageFeatures();
-      window.scrollTo(0, 0);
+      if (samePathQueryChange) window.scrollTo(0, savedScroll);
+      else window.scrollTo(0, 0);
     })
     .catch(() => { window.location.href = url; });
 }
