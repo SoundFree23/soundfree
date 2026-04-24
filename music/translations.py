@@ -308,8 +308,13 @@ TRANSLATIONS = {
         # TAB BAR
         'tab_home': 'Acasă',
         'tab_search': 'Caută',
+        'tab_radio': 'Radio',
         'tab_library': 'Biblioteca ta',
         'tab_pricing': 'Prețuri',
+        'radio_title': 'Radio SoundFree',
+        'radio_now': 'Acum',
+        'radio_play': 'Ascultă acum',
+        'radio_desc': 'Muzică selectată automat în funcție de oră și zi',
 
         # GREETINGS
         'greeting_morning': 'Bună dimineața',
@@ -748,8 +753,13 @@ TRANSLATIONS = {
         # TAB BAR
         'tab_home': 'Home',
         'tab_search': 'Search',
+        'tab_radio': 'Radio',
         'tab_library': 'Your Library',
         'tab_pricing': 'Pricing',
+        'radio_title': 'SoundFree Radio',
+        'radio_now': 'Now',
+        'radio_play': 'Play now',
+        'radio_desc': 'Music auto-selected based on time of day and day of week',
 
         # GREETINGS
         'greeting_morning': 'Good morning',

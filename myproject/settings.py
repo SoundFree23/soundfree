@@ -50,6 +50,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'django.template.context_processors.media',
                 'music.context_processors.language_context',
+                'music.context_processors.radio_context',
             ],
         },
     },

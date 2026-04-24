@@ -14,6 +14,23 @@
   </div>
 </div>
 
+<!-- RADIO CARD -->
+<div class="radio-card" id="radio-card-home">
+  <div class="radio-eq" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+  <div class="radio-card-body">
+    <div class="radio-label">🎙️ {{ t.radio_title }}</div>
+    <div class="radio-now">
+      <span class="radio-slot-emoji">{{ radio_slot_emoji }}</span>
+      <span class="radio-slot-name">{{ radio_slot_name }}</span>
+    </div>
+    <div class="radio-desc">{{ t.radio_desc }}</div>
+    <button type="button" class="radio-play-btn" id="radio-start-btn">
+      <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+      {{ t.radio_play }}
+    </button>
+  </div>
+</div>
+
 <!-- CINE SUNTEM -->
 <div class="landing-section">
   <h2>{{ t.landing_about_title }}</h2>

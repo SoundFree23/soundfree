@@ -636,6 +636,61 @@
       .fs-vol { display: none; }
       footer { display: none; }
     }
+
+    /* ── RADIO CARD ── */
+    .radio-card {
+      position: relative; overflow: hidden;
+      margin: 1.5rem auto 2rem;
+      max-width: 720px; width: calc(100% - 2rem);
+      background: linear-gradient(135deg, #7c3aed 0%, #06b6d4 100%);
+      border-radius: 18px; padding: 1.5rem 1.5rem 1.5rem 5rem;
+      color: #fff; box-shadow: 0 8px 32px rgba(124,58,237,0.25);
+    }
+    .radio-card-body { position: relative; z-index: 2; }
+    .radio-label {
+      font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1.2px;
+      opacity: 0.85; font-weight: 600; margin-bottom: 0.35rem;
+    }
+    .radio-now {
+      font-size: 1.5rem; font-weight: 800; line-height: 1.1;
+      display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;
+    }
+    .radio-slot-emoji { font-size: 1.4rem; }
+    .radio-desc {
+      font-size: 0.85rem; opacity: 0.85; margin-top: 0.5rem; line-height: 1.4;
+    }
+    .radio-play-btn {
+      margin-top: 1rem;
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: rgba(255,255,255,0.95); color: #222;
+      border: none; padding: 0.7rem 1.3rem; border-radius: 999px;
+      font-weight: 700; font-size: 0.9rem; cursor: pointer;
+      transition: transform 0.15s, background 0.15s;
+    }
+    .radio-play-btn:hover { transform: scale(1.04); background: #fff; }
+    .radio-eq {
+      position: absolute; left: 1.4rem; top: 50%; transform: translateY(-50%);
+      display: flex; align-items: flex-end; gap: 4px; height: 36px;
+    }
+    .radio-eq span {
+      display: block; width: 5px; background: rgba(255,255,255,0.9);
+      border-radius: 2px; animation: radioEq 1s ease-in-out infinite;
+    }
+    .radio-eq span:nth-child(1) { height: 60%; animation-delay: 0s; }
+    .radio-eq span:nth-child(2) { height: 100%; animation-delay: 0.15s; }
+    .radio-eq span:nth-child(3) { height: 40%; animation-delay: 0.3s; }
+    .radio-eq span:nth-child(4) { height: 80%; animation-delay: 0.45s; }
+    .radio-eq span:nth-child(5) { height: 55%; animation-delay: 0.6s; }
+    @keyframes radioEq {
+      0%, 100% { transform: scaleY(0.5); }
+      50% { transform: scaleY(1); }
+    }
+    @media (max-width: 540px) {
+      .radio-card { padding: 1.25rem 1.1rem 1.25rem 3.8rem; }
+      .radio-eq { left: 0.9rem; height: 28px; gap: 3px; }
+      .radio-eq span { width: 4px; }
+      .radio-now { font-size: 1.2rem; }
+    }
   </style>
   {% block extra_css %}{% endblock %}
 </head>
@@ -751,6 +806,10 @@ function colorizeGenreCards() {
   <a href="{% url 'music:browse' %}" class="tab-item" data-tab="search">
     <svg fill="currentColor" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
     <span>{{ t.tab_search }}</span>
+  </a>
+  <a href="#" class="tab-item" data-tab="radio" id="radio-tab-btn">
+    <svg fill="currentColor" viewBox="0 0 24 24"><path d="M3.24 6.15A2.99 2.99 0 0 0 1 9v12a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2H8.3l10.2-4.16L17.38 1 3.24 6.15zM7 20c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm13 0h-8v-6h8v6zM7 8a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/></svg>
+    <span>{{ t.tab_radio }}</span>
   </a>
   <a href="{% url 'music:library' %}" class="tab-item" data-tab="library">
     <svg fill="currentColor" viewBox="0 0 24 24"><path d="M4 6H2v14a2 2 0 0 0 2 2h14v-2H4V6zm16-4H8a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zm-1 9h-4v4h-2v-4H9V9h4V5h2v4h4v2z"/></svg>
@@ -1615,6 +1674,27 @@ function initAllPageFeatures() {
 
 // Init on page load
 document.addEventListener('DOMContentLoaded', initAllPageFeatures);
+
+// ── Radio SoundFree ──
+function startRadio() {
+  if (!isAuthenticated) { showLoginPopup('access'); return; }
+  fetch('/api/radio/')
+    .then(r => {
+      if (r.status === 401 || r.status === 403) { showLoginPopup('access'); return null; }
+      return r.json();
+    })
+    .then(data => {
+      if (!data || !data.songs || !data.songs.length) return;
+      playlist.length = 0;
+      data.songs.forEach(s => playlist.push(s));
+      playSong(0);
+    });
+}
+document.addEventListener('click', (e) => {
+  const radioTab = e.target.closest('#radio-tab-btn');
+  const radioBtn = e.target.closest('#radio-start-btn');
+  if (radioTab || radioBtn) { e.preventDefault(); startRadio(); }
+});
 </script>
 
 {% block extra_js %}{% endblock %}

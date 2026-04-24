@@ -363,6 +363,50 @@ def api_songs(request):
     return JsonResponse({'songs': songs_list})
 
 
+def api_radio(request):
+    """Radio SoundFree — listă de melodii pentru slot-ul orar curent."""
+    from .radio import get_radio_songs, get_slot_display
+
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'auth_required'}, status=401)
+    if not request.user.is_staff:
+        profile = get_or_create_profile(request.user)
+        if not profile.is_subscription_active():
+            return JsonResponse({'error': 'subscription_required'}, status=403)
+
+    lang = request.session.get('lang', 'ro')
+    slot_id, slot, songs = get_radio_songs(limit=80)
+    songs_list = [{
+        'id': s.id,
+        'title': s.title,
+        'artist': 'SoundFree',
+        'audio': request.build_absolute_uri(s.audio_file.url) if s.audio_file else '',
+        'cover': request.build_absolute_uri(s.cover_image.url) if s.cover_image else '',
+        'duration': s.duration,
+        'genre': s.genre.slug if s.genre else '',
+        'genre_name': s.genre.name if s.genre else '',
+    } for s in songs]
+    return JsonResponse({
+        'slot_id': slot_id,
+        'slot_emoji': slot['emoji'],
+        'slot_name': get_slot_display(slot, lang),
+        'songs': songs_list,
+    })
+
+
+def api_radio_current(request):
+    """Doar metadata slot-ului curent (pentru card-ul de pe homepage, fără listă)."""
+    from .radio import get_current_slot, get_slot_display
+
+    lang = request.session.get('lang', 'ro')
+    slot_id, slot = get_current_slot()
+    return JsonResponse({
+        'slot_id': slot_id,
+        'slot_emoji': slot['emoji'],
+        'slot_name': get_slot_display(slot, lang),
+    })
+
+
 # ─── PANEL ADMIN CUSTOM ───────────────────────────────────────────
 
 @login_required(login_url='/backend/login/')
