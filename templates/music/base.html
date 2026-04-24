@@ -311,6 +311,11 @@
       text-decoration: none; transition: transform 0.2s;
     }
     .genre-card:hover { transform: scale(1.02); }
+    .genre-card.genre-card-active {
+      outline: 3px solid #fff;
+      outline-offset: -3px;
+      box-shadow: 0 0 0 4px rgba(124,58,237,0.5), 0 8px 20px rgba(0,0,0,0.35);
+    }
     .genre-card .gc-icon {
       position: absolute; right: -5px; bottom: -5px;
       font-size: 3rem; opacity: 0.3; transform: rotate(15deg);
@@ -319,6 +324,10 @@
       font-size: 0.9rem; font-weight: 700; color: #fff;
       position: relative; z-index: 1;
     }
+    .genre-card.genre-card-all {
+      background: linear-gradient(135deg, #444 0%, #222 100%) !important;
+    }
+    .genre-card.genre-card-all .gc-icon { opacity: 0.4; }
 
     /* ── SECTION HEADERS ── */
     .sh { padding: 1.5rem 1rem 0.75rem; }

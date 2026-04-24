@@ -22,7 +22,6 @@
   </a>
 </div>
 
-{% if not current_genre and not current_mood and not search %}
 <!-- GENRE GRID -->
 {% if genres %}
 <div class="sh">
@@ -32,8 +31,12 @@
 </div>
 <div style="padding:0 1rem;">
   <div class="genre-grid">
+    <a href="{% url 'music:browse' %}" class="genre-card genre-card-all {% if not current_genre and not current_mood and not search %}genre-card-active{% endif %}">
+      <div class="gc-name">{{ t.lib_all_filter }}</div>
+      <div class="gc-icon">🎵</div>
+    </a>
     {% for genre in genres %}
-    <a href="{% url 'music:browse' %}?genre={{ genre.slug }}" class="genre-card" data-gc="{{ forloop.counter0 }}">
+    <a href="{% url 'music:browse' %}?genre={{ genre.slug }}" class="genre-card {% if current_genre == genre.slug %}genre-card-active{% endif %}" data-gc="{{ forloop.counter0 }}">
       <div class="gc-name">{{ genre.name }}</div>
       <div class="gc-icon">{{ genre.icon }}</div>
     </a>
@@ -42,6 +45,7 @@
 </div>
 {% endif %}
 
+{% if not current_genre and not current_mood and not search %}
 <!-- FEATURED / RECOMMENDED -->
 {% if featured_songs %}
 <div class="sh">
@@ -110,14 +114,6 @@ document.getElementById('browse-search-form').addEventListener('submit', functio
   navigateTo(url);
 });
 </script>
-</div>
-
-<!-- FILTER CHIPS -->
-<div class="chips" style="margin-top:0.75rem;margin-bottom:0.75rem;">
-  <a href="{% url 'music:browse' %}" class="chip {% if not current_genre and not current_mood and not search %}chip-active{% endif %}">{{ t.lib_all_filter }}</a>
-  {% for genre in genres %}
-  <a href="{% url 'music:browse' %}?genre={{ genre.slug }}" class="chip {% if current_genre == genre.slug %}chip-active{% endif %}">{{ genre.icon }} {{ genre.name }}</a>
-  {% endfor %}
 </div>
 
 <!-- RESULTS INFO -->
