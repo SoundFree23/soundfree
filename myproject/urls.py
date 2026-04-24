@@ -7,15 +7,10 @@ from music.media_serve import serve_media_with_range
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    re_path(
+        r'^media/(?P<path>.*)$',
+        serve_media_with_range,
+        {'document_root': settings.MEDIA_ROOT},
+    ),
     path('', include('music.urls', namespace='music')),
 ]
-
-# In development, serve media files with Range request support (needed for audio seek)
-if settings.DEBUG:
-    urlpatterns += [
-        re_path(
-            r'^media/(?P<path>.*)$',
-            serve_media_with_range,
-            {'document_root': settings.MEDIA_ROOT},
-        ),
-    ]
