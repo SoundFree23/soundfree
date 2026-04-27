@@ -1189,7 +1189,7 @@ history.replaceState({ url: window.location.pathname }, '', window.location.path
 
 fetch('/api/songs/')
   .then(r => r.json())
-  .then(data => { playlist = data.songs; fullCatalog = data.songs; attachCardListeners(); updateAllHearts(); });
+  .then(data => { playlist = data.songs; fullCatalog = data.songs.slice(); attachCardListeners(); updateAllHearts(); });
 
 // ── Favorites (localStorage) - per user ──
 const CURRENT_USER = '{{ user.username|default:"guest" }}';
