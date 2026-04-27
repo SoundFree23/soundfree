@@ -1093,6 +1093,7 @@ function closeFullscreen() {
   document.body.style.overflow = '';
 }
 
+miniPlayer.addEventListener('click', () => { if (hasSong) openFullscreen(); });
 miniInfoArea.addEventListener('click', (e) => { e.stopPropagation(); if (hasSong) openFullscreen(); });
 miniCover.addEventListener('click', (e) => { e.stopPropagation(); if (hasSong) openFullscreen(); });
 miniPlayBtn.addEventListener('click', (e) => { e.stopPropagation(); togglePlay(); });
