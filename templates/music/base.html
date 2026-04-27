@@ -953,6 +953,7 @@ const fsTimeDur = document.getElementById('fs-time-dur');
 const fsVolSlider = document.getElementById('fs-vol-slider');
 
 let playlist = [];
+let fullCatalog = []; // never overwritten — used as fallback when clicking a song not in current playlist (e.g. after switching from radio to catalog)
 let currentIdx = 0;
 let isPlaying = false;
 let hasSong = false;
@@ -1034,7 +1035,15 @@ function attachCardListeners() {
   document.querySelectorAll('.song-card[data-id], .song-row[data-id]').forEach(card => {
     card.addEventListener('click', () => {
       const id = parseInt(card.dataset.id);
-      const idx = playlist.findIndex(s => s.id === id);
+      let idx = playlist.findIndex(s => s.id === id);
+      if (idx < 0) {
+        // Song isn't in the active queue (e.g. radio replaced playlist) — fall back to full catalog
+        const fullIdx = fullCatalog.findIndex(s => s.id === id);
+        if (fullIdx >= 0) {
+          playlist = fullCatalog.slice();
+          idx = fullIdx;
+        }
+      }
       if (idx >= 0) playSong(idx);
     });
   });
@@ -1180,7 +1189,7 @@ history.replaceState({ url: window.location.pathname }, '', window.location.path
 
 fetch('/api/songs/')
   .then(r => r.json())
-  .then(data => { playlist = data.songs; attachCardListeners(); updateAllHearts(); });
+  .then(data => { playlist = data.songs; fullCatalog = data.songs; attachCardListeners(); updateAllHearts(); });
 
 // ── Favorites (localStorage) - per user ──
 const CURRENT_USER = '{{ user.username|default:"guest" }}';
@@ -1706,7 +1715,7 @@ function startRadio() {
 }
 document.addEventListener('click', (e) => {
   const radioTab = e.target.closest('#radio-tab-btn');
-  const radioBtn = e.target.closest('#radio-start-btn');
+  const radioBtn = e.target.closest('[id^="radio-start-btn"]');
   if (radioTab || radioBtn) { e.preventDefault(); startRadio(); }
 });
 </script>
