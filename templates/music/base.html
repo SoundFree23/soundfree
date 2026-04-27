@@ -146,12 +146,26 @@
       font-size: 0.72rem; color: var(--text2); margin-top: 1px;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
+    .mini-controls {
+      display: flex; align-items: center; gap: 6px;
+      flex-shrink: 0;
+    }
     .mini-play-btn {
       background: none; border: none; color: #fff;
       cursor: pointer; padding: 8px; border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
       flex-shrink: 0;
+      transition: background 0.2s, transform 0.15s;
     }
+    .mini-side-btn {
+      display: none;
+      background: none; border: none; color: #b0b0b0;
+      cursor: pointer; padding: 6px; border-radius: 50%;
+      align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: color 0.2s, background 0.2s;
+    }
+    .mini-side-btn:hover { color: #fff; background: rgba(255,255,255,0.06); }
     .mini-progress {
       position: absolute; bottom: 0; left: 8px; right: 8px; height: 2px;
       background: rgba(255,255,255,0.1); border-radius: 1px;
@@ -630,13 +644,22 @@
       #tab-bar { display: none; }
       body { padding-bottom: 0; }
       body.has-player { padding-bottom: var(--player-h); }
-      #mini-player { bottom: 0; margin: 0; border-radius: 0; }
+      #mini-player { bottom: 0; margin: 0; border-radius: 0; padding: 0 2rem; gap: 1rem; }
       .top-header { padding: 0.75rem 2rem; }
       .genre-grid { grid-template-columns: repeat(4, 1fr); }
       .fs-cover-area { max-width: 420px; }
       .fs-controls { max-width: 480px; }
       .h-card { width: 180px; }
       .h-card .hc-cover { width: 180px; height: 180px; }
+      /* Desktop player layout: cover+info on left, controls centered, balanced */
+      .mini-info { flex: 0 0 280px; }
+      .mini-controls { margin-left: auto; margin-right: auto; gap: 10px; }
+      .mini-side-btn { display: flex; }
+      .mini-play-btn {
+        background: rgba(29,185,84,0.15);
+        width: 48px; height: 48px;
+      }
+      .mini-play-btn:hover { background: rgba(29,185,84,0.3); transform: scale(1.06); }
     }
 
     /* ── MOBILE ── */
@@ -797,10 +820,18 @@ function colorizeGenreCards() {
     <div class="p-title" id="mini-title">{{ t.player_select }}</div>
     <div class="p-artist" id="mini-artist">SoundFree.ro</div>
   </div>
-  <button class="mini-play-btn" id="mini-play-btn">
-    <svg id="mini-icon-play" width="32" height="32" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-    <svg id="mini-icon-pause" width="32" height="32" fill="currentColor" viewBox="0 0 24 24" style="display:none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
-  </button>
+  <div class="mini-controls">
+    <button class="mini-side-btn" id="mini-prev-btn" aria-label="Previous">
+      <svg width="22" height="22" fill="currentColor" viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+    </button>
+    <button class="mini-play-btn" id="mini-play-btn">
+      <svg id="mini-icon-play" width="32" height="32" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+      <svg id="mini-icon-pause" width="32" height="32" fill="currentColor" viewBox="0 0 24 24" style="display:none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+    </button>
+    <button class="mini-side-btn" id="mini-next-btn" aria-label="Next">
+      <svg width="22" height="22" fill="currentColor" viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+    </button>
+  </div>
   <div class="mini-progress">
     <div class="mini-progress-fill" id="mini-progress-fill"></div>
   </div>
@@ -1065,6 +1096,14 @@ function closeFullscreen() {
 miniInfoArea.addEventListener('click', (e) => { e.stopPropagation(); if (hasSong) openFullscreen(); });
 miniCover.addEventListener('click', (e) => { e.stopPropagation(); if (hasSong) openFullscreen(); });
 miniPlayBtn.addEventListener('click', (e) => { e.stopPropagation(); togglePlay(); });
+document.getElementById('mini-prev-btn').addEventListener('click', (e) => {
+  e.stopPropagation();
+  if (playlist.length) playSong((currentIdx - 1 + playlist.length) % playlist.length);
+});
+document.getElementById('mini-next-btn').addEventListener('click', (e) => {
+  e.stopPropagation();
+  if (playlist.length) playSong((currentIdx + 1) % playlist.length);
+});
 document.getElementById('fs-close-btn').addEventListener('click', closeFullscreen);
 fsBtnPlay.addEventListener('click', togglePlay);
 document.getElementById('fs-btn-next').addEventListener('click', () => { if (playlist.length) playSong((currentIdx + 1) % playlist.length); });
