@@ -2,7 +2,7 @@
   "name": "SoundFree — Muzică pentru Afaceri",
   "short_name": "SoundFree",
   "description": "Muzică royalty-free pentru afacerea ta. Radio non-stop și catalog complet, ascultă oriunde, oricând.",
-  "start_url": "/?utm_source=pwa",
+  "start_url": "/browse/?utm_source=pwa",
   "scope": "/",
   "display": "standalone",
   "orientation": "any",

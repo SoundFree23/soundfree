@@ -10,7 +10,7 @@
  *
  * Bump CACHE_VERSION whenever this file changes so old clients pick it up.
  */
-const CACHE_VERSION = 'sf-v1';
+const CACHE_VERSION = 'sf-v2';
 const SHELL_CACHE   = `${CACHE_VERSION}-shell`;
 const ASSET_CACHE   = `${CACHE_VERSION}-assets`;
 const API_CACHE     = `${CACHE_VERSION}-api`;
