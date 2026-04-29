@@ -795,7 +795,7 @@ def backend_orders(request):
             Order.objects.filter(id=order_id).delete()
 
         elif action == 'create_manual':
-            Order.objects.create(
+            order = Order.objects.create(
                 plan=request.POST.get('plan', 'standard'),
                 billing=request.POST.get('billing', 'annual'),
                 business_type=request.POST.get('business_type', 'cafenea'),
@@ -812,6 +812,41 @@ def backend_orders(request):
                 company_reg=request.POST.get('company_reg', '').strip(),
                 payment_type=request.POST.get('payment_type', 'normal'),
             )
+
+            # Generate proforma invoice via Oblio (same flow as self-service /purchase/submit/)
+            try:
+                from .oblio_api import OblioAPI
+                result = OblioAPI.create_proforma(order)
+                if result and result.get('seriesName'):
+                    order.oblio_invoice = f"{result.get('seriesName')}{result.get('number', '')}"
+                    order.save(update_fields=['oblio_invoice'])
+            except Exception:
+                pass
+
+            # Send notification email to admin
+            try:
+                business_labels = {
+                    'cafenea': 'Cafenea / Cofetărie',
+                    'restaurant': 'Restaurant / Pizzerie',
+                    'bar': 'Bar / Pub',
+                    'club': 'Club / Discotecă',
+                    'hotel': 'Hotel / Pensiune',
+                    'salon': 'Salon / Spa',
+                    'retail': 'Magazine / Retail',
+                    'birou': 'Birou / Coworking',
+                    'cabinet': 'Cabinet / Clinică',
+                    'gym': 'Gym / Fitness',
+                }
+                business_label = business_labels.get(order.business_type, order.business_type)
+                send_mail(
+                    subject=f'[SoundFree] Comandă manuală: {order.reference}',
+                    message=f'Comandă manuală creată din backend #{order.reference}\n\nFirmă: {order.company_name}\nBrand: {order.brand_name}\nCUI: {order.company_cui}\nAdresa firmă: {order.company_address}\nAdresa locație: {order.venue_address}\nTip afacere: {business_label}\nSuprafață: {order.business_size}\nFacturare: {order.get_billing_display()}\nPreț: {order.price_total} lei\nEmail: {order.company_email}\nTelefon: {order.company_phone}\nFactură Oblio: {order.oblio_invoice or "N/A"}',
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=['office@soundfree.ro'],
+                    fail_silently=True,
+                )
+            except Exception:
+                pass
 
         return redirect('music:backend_orders')
 
