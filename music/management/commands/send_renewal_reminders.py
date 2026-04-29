@@ -81,7 +81,7 @@ class Command(BaseCommand):
                         f'Proforma a fost trimisă și pe email de către sistemul de facturare.\n\n'
                         f'♫ SoundFree\n'
                         f'Muzică licențiată pentru afacerea ta\n'
-                        f'www.soundfree.ro | office@soundfree.ro | 0740 149 975'
+                        f'www.soundfree.ro | office@soundfree.ro | 0733 272 263'
                     ),
                     from_email=settings.DEFAULT_FROM_EMAIL,
                     recipient_list=[last_order.company_email],

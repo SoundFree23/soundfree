@@ -772,7 +772,7 @@ def backend_orders(request):
                         body += f'Parola: {generated_password}\n'
                     else:
                         body += f'Parola: (cea existentă, neschimbată)\n'
-                    body += f'\nÎn atașament veți găsi Licența Muzicală SoundFree.\n\n♫ SoundFree\nMuzică licențiată pentru afacerea ta\nwww.soundfree.ro | office@soundfree.ro | 0740 149 975'
+                    body += f'\nÎn atașament veți găsi Licența Muzicală SoundFree.\n\n♫ SoundFree\nMuzică licențiată pentru afacerea ta\nwww.soundfree.ro | office@soundfree.ro | 0733 272 263'
 
                     email = EmailMessage(
                         subject='[SoundFree] Licența ta a fost activată!',
