@@ -739,6 +739,17 @@
     }
   </style>
   {% block extra_css %}{% endblock %}
+
+  <!-- PWA standalone redirect: launched-as-app should land in /browse/ regardless of cached manifest -->
+  <script>
+  (function(){
+    var standalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches)
+                  || window.navigator.standalone === true;
+    if (standalone && window.location.pathname === '/') {
+      window.location.replace('/browse/?utm_source=pwa');
+    }
+  })();
+  </script>
 </head>
 <body>
 
