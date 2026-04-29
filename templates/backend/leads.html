@@ -188,7 +188,11 @@
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:1.25rem;">
         <div class="form-group">
           <label class="form-label">CUI</label>
-          <input type="text" name="company_cui" id="f-cui" class="form-input" placeholder="ex: 49361245">
+          <div style="display:flex;gap:0.5rem;">
+            <input type="text" name="company_cui" id="f-cui" class="form-input" placeholder="ex: 49361245" style="flex:1;">
+            <button type="button" id="btn-f-lookup" class="btn btn-outline" style="white-space:nowrap;padding:0.4rem 0.75rem;font-size:0.8rem;">🔍 Caută</button>
+          </div>
+          <div id="f-cui-status" style="display:none;font-size:0.8rem;margin-top:0.3rem;"></div>
         </div>
         <div class="form-group">
           <label class="form-label">Nr. Reg. Comerț</label>
@@ -334,6 +338,39 @@ function closeLeadModal() {
 
 document.getElementById('lead-modal').addEventListener('click', function(e){
   if (e.target.id === 'lead-modal') closeLeadModal();
+});
+
+// CUI auto-lookup — same endpoint as the manual order form
+document.getElementById('btn-f-lookup').addEventListener('click', function() {
+  var cui = document.getElementById('f-cui').value.trim();
+  var status = document.getElementById('f-cui-status');
+  if (!cui) { document.getElementById('f-cui').focus(); return; }
+  status.style.display = 'block';
+  status.style.color = 'var(--text3)';
+  status.textContent = 'Se caută...';
+  fetch('{% url "music:lookup_cui" %}?cui=' + encodeURIComponent(cui))
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.ok) {
+        if (data.denumire) document.getElementById('f-company').value = data.denumire;
+        if (data.adresa)   document.getElementById('f-address').value = data.adresa;
+        if (data.nrRegCom) document.getElementById('f-reg').value     = data.nrRegCom;
+        status.style.color = '#22c55e';
+        status.textContent = '✅ ' + (data.denumire || 'Firmă găsită');
+      } else {
+        status.style.color = '#ef4444';
+        status.textContent = '❌ ' + (data.error || 'CUI negăsit');
+      }
+    })
+    .catch(function() {
+      status.style.color = '#ef4444';
+      status.textContent = '❌ Eroare la căutare';
+    });
+});
+
+// Enter in the CUI field also triggers lookup
+document.getElementById('f-cui').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') { e.preventDefault(); document.getElementById('btn-f-lookup').click(); }
 });
 </script>
 
