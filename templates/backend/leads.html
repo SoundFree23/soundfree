@@ -1,0 +1,340 @@
+{% extends 'backend/base_backend.html' %}
+{% block title %}Lead-uri — Backend SoundFree{% endblock %}
+{% block page_title %}📞 Lead-uri{% endblock %}
+{% block active_leads %}active{% endblock %}
+
+{% block content %}
+
+<div class="page-header" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;">
+  <div>
+    <h1>Clienți potențiali</h1>
+    <p style="color:var(--text3);font-size:0.85rem;margin-top:0.25rem;">
+      {{ leads|length }} lead{{ leads|length|pluralize:"-uri" }} afișat{{ leads|length|pluralize:"e" }}
+    </p>
+  </div>
+  <button type="button" class="btn btn-primary" onclick="openLeadModal()">➕ Adaugă lead</button>
+</div>
+
+<!-- Stats -->
+<div class="stats-grid" style="margin-bottom:1.5rem;">
+  <div class="stat-card c-purple">
+    <div class="s-label">În lucru</div>
+    <div class="s-val">{{ open_count }}</div>
+    <div class="s-sub">lead-uri active</div>
+  </div>
+  <div class="stat-card c-yellow">
+    <div class="s-label">Follow-up azi</div>
+    <div class="s-val">{{ today_count }}</div>
+    <div class="s-sub">de contactat astăzi</div>
+  </div>
+  <div class="stat-card" style="border-color:rgba(239,68,68,0.4);">
+    <div class="s-label" style="color:#ef4444;">Restante</div>
+    <div class="s-val" style="color:#ef4444;">{{ overdue_count }}</div>
+    <div class="s-sub">follow-up depășite</div>
+  </div>
+  <div class="stat-card c-green">
+    <div class="s-label">Câștigate</div>
+    <div class="s-val">{{ won_count }}</div>
+    <div class="s-sub">convertite în comenzi</div>
+  </div>
+</div>
+
+<!-- Filters -->
+<form method="get" style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:0.85rem 1rem;margin-bottom:1.25rem;display:flex;gap:0.6rem;align-items:center;flex-wrap:wrap;">
+  <select name="status" class="form-input" style="width:auto;min-width:160px;" onchange="this.form.submit()">
+    <option value="">— Toate statusurile —</option>
+    {% for v, label in STATUS_CHOICES %}
+      <option value="{{ v }}" {% if status_filter == v %}selected{% endif %}>{{ label }}</option>
+    {% endfor %}
+  </select>
+  <select name="assigned" class="form-input" style="width:auto;min-width:160px;" onchange="this.form.submit()">
+    <option value="">— Asignat oricui —</option>
+    <option value="unassigned" {% if user_filter == 'unassigned' %}selected{% endif %}>Neasignat</option>
+    {% for u in staff_users %}
+      <option value="{{ u.id }}" {% if user_filter == u.id|stringformat:"s" %}selected{% endif %}>{{ u.username }}</option>
+    {% endfor %}
+  </select>
+  <label style="display:inline-flex;align-items:center;gap:0.4rem;font-size:0.85rem;color:var(--text2);cursor:pointer;">
+    <input type="checkbox" name="overdue" value="1" {% if overdue_filter %}checked{% endif %} onchange="this.form.submit()" class="form-check">
+    Doar restante
+  </label>
+  {% if status_filter or user_filter or overdue_filter %}
+    <a href="{% url 'music:backend_leads' %}" class="btn btn-outline btn-sm">Resetează</a>
+  {% endif %}
+</form>
+
+<div class="table-card">
+  <table>
+    <thead>
+      <tr>
+        <th>Status</th>
+        <th>Firmă / Brand</th>
+        <th>Contact</th>
+        <th>Tip / Sursă</th>
+        <th>Asignat</th>
+        <th>Follow-up</th>
+        <th>Acțiuni</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for lead in leads %}
+      {% with overdue=lead.is_overdue %}
+      <tr style="{% if overdue %}background:rgba(239,68,68,0.06);{% endif %}">
+        <td>
+          {% if lead.status == 'new' %}
+            <span class="badge-genre" style="background:rgba(124,58,237,0.15);color:var(--accent2);border-color:rgba(124,58,237,0.35);">🆕 Nou</span>
+          {% elif lead.status == 'contacted' %}
+            <span class="badge-genre" style="background:rgba(6,182,212,0.15);color:var(--accent3);border-color:rgba(6,182,212,0.35);">📞 Contactat</span>
+          {% elif lead.status == 'interested' %}
+            <span class="badge-genre" style="background:rgba(245,158,11,0.15);color:var(--warn);border-color:rgba(245,158,11,0.35);">👍 Interesat</span>
+          {% elif lead.status == 'proposal_sent' %}
+            <span class="badge-genre" style="background:rgba(59,130,246,0.15);color:#3b82f6;border-color:rgba(59,130,246,0.35);">📄 Ofertă</span>
+          {% elif lead.status == 'won' %}
+            <span class="badge-active">✅ Câștigat</span>
+          {% else %}
+            <span class="badge-inactive">❌ Pierdut</span>
+          {% endif %}
+        </td>
+        <td>
+          <div class="td-title">{{ lead.company_name }}</div>
+          {% if lead.brand_name %}<div style="font-size:0.78rem;color:var(--accent2);">{{ lead.brand_name }}</div>{% endif %}
+          {% if lead.company_cui %}<div style="font-size:0.72rem;color:var(--text3);">CUI: {{ lead.company_cui }}</div>{% endif %}
+        </td>
+        <td style="font-size:0.82rem;color:var(--text2);">
+          {% if lead.contact_person %}<div>👤 {{ lead.contact_person }}</div>{% endif %}
+          {% if lead.contact_phone %}<div>📞 {{ lead.contact_phone }}</div>{% endif %}
+          {% if lead.contact_email %}<div style="color:var(--text3);font-size:0.75rem;">{{ lead.contact_email }}</div>{% endif %}
+        </td>
+        <td style="font-size:0.82rem;color:var(--text2);">
+          {{ lead.get_business_type_display }}<br>
+          <span style="color:var(--text3);font-size:0.75rem;">{{ lead.business_size }} · {{ lead.get_source_display }}</span>
+        </td>
+        <td style="font-size:0.82rem;color:var(--text2);">
+          {% if lead.assigned_to %}{{ lead.assigned_to.username }}{% else %}<span style="color:var(--text3);">—</span>{% endif %}
+        </td>
+        <td style="font-size:0.82rem;{% if overdue %}color:#ef4444;font-weight:600;{% else %}color:var(--text2);{% endif %}">
+          {% if lead.next_followup %}
+            {{ lead.next_followup|date:"d.m.Y" }}{% if overdue %} ⚠️{% endif %}
+          {% else %}<span style="color:var(--text3);">—</span>{% endif %}
+        </td>
+        <td>
+          <div style="display:flex;gap:0.3rem;flex-wrap:wrap;">
+            <button type="button" class="btn btn-outline btn-sm" onclick='openLeadModal({{ lead.id }}, {{ lead|safe|default:"null" }})' title="Editează"
+              data-lead='{
+                "id": {{ lead.id }},
+                "company_name": "{{ lead.company_name|escapejs }}",
+                "company_cui": "{{ lead.company_cui|escapejs }}",
+                "company_reg": "{{ lead.company_reg|escapejs }}",
+                "company_address": "{{ lead.company_address|escapejs }}",
+                "brand_name": "{{ lead.brand_name|escapejs }}",
+                "venue_address": "{{ lead.venue_address|escapejs }}",
+                "business_type": "{{ lead.business_type }}",
+                "business_size": "{{ lead.business_size }}",
+                "contact_person": "{{ lead.contact_person|escapejs }}",
+                "contact_phone": "{{ lead.contact_phone|escapejs }}",
+                "contact_email": "{{ lead.contact_email|escapejs }}",
+                "status": "{{ lead.status }}",
+                "source": "{{ lead.source }}",
+                "notes": "{{ lead.notes|escapejs }}",
+                "next_followup": "{{ lead.next_followup|date:"Y-m-d" }}",
+                "assigned_to": "{% if lead.assigned_to %}{{ lead.assigned_to.id }}{% endif %}"
+              }'
+            >✏️</button>
+            {% if lead.status != 'won' and lead.status != 'lost' %}
+            <form method="post" style="display:inline;">
+              {% csrf_token %}
+              <input type="hidden" name="lead_id" value="{{ lead.id }}">
+              <button type="submit" name="action" value="convert" class="btn btn-success btn-sm" title="Convertește în comandă"
+                onclick="return confirm('Convertește acest lead în comandă manuală? Vei fi redirecționat să completezi prețul și planul.')">
+                🛒 Convertește
+              </button>
+            </form>
+            {% endif %}
+            {% if lead.converted_to_order %}
+              <a href="{% url 'music:backend_orders' %}" class="btn btn-outline btn-sm" title="Vezi comanda" style="text-decoration:none;">📦 {{ lead.converted_to_order.reference }}</a>
+            {% endif %}
+            <form method="post" style="display:inline;">
+              {% csrf_token %}
+              <input type="hidden" name="lead_id" value="{{ lead.id }}">
+              <button type="submit" name="action" value="delete" class="btn btn-danger btn-sm" title="Șterge"
+                onclick="return confirm('Ștergi lead-ul „{{ lead.company_name|escapejs }}”?')">🗑️</button>
+            </form>
+          </div>
+        </td>
+      </tr>
+      {% endwith %}
+      {% empty %}
+      <tr>
+        <td colspan="7" style="text-align:center;padding:3rem;color:var(--text3);">
+          <div style="font-size:2.5rem;margin-bottom:0.75rem;">📞</div>
+          <div>Niciun lead înregistrat. Apasă „Adaugă lead" pentru a începe.</div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- Modal create / edit -->
+<div id="lead-modal" style="display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);align-items:center;justify-content:center;overflow-y:auto;padding:2rem 0;">
+  <div style="background:#1a1a2e;border:1px solid var(--border);border-radius:16px;padding:2rem;width:95%;max-width:780px;margin:auto;">
+    <h3 id="lead-modal-title" style="font-size:1.2rem;font-weight:700;margin-bottom:1.5rem;">➕ Adaugă lead</h3>
+    <form method="post" id="lead-form">
+      {% csrf_token %}
+      <input type="hidden" name="action" id="lead-action" value="create">
+      <input type="hidden" name="lead_id" id="lead-id" value="">
+
+      <h4 style="font-size:0.9rem;color:var(--accent);margin-bottom:0.75rem;">🏢 Date firmă</h4>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:1.25rem;">
+        <div class="form-group">
+          <label class="form-label">CUI</label>
+          <input type="text" name="company_cui" id="f-cui" class="form-input" placeholder="ex: 49361245">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Nr. Reg. Comerț</label>
+          <input type="text" name="company_reg" id="f-reg" class="form-input" placeholder="ex: J22/1234/2024">
+        </div>
+        <div class="form-group" style="grid-column:span 2;">
+          <label class="form-label">Denumire firmă *</label>
+          <input type="text" name="company_name" id="f-company" class="form-input" required placeholder="ex: S.C. FIRMA S.R.L.">
+        </div>
+        <div class="form-group" style="grid-column:span 2;">
+          <label class="form-label">Brand / Locație</label>
+          <input type="text" name="brand_name" id="f-brand" class="form-input" placeholder="ex: Cafenea Centru">
+        </div>
+        <div class="form-group" style="grid-column:span 2;">
+          <label class="form-label">Adresa firmei</label>
+          <input type="text" name="company_address" id="f-address" class="form-input" placeholder="Adresa sediului social">
+        </div>
+        <div class="form-group" style="grid-column:span 2;">
+          <label class="form-label">Adresa locației</label>
+          <input type="text" name="venue_address" id="f-venue" class="form-input" placeholder="Unde se va difuza muzica">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tip afacere</label>
+          <select name="business_type" id="f-btype" class="form-input">
+            {% for v, label in BUSINESS_TYPE_CHOICES %}
+              <option value="{{ v }}">{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Suprafață</label>
+          <select name="business_size" id="f-bsize" class="form-input">
+            {% for v, label in BUSINESS_SIZE_CHOICES %}
+              <option value="{{ v }}">{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <h4 style="font-size:0.9rem;color:var(--accent);margin-bottom:0.75rem;">👤 Persoană de contact</h4>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:1.25rem;">
+        <div class="form-group" style="grid-column:span 2;">
+          <label class="form-label">Nume</label>
+          <input type="text" name="contact_person" id="f-person" class="form-input" placeholder="ex: Ion Popescu">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Telefon</label>
+          <input type="text" name="contact_phone" id="f-phone" class="form-input" placeholder="07xx xxx xxx">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" name="contact_email" id="f-email" class="form-input" placeholder="email@firma.ro">
+        </div>
+      </div>
+
+      <h4 style="font-size:0.9rem;color:var(--accent);margin-bottom:0.75rem;">📋 CRM</h4>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.75rem;margin-bottom:1rem;">
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select name="status" id="f-status" class="form-input">
+            {% for v, label in STATUS_CHOICES %}
+              <option value="{{ v }}">{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Sursă</label>
+          <select name="source" id="f-source" class="form-input">
+            {% for v, label in SOURCE_CHOICES %}
+              <option value="{{ v }}">{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Asignat</label>
+          <select name="assigned_to" id="f-assigned" class="form-input">
+            <option value="">— Neasignat —</option>
+            {% for u in staff_users %}
+              <option value="{{ u.id }}">{{ u.username }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group" style="grid-column:span 3;">
+          <label class="form-label">Următorul follow-up</label>
+          <input type="date" name="next_followup" id="f-followup" class="form-input">
+        </div>
+        <div class="form-group" style="grid-column:span 3;">
+          <label class="form-label">Note</label>
+          <textarea name="notes" id="f-notes" class="form-input" rows="4" placeholder="Ce ai discutat, ce trebuie urmărit..."></textarea>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">💾 Salvează</button>
+        <button type="button" class="btn btn-outline" onclick="closeLeadModal()">Anulează</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function openLeadModal(id) {
+  var modal = document.getElementById('lead-modal');
+  var title = document.getElementById('lead-modal-title');
+  var form = document.getElementById('lead-form');
+  form.reset();
+  document.getElementById('lead-action').value = 'create';
+  document.getElementById('lead-id').value = '';
+  title.textContent = '➕ Adaugă lead';
+
+  if (id) {
+    // Find the row's edit button to read the data-lead JSON
+    var btn = document.querySelector('button[data-lead*="\"id\": ' + id + ',"]');
+    if (btn) {
+      var data = JSON.parse(btn.getAttribute('data-lead'));
+      document.getElementById('lead-action').value = 'update';
+      document.getElementById('lead-id').value = data.id;
+      title.textContent = '✏️ Editează lead';
+      document.getElementById('f-cui').value     = data.company_cui;
+      document.getElementById('f-reg').value     = data.company_reg;
+      document.getElementById('f-company').value = data.company_name;
+      document.getElementById('f-brand').value   = data.brand_name;
+      document.getElementById('f-address').value = data.company_address;
+      document.getElementById('f-venue').value   = data.venue_address;
+      document.getElementById('f-btype').value   = data.business_type;
+      document.getElementById('f-bsize').value   = data.business_size;
+      document.getElementById('f-person').value  = data.contact_person;
+      document.getElementById('f-phone').value   = data.contact_phone;
+      document.getElementById('f-email').value   = data.contact_email;
+      document.getElementById('f-status').value  = data.status;
+      document.getElementById('f-source').value  = data.source;
+      document.getElementById('f-notes').value   = data.notes;
+      document.getElementById('f-followup').value= data.next_followup;
+      document.getElementById('f-assigned').value= data.assigned_to;
+    }
+  }
+  modal.style.display = 'flex';
+}
+
+function closeLeadModal() {
+  document.getElementById('lead-modal').style.display = 'none';
+}
+
+document.getElementById('lead-modal').addEventListener('click', function(e){
+  if (e.target.id === 'lead-modal') closeLeadModal();
+});
+</script>
+
+{% endblock %}

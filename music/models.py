@@ -215,6 +215,85 @@ class Order(models.Model):
         super().save(*args, **kwargs)
 
 
+class Lead(models.Model):
+    """Client potențial (CRM)."""
+    STATUS_CHOICES = [
+        ('new',           '🆕 Nou'),
+        ('contacted',     '📞 Contactat'),
+        ('interested',    '👍 Interesat'),
+        ('proposal_sent', '📄 Ofertă trimisă'),
+        ('won',           '✅ Câștigat'),
+        ('lost',          '❌ Pierdut'),
+    ]
+    SOURCE_CHOICES = [
+        ('referral',  'Recomandare'),
+        ('google',    'Google'),
+        ('facebook',  'Facebook'),
+        ('walk_in',   'Vizită fizică'),
+        ('cold_call', 'Cold call'),
+        ('other',     'Altul'),
+    ]
+    BUSINESS_TYPE_CHOICES = [
+        ('cafenea',    'Cafenea / Cofetărie'),
+        ('restaurant', 'Restaurant / Pizzerie'),
+        ('bar',        'Bar / Pub'),
+        ('club',       'Club / Discotecă'),
+        ('hotel',      'Hotel / Pensiune'),
+        ('salon',      'Salon / Spa'),
+        ('retail',     'Magazine / Retail'),
+        ('birou',      'Birou / Coworking'),
+        ('cabinet',    'Cabinet / Clinică'),
+        ('gym',        'Gym / Fitness'),
+    ]
+    BUSINESS_SIZE_CHOICES = [
+        ('< 100 mp',     '< 100 mp'),
+        ('101-250 mp',   '101-250 mp'),
+        ('251-500 mp',   '251-500 mp'),
+        ('501-1000 mp',  '501-1000 mp'),
+        ('> 1000 mp',    '> 1000 mp'),
+    ]
+
+    # Date firmă
+    company_name    = models.CharField(max_length=200, verbose_name="Denumire firmă")
+    company_cui     = models.CharField(max_length=20, blank=True, verbose_name="CUI")
+    company_reg     = models.CharField(max_length=50, blank=True, verbose_name="Nr. Reg. Comerț")
+    company_address = models.CharField(max_length=300, blank=True, verbose_name="Adresa firmei")
+    brand_name      = models.CharField(max_length=200, blank=True, verbose_name="Brand / Locație")
+    venue_address   = models.CharField(max_length=300, blank=True, verbose_name="Adresa locației")
+    business_type   = models.CharField(max_length=20, choices=BUSINESS_TYPE_CHOICES, default='cafenea', verbose_name="Tip afacere")
+    business_size   = models.CharField(max_length=20, choices=BUSINESS_SIZE_CHOICES, default='< 100 mp', verbose_name="Suprafață")
+
+    # Contact
+    contact_person = models.CharField(max_length=200, blank=True, verbose_name="Persoană de contact")
+    contact_phone  = models.CharField(max_length=50, blank=True, verbose_name="Telefon")
+    contact_email  = models.EmailField(blank=True, verbose_name="Email")
+
+    # CRM
+    status        = models.CharField(max_length=20, choices=STATUS_CHOICES, default='new', verbose_name="Status")
+    source        = models.CharField(max_length=20, choices=SOURCE_CHOICES, default='other', verbose_name="Sursă")
+    notes         = models.TextField(blank=True, verbose_name="Note")
+    next_followup = models.DateField(null=True, blank=True, verbose_name="Următorul follow-up")
+    assigned_to   = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL, related_name='assigned_leads', verbose_name="Asignat")
+
+    # Tracking
+    converted_to_order = models.ForeignKey(Order, null=True, blank=True, on_delete=models.SET_NULL, related_name='source_lead', verbose_name="Comandă rezultată")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Lead"
+        verbose_name_plural = "Lead-uri"
+        ordering = ['-updated_at']
+
+    def __str__(self):
+        return f"{self.company_name} ({self.get_status_display()})"
+
+    def is_overdue(self):
+        if not self.next_followup or self.status in ('won', 'lost'):
+            return False
+        return self.next_followup < date.today()
+
+
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
     """Creează automat un UserProfile la crearea unui User."""

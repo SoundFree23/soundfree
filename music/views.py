@@ -6,7 +6,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.db.models import Sum
-from .models import Song, Genre, Mood, Playlist, ContactMessage, UserProfile, Order
+from .models import Song, Genre, Mood, Playlist, ContactMessage, UserProfile, Order, Lead
 from .forms import SongUploadForm, GenreForm
 
 
@@ -414,12 +414,17 @@ def api_radio_current(request):
 @login_required(login_url='/backend/login/')
 @user_passes_test(is_staff, login_url='/backend/login/')
 def backend_dashboard(request):
+    from datetime import date as _date
+    today = _date.today()
     total_songs = Song.objects.count()
     active_songs = Song.objects.filter(is_active=True).count()
     featured_songs = Song.objects.filter(is_featured=True).count()
     total_plays = Song.objects.aggregate(total=Sum('plays_count'))['total'] or 0
     recent_songs = Song.objects.order_by('-created_at')[:10]
     genres = Genre.objects.all()
+    leads_overdue = Lead.objects.filter(next_followup__lt=today).exclude(status__in=['won', 'lost']).count()
+    leads_today = Lead.objects.filter(next_followup=today).exclude(status__in=['won', 'lost']).count()
+    leads_open = Lead.objects.exclude(status__in=['won', 'lost']).count()
     context = {
         'total_songs': total_songs,
         'active_songs': active_songs,
@@ -427,6 +432,9 @@ def backend_dashboard(request):
         'total_plays': total_plays,
         'recent_songs': recent_songs,
         'genres': genres,
+        'leads_overdue': leads_overdue,
+        'leads_today': leads_today,
+        'leads_open': leads_open,
     }
     return render(request, 'backend/dashboard.html', context)
 
@@ -813,6 +821,14 @@ def backend_orders(request):
                 payment_type=request.POST.get('payment_type', 'normal'),
             )
 
+            # If converted from a lead, mark the lead as won and link it
+            try:
+                lead_id = int(request.POST.get('lead_id') or 0)
+                if lead_id:
+                    Lead.objects.filter(pk=lead_id).update(status='won', converted_to_order=order)
+            except (ValueError, TypeError):
+                pass
+
             # Generate proforma invoice via Oblio (same flow as self-service /purchase/submit/)
             try:
                 from .oblio_api import OblioAPI
@@ -852,9 +868,147 @@ def backend_orders(request):
 
     orders = Order.objects.all()
     pending_count = orders.filter(status='pending').count()
+    prefill = None
+    if request.GET.get('prefill') == '1':
+        prefill = request.session.pop('prefill_order', None)
     return render(request, 'backend/orders.html', {
         'orders': orders,
         'pending_count': pending_count,
+        'prefill': prefill,
+    })
+
+
+@login_required(login_url='/backend/login/')
+@user_passes_test(is_staff, login_url='/backend/login/')
+def backend_leads(request):
+    from datetime import date as _date
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        lead_id = request.POST.get('lead_id')
+
+        def _parse_date(s):
+            if not s:
+                return None
+            try:
+                from datetime import datetime
+                return datetime.strptime(s, '%Y-%m-%d').date()
+            except Exception:
+                return None
+
+        def _parse_assigned(s):
+            if not s:
+                return None
+            try:
+                return User.objects.filter(pk=int(s), is_staff=True).first()
+            except (ValueError, TypeError):
+                return None
+
+        if action == 'create':
+            Lead.objects.create(
+                company_name=request.POST.get('company_name', '').strip(),
+                company_cui=request.POST.get('company_cui', '').strip(),
+                company_reg=request.POST.get('company_reg', '').strip(),
+                company_address=request.POST.get('company_address', '').strip(),
+                brand_name=request.POST.get('brand_name', '').strip(),
+                venue_address=request.POST.get('venue_address', '').strip(),
+                business_type=request.POST.get('business_type', 'cafenea'),
+                business_size=request.POST.get('business_size', '< 100 mp'),
+                contact_person=request.POST.get('contact_person', '').strip(),
+                contact_phone=request.POST.get('contact_phone', '').strip(),
+                contact_email=request.POST.get('contact_email', '').strip(),
+                status=request.POST.get('status', 'new'),
+                source=request.POST.get('source', 'other'),
+                notes=request.POST.get('notes', '').strip(),
+                next_followup=_parse_date(request.POST.get('next_followup')),
+                assigned_to=_parse_assigned(request.POST.get('assigned_to')),
+            )
+            messages.success(request, 'Lead creat.')
+
+        elif action == 'update' and lead_id:
+            lead = get_object_or_404(Lead, pk=lead_id)
+            lead.company_name    = request.POST.get('company_name', lead.company_name).strip()
+            lead.company_cui     = request.POST.get('company_cui', '').strip()
+            lead.company_reg     = request.POST.get('company_reg', '').strip()
+            lead.company_address = request.POST.get('company_address', '').strip()
+            lead.brand_name      = request.POST.get('brand_name', '').strip()
+            lead.venue_address   = request.POST.get('venue_address', '').strip()
+            lead.business_type   = request.POST.get('business_type', lead.business_type)
+            lead.business_size   = request.POST.get('business_size', lead.business_size)
+            lead.contact_person  = request.POST.get('contact_person', '').strip()
+            lead.contact_phone   = request.POST.get('contact_phone', '').strip()
+            lead.contact_email   = request.POST.get('contact_email', '').strip()
+            lead.status          = request.POST.get('status', lead.status)
+            lead.source          = request.POST.get('source', lead.source)
+            lead.notes           = request.POST.get('notes', '').strip()
+            lead.next_followup   = _parse_date(request.POST.get('next_followup'))
+            lead.assigned_to     = _parse_assigned(request.POST.get('assigned_to'))
+            lead.save()
+            messages.success(request, 'Lead actualizat.')
+
+        elif action == 'delete' and lead_id:
+            Lead.objects.filter(pk=lead_id).delete()
+            messages.success(request, 'Lead șters.')
+
+        elif action == 'convert' and lead_id:
+            # Pre-fill the manual order form with lead data and redirect to /backend/orders/
+            lead = get_object_or_404(Lead, pk=lead_id)
+            request.session['prefill_order'] = {
+                'company_name':   lead.company_name,
+                'company_cui':    lead.company_cui,
+                'company_reg':    lead.company_reg,
+                'company_address': lead.company_address,
+                'brand_name':     lead.brand_name,
+                'venue_address':  lead.venue_address,
+                'business_type':  lead.business_type,
+                'business_size':  lead.business_size,
+                'company_email':  lead.contact_email,
+                'company_phone':  lead.contact_phone,
+                'lead_id':        lead.id,
+            }
+            return redirect(f"{request.build_absolute_uri('/backend/orders/')}?prefill=1")
+
+        return redirect('music:backend_leads')
+
+    leads = Lead.objects.select_related('assigned_to', 'converted_to_order').all()
+
+    status_filter = request.GET.get('status', '')
+    if status_filter:
+        leads = leads.filter(status=status_filter)
+
+    user_filter = request.GET.get('assigned', '')
+    if user_filter == 'unassigned':
+        leads = leads.filter(assigned_to__isnull=True)
+    elif user_filter:
+        try:
+            leads = leads.filter(assigned_to_id=int(user_filter))
+        except (ValueError, TypeError):
+            pass
+
+    if request.GET.get('overdue') == '1':
+        leads = leads.filter(next_followup__lt=_date.today()).exclude(status__in=['won', 'lost'])
+
+    today = _date.today()
+    overdue_count = Lead.objects.filter(next_followup__lt=today).exclude(status__in=['won', 'lost']).count()
+    today_count = Lead.objects.filter(next_followup=today).exclude(status__in=['won', 'lost']).count()
+    open_count = Lead.objects.exclude(status__in=['won', 'lost']).count()
+    won_count = Lead.objects.filter(status='won').count()
+
+    return render(request, 'backend/leads.html', {
+        'leads': leads,
+        'staff_users': User.objects.filter(is_staff=True).order_by('username'),
+        'status_filter': status_filter,
+        'user_filter': user_filter,
+        'overdue_filter': request.GET.get('overdue') == '1',
+        'overdue_count': overdue_count,
+        'today_count': today_count,
+        'open_count': open_count,
+        'won_count': won_count,
+        'today': today,
+        'STATUS_CHOICES': Lead.STATUS_CHOICES,
+        'SOURCE_CHOICES': Lead.SOURCE_CHOICES,
+        'BUSINESS_TYPE_CHOICES': Lead.BUSINESS_TYPE_CHOICES,
+        'BUSINESS_SIZE_CHOICES': Lead.BUSINESS_SIZE_CHOICES,
     })
 
 

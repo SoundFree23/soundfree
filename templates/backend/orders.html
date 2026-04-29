@@ -106,10 +106,18 @@
 <!-- Modal creare comandă manuală -->
 <div id="create-modal" style="display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);align-items:center;justify-content:center;overflow-y:auto;padding:2rem 0;">
   <div style="background:#1a1a2e;border:1px solid var(--border);border-radius:16px;padding:2rem;width:95%;max-width:700px;margin:auto;">
-    <h3 style="font-size:1.2rem;font-weight:700;margin-bottom:1.5rem;">➕ Adaugă comandă manuală</h3>
+    <h3 style="font-size:1.2rem;font-weight:700;margin-bottom:1.5rem;">
+      {% if prefill %}🛒 Convertește lead în comandă{% else %}➕ Adaugă comandă manuală{% endif %}
+    </h3>
+    {% if prefill %}
+    <div class="alert alert-success" style="margin-bottom:1.25rem;">
+      Datele firmei au fost preluate din lead. Completează prețul și planul, apoi salvează.
+    </div>
+    {% endif %}
     <form method="post">
       {% csrf_token %}
       <input type="hidden" name="action" value="create_manual">
+      {% if prefill.lead_id %}<input type="hidden" name="lead_id" value="{{ prefill.lead_id }}">{% endif %}
 
       <!-- Firma -->
       <div style="margin-bottom:1.5rem;">
@@ -118,34 +126,34 @@
           <div class="form-group">
             <label class="form-label">CUI *</label>
             <div style="display:flex;gap:0.5rem;">
-              <input type="text" name="company_cui" id="m-cui" class="form-input" placeholder="ex: 49361245" required style="flex:1;">
+              <input type="text" name="company_cui" id="m-cui" class="form-input" placeholder="ex: 49361245" required style="flex:1;" value="{{ prefill.company_cui|default:'' }}">
               <button type="button" id="btn-m-lookup" class="btn btn-outline" style="white-space:nowrap;padding:0.4rem 0.75rem;font-size:0.8rem;">🔍 Caută</button>
             </div>
             <div id="m-cui-status" style="display:none;font-size:0.8rem;margin-top:0.3rem;"></div>
           </div>
           <div class="form-group">
             <label class="form-label">Nr. Reg. Comerț</label>
-            <input type="text" name="company_reg" id="m-reg" class="form-input" placeholder="ex: J22/1234/2024">
+            <input type="text" name="company_reg" id="m-reg" class="form-input" placeholder="ex: J22/1234/2024" value="{{ prefill.company_reg|default:'' }}">
           </div>
           <div class="form-group" style="grid-column:span 2;">
             <label class="form-label">Denumire firmă *</label>
-            <input type="text" name="company_name" id="m-company" class="form-input" placeholder="ex: S.C. FIRMA S.R.L." required>
+            <input type="text" name="company_name" id="m-company" class="form-input" placeholder="ex: S.C. FIRMA S.R.L." required value="{{ prefill.company_name|default:'' }}">
           </div>
           <div class="form-group" style="grid-column:span 2;">
             <label class="form-label">Nume brand / locație</label>
-            <input type="text" name="brand_name" class="form-input" placeholder="ex: Cafenea Centru">
+            <input type="text" name="brand_name" class="form-input" placeholder="ex: Cafenea Centru" value="{{ prefill.brand_name|default:'' }}">
           </div>
           <div class="form-group" style="grid-column:span 2;">
             <label class="form-label">Adresa sediu *</label>
-            <input type="text" name="company_address" id="m-address" class="form-input" placeholder="Adresa completă sediu social" required>
+            <input type="text" name="company_address" id="m-address" class="form-input" placeholder="Adresa completă sediu social" required value="{{ prefill.company_address|default:'' }}">
           </div>
           <div class="form-group">
             <label class="form-label">Email *</label>
-            <input type="email" name="company_email" class="form-input" placeholder="email@firma.ro" required>
+            <input type="email" name="company_email" class="form-input" placeholder="email@firma.ro" required value="{{ prefill.company_email|default:'' }}">
           </div>
           <div class="form-group">
             <label class="form-label">Telefon *</label>
-            <input type="text" name="company_phone" class="form-input" placeholder="07xx xxx xxx" required>
+            <input type="text" name="company_phone" class="form-input" placeholder="07xx xxx xxx" required value="{{ prefill.company_phone|default:'' }}">
           </div>
         </div>
       </div>
@@ -154,7 +162,7 @@
       <div style="margin-bottom:1.5rem;">
         <h4 style="font-size:0.9rem;color:var(--accent);margin-bottom:0.75rem;">📍 Adresa locație</h4>
         <div class="form-group">
-          <input type="text" name="venue_address" class="form-input" placeholder="Adresa completă a locației unde se difuzează muzica">
+          <input type="text" name="venue_address" class="form-input" placeholder="Adresa completă a locației unde se difuzează muzica" value="{{ prefill.venue_address|default:'' }}">
         </div>
       </div>
 
@@ -165,26 +173,26 @@
           <div class="form-group">
             <label class="form-label">Tip afacere *</label>
             <select name="business_type" class="form-input" required>
-              <option value="cafenea">Cafenea / Cofetărie</option>
-              <option value="restaurant">Restaurant / Pizzerie</option>
-              <option value="bar">Bar / Pub</option>
-              <option value="club">Club / Discotecă</option>
-              <option value="hotel">Hotel / Pensiune</option>
-              <option value="salon">Salon / Spa</option>
-              <option value="retail">Magazine / Retail</option>
-              <option value="birou">Birou / Coworking</option>
-              <option value="cabinet">Cabinet / Clinică</option>
-              <option value="gym">Gym / Fitness</option>
+              <option value="cafenea" {% if prefill.business_type == 'cafenea' %}selected{% endif %}>Cafenea / Cofetărie</option>
+              <option value="restaurant" {% if prefill.business_type == 'restaurant' %}selected{% endif %}>Restaurant / Pizzerie</option>
+              <option value="bar" {% if prefill.business_type == 'bar' %}selected{% endif %}>Bar / Pub</option>
+              <option value="club" {% if prefill.business_type == 'club' %}selected{% endif %}>Club / Discotecă</option>
+              <option value="hotel" {% if prefill.business_type == 'hotel' %}selected{% endif %}>Hotel / Pensiune</option>
+              <option value="salon" {% if prefill.business_type == 'salon' %}selected{% endif %}>Salon / Spa</option>
+              <option value="retail" {% if prefill.business_type == 'retail' %}selected{% endif %}>Magazine / Retail</option>
+              <option value="birou" {% if prefill.business_type == 'birou' %}selected{% endif %}>Birou / Coworking</option>
+              <option value="cabinet" {% if prefill.business_type == 'cabinet' %}selected{% endif %}>Cabinet / Clinică</option>
+              <option value="gym" {% if prefill.business_type == 'gym' %}selected{% endif %}>Gym / Fitness</option>
             </select>
           </div>
           <div class="form-group">
             <label class="form-label">Suprafață *</label>
             <select name="business_size" class="form-input" required>
-              <option value="< 100 mp">&lt; 100 mp</option>
-              <option value="101-250 mp">101-250 mp</option>
-              <option value="251-500 mp">251-500 mp</option>
-              <option value="501-1000 mp">501-1000 mp</option>
-              <option value="> 1000 mp">&gt; 1000 mp</option>
+              <option value="< 100 mp" {% if prefill.business_size == '< 100 mp' %}selected{% endif %}>&lt; 100 mp</option>
+              <option value="101-250 mp" {% if prefill.business_size == '101-250 mp' %}selected{% endif %}>101-250 mp</option>
+              <option value="251-500 mp" {% if prefill.business_size == '251-500 mp' %}selected{% endif %}>251-500 mp</option>
+              <option value="501-1000 mp" {% if prefill.business_size == '501-1000 mp' %}selected{% endif %}>501-1000 mp</option>
+              <option value="> 1000 mp" {% if prefill.business_size == '> 1000 mp' %}selected{% endif %}>&gt; 1000 mp</option>
             </select>
           </div>
         </div>
@@ -235,6 +243,11 @@
 document.getElementById('create-modal').addEventListener('click', function(e) {
   if (e.target === this) this.style.display = 'none';
 });
+
+// Auto-open the modal when arriving from a "Convert lead" redirect
+{% if prefill %}
+document.getElementById('create-modal').style.display = 'flex';
+{% endif %}
 
 // CUI Lookup for manual order
 document.getElementById('btn-m-lookup').addEventListener('click', function() {
