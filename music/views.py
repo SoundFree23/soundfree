@@ -994,8 +994,30 @@ def backend_leads(request):
     open_count = Lead.objects.exclude(status__in=['won', 'lost']).count()
     won_count = Lead.objects.filter(status='won').count()
 
+    leads_data = {
+        l.id: {
+            'company_name':    l.company_name,
+            'company_cui':     l.company_cui,
+            'company_reg':     l.company_reg,
+            'company_address': l.company_address,
+            'brand_name':      l.brand_name,
+            'venue_address':   l.venue_address,
+            'business_type':   l.business_type,
+            'business_size':   l.business_size,
+            'contact_person':  l.contact_person,
+            'contact_phone':   l.contact_phone,
+            'contact_email':   l.contact_email,
+            'status':          l.status,
+            'source':          l.source,
+            'notes':           l.notes,
+            'next_followup':   l.next_followup.strftime('%Y-%m-%d') if l.next_followup else '',
+            'assigned_to':     str(l.assigned_to_id) if l.assigned_to_id else '',
+        } for l in leads
+    }
+
     return render(request, 'backend/leads.html', {
         'leads': leads,
+        'leads_data': leads_data,
         'staff_users': User.objects.filter(is_staff=True).order_by('username'),
         'status_filter': status_filter,
         'user_filter': user_filter,
