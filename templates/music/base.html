@@ -280,6 +280,12 @@
       display: flex; align-items: center; transition: all 0.2s;
     }
     .fs-btn:hover { color: var(--text); }
+    .fs-btn.is-active { color: var(--accent); position: relative; }
+    .fs-btn.is-active::after {
+      content: ''; position: absolute; bottom: 0; left: 50%;
+      width: 4px; height: 4px; border-radius: 50%;
+      background: var(--accent); transform: translateX(-50%);
+    }
     .fs-btn.fs-play-btn {
       width: 64px; height: 64px;
       background: #fff; color: #000;
@@ -924,6 +930,9 @@ function colorizeGenreCards() {
       </div>
     </div>
     <div class="fs-btns">
+      <button class="fs-btn" id="fs-btn-shuffle" aria-label="Shuffle" title="Redare aleatorie">
+        <svg width="22" height="22" fill="currentColor" viewBox="0 0 24 24"><path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/></svg>
+      </button>
       <button class="fs-btn" id="fs-btn-prev"><svg width="28" height="28" fill="currentColor" viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg></button>
       <button class="fs-btn fs-play-btn" id="fs-btn-play">
         <svg id="fs-icon-play" width="32" height="32" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
@@ -1020,6 +1029,33 @@ let isPlaying = false;
 let hasSong = false;
 let guestSongsPlayed = 0;
 const GUEST_SONG_LIMIT = 3;
+
+// ── Shuffle state (persists across sessions) ──
+let isShuffle = (function(){
+  try { return localStorage.getItem('sf_shuffle') === '1'; } catch(_) { return false; }
+})();
+function setShuffle(on) {
+  isShuffle = !!on;
+  try { localStorage.setItem('sf_shuffle', isShuffle ? '1' : '0'); } catch(_) {}
+  const btn = document.getElementById('fs-btn-shuffle');
+  if (btn) btn.classList.toggle('is-active', isShuffle);
+}
+function getNextIdx() {
+  if (!playlist.length) return 0;
+  if (isShuffle && playlist.length > 1) {
+    let n; do { n = Math.floor(Math.random() * playlist.length); } while (n === currentIdx);
+    return n;
+  }
+  return (currentIdx + 1) % playlist.length;
+}
+function getPrevIdx() {
+  if (!playlist.length) return 0;
+  if (isShuffle && playlist.length > 1) {
+    let n; do { n = Math.floor(Math.random() * playlist.length); } while (n === currentIdx);
+    return n;
+  }
+  return (currentIdx - 1 + playlist.length) % playlist.length;
+}
 
 function fmtTime(s) {
   s = Math.floor(s || 0);
@@ -1129,16 +1165,19 @@ miniCover.addEventListener('click', (e) => { e.stopPropagation(); if (hasSong) o
 miniPlayBtn.addEventListener('click', (e) => { e.stopPropagation(); togglePlay(); });
 document.getElementById('mini-prev-btn').addEventListener('click', (e) => {
   e.stopPropagation();
-  if (playlist.length) playSong((currentIdx - 1 + playlist.length) % playlist.length);
+  if (playlist.length) playSong(getPrevIdx());
 });
 document.getElementById('mini-next-btn').addEventListener('click', (e) => {
   e.stopPropagation();
-  if (playlist.length) playSong((currentIdx + 1) % playlist.length);
+  if (playlist.length) playSong(getNextIdx());
 });
 document.getElementById('fs-close-btn').addEventListener('click', closeFullscreen);
 fsBtnPlay.addEventListener('click', togglePlay);
-document.getElementById('fs-btn-next').addEventListener('click', () => { if (playlist.length) playSong((currentIdx + 1) % playlist.length); });
-document.getElementById('fs-btn-prev').addEventListener('click', () => { if (playlist.length) playSong((currentIdx - 1 + playlist.length) % playlist.length); });
+document.getElementById('fs-btn-next').addEventListener('click', () => { if (playlist.length) playSong(getNextIdx()); });
+document.getElementById('fs-btn-prev').addEventListener('click', () => { if (playlist.length) playSong(getPrevIdx()); });
+document.getElementById('fs-btn-shuffle').addEventListener('click', () => { setShuffle(!isShuffle); });
+// Initialise shuffle button visual state from persisted value
+setShuffle(isShuffle);
 
 audio.addEventListener('timeupdate', () => {
   if (!audio.duration) return;
@@ -1150,7 +1189,7 @@ audio.addEventListener('timeupdate', () => {
 });
 
 audio.addEventListener('ended', () => {
-  playSong((currentIdx + 1) % playlist.length);
+  if (playlist.length) playSong(getNextIdx());
 });
 
 function seekFromEvent(e, bar) {
@@ -1863,8 +1902,8 @@ document.addEventListener('click', (e) => {
     var actions = {
       play:           function() { if (audio.paused) { audio.play(); isPlaying = true; updatePlayBtn(); } },
       pause:          function() { if (!audio.paused) { audio.pause(); isPlaying = false; updatePlayBtn(); } },
-      previoustrack:  function() { if (playlist.length) playSong((currentIdx - 1 + playlist.length) % playlist.length); },
-      nexttrack:      function() { if (playlist.length) playSong((currentIdx + 1) % playlist.length); },
+      previoustrack:  function() { if (playlist.length) playSong(getPrevIdx()); },
+      nexttrack:      function() { if (playlist.length) playSong(getNextIdx()); },
       seekbackward:   function(d) { audio.currentTime = Math.max(0, audio.currentTime - (d.seekOffset || 10)); },
       seekforward:    function(d) { audio.currentTime = Math.min(audio.duration || 0, audio.currentTime + (d.seekOffset || 10)); },
       seekto:         function(d) { if (d.fastSeek && 'fastSeek' in audio) audio.fastSeek(d.seekTime); else audio.currentTime = d.seekTime; },
