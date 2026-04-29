@@ -51,6 +51,7 @@ TEMPLATES = [
                 'django.template.context_processors.media',
                 'music.context_processors.language_context',
                 'music.context_processors.radio_context',
+                'music.context_processors.install_prompt_context',
             ],
         },
     },

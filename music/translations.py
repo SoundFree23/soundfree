@@ -364,6 +364,10 @@ TRANSLATIONS = {
         'pwa_install_android_step2': 'Confirmă instalarea în fereastra apărută.',
         'pwa_install_android_step3': 'Aplicația apare pe ecranul de pornire — deschide-o ca pe orice altă aplicație.',
         'pwa_install_close': 'Am înțeles',
+        'pwa_post_login_title': 'Bine ai venit!',
+        'pwa_post_login_desc': 'Instalează aplicația SoundFree pe telefon și ascultă fără întrerupere — funcționează ca o aplicație nativă, cu controale pe lockscreen.',
+        'pwa_post_login_yes': 'Instalează acum',
+        'pwa_post_login_later': 'Mai târziu',
 
         # AUTH
         'login_title': 'Intră în cont',
@@ -824,6 +828,10 @@ TRANSLATIONS = {
         'pwa_install_android_step2': 'Confirm in the dialog that appears.',
         'pwa_install_android_step3': 'The app will appear on your home screen — open it like any other app.',
         'pwa_install_close': 'Got it',
+        'pwa_post_login_title': 'Welcome!',
+        'pwa_post_login_desc': 'Install the SoundFree app on your device and listen without interruption — works like a native app, with lockscreen controls.',
+        'pwa_post_login_yes': 'Install now',
+        'pwa_post_login_later': 'Maybe later',
 
         # AUTH
         'login_title': 'Sign in',

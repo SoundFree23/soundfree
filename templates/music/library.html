@@ -160,6 +160,17 @@
   document.addEventListener('pwa-installable', refreshUI);
   window.addEventListener('appinstalled', refreshUI);
   refreshUI();
+
+  // If we landed here from the post-login modal with ?pwa=1, auto-open the right install path
+  if (new URLSearchParams(location.search).get('pwa') === '1' && !isStandalone) {
+    setTimeout(function(){
+      if (window.deferredPWAInstall) {
+        window.triggerPWAInstall();
+      } else {
+        showInstructions(isIOS);
+      }
+    }, 400);
+  }
 })();
 </script>
 

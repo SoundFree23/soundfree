@@ -21,3 +21,11 @@ def radio_context(request):
         'radio_slot_emoji': slot['emoji'],
         'radio_slot_name': get_slot_display(slot, lang),
     }
+
+
+def install_prompt_context(request):
+    """Pop the post-login flag so the install modal fires exactly once after login."""
+    if not hasattr(request, 'session'):
+        return {'offer_install_prompt': False}
+    show = bool(request.session.pop('offer_install_prompt', False))
+    return {'offer_install_prompt': show}

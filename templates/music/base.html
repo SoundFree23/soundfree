@@ -961,7 +961,69 @@ function colorizeGenreCards() {
   </div>
 </div>
 
-<audio id="audio-el" preload="metadata"></audio>
+<audio id="audio-el" preload="metadata" playsinline webkit-playsinline></audio>
+
+<!-- POST-LOGIN INSTALL PROMPT (rendered server-side only on the request right after login) -->
+{% if offer_install_prompt %}
+<div id="post-login-install-modal" style="position:fixed;inset:0;z-index:700;background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:1rem;">
+  <div style="background:linear-gradient(135deg,rgba(29,185,84,0.18),rgba(124,58,237,0.18)),var(--bg2);border:1px solid rgba(29,185,84,0.5);border-radius:18px;padding:1.75rem 1.5rem;width:100%;max-width:380px;text-align:center;">
+    <div style="width:72px;height:72px;border-radius:18px;background:linear-gradient(135deg,#1db954,#0d8838);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="#fff"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+    </div>
+    <h2 style="margin:0 0 0.5rem;font-size:1.2rem;font-weight:800;">{{ t.pwa_post_login_title }}</h2>
+    <p style="margin:0 0 1.25rem;color:var(--text2);font-size:0.9rem;line-height:1.5;">{{ t.pwa_post_login_desc }}</p>
+    <button id="post-login-install-yes" class="btn-primary" style="width:100%;padding:0.75rem;font-size:0.95rem;margin-bottom:0.6rem;">{{ t.pwa_post_login_yes }}</button>
+    <button id="post-login-install-later" style="width:100%;padding:0.6rem;font-size:0.85rem;background:none;border:none;color:var(--text2);cursor:pointer;font-family:inherit;">{{ t.pwa_post_login_later }}</button>
+  </div>
+</div>
+<script>
+(function(){
+  var modal = document.getElementById('post-login-install-modal');
+  if (!modal) return;
+  // Don't show if already running as installed PWA
+  var standalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true;
+  if (standalone) { modal.remove(); return; }
+  // Don't show if user dismissed within last 30 days
+  try {
+    var dismissed = localStorage.getItem('sf_install_dismissed_at');
+    if (dismissed && (Date.now() - parseInt(dismissed, 10)) < 30 * 24 * 60 * 60 * 1000) {
+      modal.remove();
+      return;
+    }
+  } catch (_) {}
+
+  function close() { modal.style.display = 'none'; }
+  document.getElementById('post-login-install-later').addEventListener('click', function(){
+    try { localStorage.setItem('sf_install_dismissed_at', String(Date.now())); } catch (_) {}
+    close();
+  });
+  document.getElementById('post-login-install-yes').addEventListener('click', function(){
+    close();
+    // Android / desktop Chrome: native prompt was deferred by our beforeinstallprompt handler
+    if (window.deferredPWAInstall) {
+      window.triggerPWAInstall();
+      return;
+    }
+    // iOS: no native prompt — send the user to /library/ where the share-sheet instructions modal lives
+    var ua = (navigator.userAgent || '').toLowerCase();
+    var isIOS = /iphone|ipad|ipod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    if (isIOS) {
+      window.location.href = '/library/?pwa=1';
+      return;
+    }
+    // Browser doesn't (yet) support beforeinstallprompt — fall back to library page too
+    window.location.href = '/library/';
+  });
+})();
+</script>
+{% endif %}
+
+<!-- iOS auto-resume fallback: a small pill that appears when the OS blocks programmatic resume.
+     One tap and we play() inside a real user gesture — guaranteed to work even on iOS Safari. -->
+<button id="resume-pill" style="display:none;position:fixed;left:50%;bottom:96px;transform:translateX(-50%);z-index:550;background:#1db954;color:#fff;border:none;border-radius:999px;padding:0.7rem 1.3rem;font-family:inherit;font-size:0.92rem;font-weight:700;box-shadow:0 6px 20px rgba(29,185,84,0.45);cursor:pointer;display:none;align-items:center;gap:0.55rem;">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+  <span>Reia muzica</span>
+</button>
 
 <script>
 const isAuthenticated = {{ user.is_authenticated|yesno:"true,false" }};
@@ -1119,30 +1181,72 @@ function togglePlay() {
 
 // ── Auto-resume after external interruption (phone call, alarm, etc.) ──
 // userPaused = true only when the user explicitly hits pause. System-level
-// pauses (call coming in, OS muting audio) leave it false, so the moment the
-// page regains visibility/focus we can attempt to resume playback silently.
+// pauses (incoming call, alarm, OS audio-focus loss) leave it false, so
+// when the page regains visibility/focus we attempt to resume.
+//
+// iOS Safari is the hard case: WebKit refuses programmatic play() after an
+// interruption unless it gets a fresh user gesture. We try a handful of
+// times with increasing delay, and if none succeed we surface a small
+// "Reia muzica" pill — a single tap on it counts as a gesture and resumes.
 let userPaused = false;
-let resumeRetryTimer = null;
-function tryResumePlayback() {
-  if (userPaused) return;
-  if (!hasSong) return;
-  if (!audio.paused) return;
-  audio.play().then(() => {
+const resumePill = document.getElementById('resume-pill');
+
+function showResumePill() {
+  if (resumePill) resumePill.style.display = 'inline-flex';
+}
+function hideResumePill() {
+  if (resumePill) resumePill.style.display = 'none';
+}
+
+function attemptPlay() {
+  return audio.play().then(() => {
     isPlaying = true;
+    userPaused = false;
     updatePlayBtn();
-    if (resumeRetryTimer) { clearTimeout(resumeRetryTimer); resumeRetryTimer = null; }
-  }).catch(() => {
-    // Browser may need a tiny grace period after an interruption — retry shortly
-    if (!resumeRetryTimer) {
-      resumeRetryTimer = setTimeout(() => { resumeRetryTimer = null; tryResumePlayback(); }, 700);
-    }
+    hideResumePill();
+    return true;
+  }).catch(() => false);
+}
+
+let resumeInFlight = false;
+async function tryResumePlayback() {
+  if (resumeInFlight) return;
+  if (userPaused || !hasSong || !audio.paused) return;
+  resumeInFlight = true;
+  // iOS sometimes lets play() through at random points after an interruption —
+  // try a few times with backoff before falling back to the user-tap pill.
+  const delays = [0, 250, 800, 1800, 3500];
+  for (const d of delays) {
+    if (d) await new Promise(r => setTimeout(r, d));
+    if (userPaused || !audio.paused) { resumeInFlight = false; hideResumePill(); return; }
+    if (await attemptPlay()) { resumeInFlight = false; return; }
+  }
+  resumeInFlight = false;
+  // All retries blocked by browser → show the resume pill so user can tap once.
+  if (!userPaused && audio.paused && hasSong) showResumePill();
+}
+
+if (resumePill) {
+  resumePill.addEventListener('click', () => {
+    hideResumePill();
+    attemptPlay();
   });
 }
+
 document.addEventListener('visibilitychange', () => { if (!document.hidden) tryResumePlayback(); });
 window.addEventListener('focus',   tryResumePlayback);
-window.addEventListener('pageshow', tryResumePlayback);
-// Audio's own canplay fires when the source is ready again after a stall — also a resume opportunity
-audio.addEventListener('canplay',  tryResumePlayback);
+window.addEventListener('pageshow', (e) => {
+  // bfcache restore on iOS — the audio element may need a reload before play() succeeds
+  if (e.persisted && hasSong && !userPaused) {
+    const t = audio.currentTime;
+    try { audio.load(); audio.currentTime = t; } catch (_) {}
+  }
+  tryResumePlayback();
+});
+// canplay fires when the source is ready again after a stall — another resume opportunity
+audio.addEventListener('canplay', tryResumePlayback);
+// If the audio paused itself without us asking, that's an interruption — try to recover
+audio.addEventListener('pause', () => { if (!userPaused && hasSong) setTimeout(tryResumePlayback, 100); });
 
 function highlightActiveCard() {
   document.querySelectorAll('.song-card[data-id], .song-row[data-id]').forEach(c => {

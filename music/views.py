@@ -38,12 +38,14 @@ def user_login(request):
             # Staff users bypass subscription check
             if user.is_staff:
                 login(request, user)
+                request.session['offer_install_prompt'] = True
                 next_url = request.GET.get('next', '/')
                 return redirect(next_url)
             # Check subscription period
             profile = get_or_create_profile(user)
             if profile.is_subscription_active():
                 login(request, user)
+                request.session['offer_install_prompt'] = True
                 next_url = request.GET.get('next', '/')
                 return redirect(next_url)
             else:
