@@ -5,6 +5,20 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
   <title>{% block title %}SoundFree.ro — Muzică Royalty-Free pentru Afaceri{% endblock %}</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#121212">
+  <meta name="application-name" content="SoundFree">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="SoundFree">
+  <link rel="apple-touch-icon" href="{% static 'pwa/apple-touch-icon.png' %}">
+  <link rel="icon" type="image/png" sizes="32x32" href="{% static 'pwa/favicon-32.png' %}">
+  <link rel="icon" type="image/png" sizes="16x16" href="{% static 'pwa/favicon-16.png' %}">
+  <link rel="icon" type="image/png" sizes="192x192" href="{% static 'pwa/icon-192.png' %}">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
@@ -753,7 +767,12 @@
         {{ user.username }}
         <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M7 10l5 5 5-5z"/></svg>
       </button>
-      <div id="user-menu-dropdown" style="display:none;position:absolute;right:0;top:calc(100% + 6px);background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:0.4rem;min-width:140px;z-index:200;box-shadow:0 8px 24px rgba(0,0,0,0.4);">
+      <div id="user-menu-dropdown" style="display:none;position:absolute;right:0;top:calc(100% + 6px);background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:0.4rem;min-width:170px;z-index:200;box-shadow:0 8px 24px rgba(0,0,0,0.4);">
+        <a href="{% url 'music:library' %}#pwa-install-card" id="header-pwa-install-link" style="display:none;align-items:center;gap:0.5rem;color:#1db954;text-decoration:none;font-size:0.82rem;padding:0.5rem 0.75rem;border-radius:6px;transition:background 0.15s;"
+           onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='none'">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+          {{ t.pwa_install_btn }}
+        </a>
         <a href="{% url 'music:user_logout' %}" style="display:flex;align-items:center;gap:0.5rem;color:var(--text);text-decoration:none;font-size:0.82rem;padding:0.5rem 0.75rem;border-radius:6px;transition:background 0.15s;"
            onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='none'">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
@@ -1758,6 +1777,158 @@ document.addEventListener('click', (e) => {
   const radioBtn = e.target.closest('[id^="radio-start-btn"]');
   if (radioTab || radioBtn) { e.preventDefault(); startRadio(); }
 });
+</script>
+
+<!-- ────────── PWA + MEDIA SESSION ────────── -->
+<script>
+(function(){
+  // ── 1. Register service worker ──
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+      navigator.serviceWorker.register('/service-worker.js', { scope: '/' })
+        .then(function(reg) {
+          // If a new SW is waiting, prompt activation immediately
+          if (reg.waiting) reg.waiting.postMessage('SKIP_WAITING');
+          reg.addEventListener('updatefound', function() {
+            var nw = reg.installing;
+            if (!nw) return;
+            nw.addEventListener('statechange', function() {
+              if (nw.state === 'installed' && navigator.serviceWorker.controller) {
+                nw.postMessage('SKIP_WAITING');
+              }
+            });
+          });
+        })
+        .catch(function(){ /* SW unsupported or blocked */ });
+      // When a new SW takes control, reload once so users get fresh assets
+      var refreshing = false;
+      navigator.serviceWorker.addEventListener('controllerchange', function() {
+        if (refreshing) return;
+        refreshing = true;
+        // Don't reload if audio is playing — would cut the song. Reload silently next nav.
+        if (typeof audio !== 'undefined' && !audio.paused) return;
+        window.location.reload();
+      });
+    });
+  }
+
+  // ── 2. Media Session API: lockscreen controls + notification ──
+  if ('mediaSession' in navigator && typeof audio !== 'undefined') {
+    function buildArtwork(coverUrl) {
+      var fallback = '/static/pwa/icon-512.png';
+      var src = coverUrl || fallback;
+      // If the cover is a relative path starting with /media, browser handles it
+      return [
+        { src: src, sizes: '96x96',   type: 'image/png' },
+        { src: src, sizes: '192x192', type: 'image/png' },
+        { src: src, sizes: '512x512', type: 'image/png' }
+      ];
+    }
+
+    function syncMediaSession() {
+      if (!playlist || !playlist.length || currentIdx == null) return;
+      var s = playlist[currentIdx];
+      if (!s) return;
+      try {
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title:  s.title || 'SoundFree',
+          artist: 'SoundFree',
+          album:  s.genre || 'SoundFree.ro',
+          artwork: buildArtwork(s.cover)
+        });
+      } catch (_) { /* older browsers */ }
+    }
+
+    // Hook into existing loadSong so metadata stays in sync
+    if (typeof loadSong === 'function') {
+      var __origLoad = loadSong;
+      window.loadSong = function(idx) {
+        __origLoad(idx);
+        syncMediaSession();
+      };
+    }
+
+    // Wire transport actions to the existing player API
+    var actions = {
+      play:           function() { if (audio.paused) { audio.play(); isPlaying = true; updatePlayBtn(); } },
+      pause:          function() { if (!audio.paused) { audio.pause(); isPlaying = false; updatePlayBtn(); } },
+      previoustrack:  function() { if (playlist.length) playSong((currentIdx - 1 + playlist.length) % playlist.length); },
+      nexttrack:      function() { if (playlist.length) playSong((currentIdx + 1) % playlist.length); },
+      seekbackward:   function(d) { audio.currentTime = Math.max(0, audio.currentTime - (d.seekOffset || 10)); },
+      seekforward:    function(d) { audio.currentTime = Math.min(audio.duration || 0, audio.currentTime + (d.seekOffset || 10)); },
+      seekto:         function(d) { if (d.fastSeek && 'fastSeek' in audio) audio.fastSeek(d.seekTime); else audio.currentTime = d.seekTime; },
+      stop:           function() { audio.pause(); audio.currentTime = 0; isPlaying = false; updatePlayBtn(); }
+    };
+    Object.keys(actions).forEach(function(k) {
+      try { navigator.mediaSession.setActionHandler(k, actions[k]); } catch (_) {}
+    });
+
+    // Position state for scrubbing on the lockscreen
+    function updatePosition() {
+      if (!audio.duration || isNaN(audio.duration)) return;
+      try {
+        navigator.mediaSession.setPositionState({
+          duration: audio.duration,
+          playbackRate: audio.playbackRate || 1,
+          position: audio.currentTime || 0
+        });
+      } catch (_) {}
+    }
+    audio.addEventListener('loadedmetadata', updatePosition);
+    audio.addEventListener('timeupdate', function() {
+      if ((audio.currentTime | 0) % 5 === 0) updatePosition();
+    });
+    audio.addEventListener('play',  function(){ navigator.mediaSession.playbackState = 'playing'; });
+    audio.addEventListener('pause', function(){ navigator.mediaSession.playbackState = 'paused'; });
+  }
+
+  // ── 3. Install prompt: capture event so we can trigger from custom UI ──
+  window.deferredPWAInstall = null;
+  window.addEventListener('beforeinstallprompt', function(e) {
+    e.preventDefault();
+    window.deferredPWAInstall = e;
+    document.body.classList.add('pwa-installable');
+    document.dispatchEvent(new CustomEvent('pwa-installable'));
+  });
+  window.addEventListener('appinstalled', function() {
+    window.deferredPWAInstall = null;
+    document.body.classList.remove('pwa-installable');
+    document.body.classList.add('pwa-installed');
+    try { localStorage.setItem('sf_pwa_installed', '1'); } catch (_) {}
+  });
+  // Detect already-installed (standalone) state
+  if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+    document.body.classList.add('pwa-standalone', 'pwa-installed');
+  }
+
+  // Helper exposed globally so the install button on any page can call it
+  window.triggerPWAInstall = function() {
+    var d = window.deferredPWAInstall;
+    if (d) {
+      d.prompt();
+      d.userChoice.then(function(){ window.deferredPWAInstall = null; });
+      return true;
+    }
+    return false; // fallback — caller shows manual instructions
+  };
+
+  // ── 4. Header dropdown install link visibility ──
+  function refreshHeaderInstallLink() {
+    var link = document.getElementById('header-pwa-install-link');
+    if (!link) return;
+    var standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    var ua = (navigator.userAgent || '').toLowerCase();
+    var isIOS = /iphone|ipad|ipod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    if (standalone) { link.style.display = 'none'; return; }
+    // Show link if installable (Android/desktop) or iOS (always show — manual install)
+    link.style.display = (window.deferredPWAInstall || isIOS) ? 'flex' : 'none';
+  }
+  document.addEventListener('pwa-installable', refreshHeaderInstallLink);
+  window.addEventListener('appinstalled', refreshHeaderInstallLink);
+  document.addEventListener('DOMContentLoaded', refreshHeaderInstallLink);
+  // Also refresh after SPA navigation re-renders <main> (header itself doesn't change but state may)
+  setTimeout(refreshHeaderInstallLink, 1500);
+})();
 </script>
 
 {% block extra_js %}{% endblock %}

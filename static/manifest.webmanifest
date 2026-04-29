@@ -1,0 +1,64 @@
+{
+  "name": "SoundFree — Muzică pentru Afaceri",
+  "short_name": "SoundFree",
+  "description": "Muzică royalty-free pentru afacerea ta. Radio non-stop și catalog complet, ascultă oriunde, oricând.",
+  "start_url": "/?utm_source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#121212",
+  "theme_color": "#121212",
+  "lang": "ro",
+  "dir": "ltr",
+  "categories": ["music", "entertainment", "lifestyle"],
+  "icons": [
+    {
+      "src": "/static/pwa/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/pwa/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/pwa/icon-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/static/pwa/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Radio",
+      "short_name": "Radio",
+      "description": "Ascultă radio non-stop",
+      "url": "/?radio=1&utm_source=pwa",
+      "icons": [{ "src": "/static/pwa/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Biblioteca mea",
+      "short_name": "Biblioteca",
+      "description": "Playlists și piese favorite",
+      "url": "/library/?utm_source=pwa",
+      "icons": [{ "src": "/static/pwa/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Caută muzică",
+      "short_name": "Caută",
+      "description": "Răsfoiește catalogul",
+      "url": "/browse/?utm_source=pwa",
+      "icons": [{ "src": "/static/pwa/icon-192.png", "sizes": "192x192" }]
+    }
+  ],
+  "prefer_related_applications": false
+}

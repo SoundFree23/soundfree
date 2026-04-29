@@ -350,6 +350,21 @@ TRANSLATIONS = {
         'lib_remove_from_playlist': 'Scoate din playlist',
         'lib_browse_songs': 'Caută melodii',
 
+        # PWA — INSTALL APP
+        'pwa_install_title': 'Instalează aplicația SoundFree',
+        'pwa_install_desc': 'Adaugă SoundFree pe ecranul tău și ascultă fără întrerupere — funcționează pe orice telefon sau tabletă.',
+        'pwa_install_btn': 'Instalează aplicația',
+        'pwa_installed_label': 'Aplicația este instalată ✓',
+        'pwa_install_ios_title': 'Instalare pe iPhone / iPad',
+        'pwa_install_ios_step1': 'Apasă butonul „Distribuie" (Share) din Safari.',
+        'pwa_install_ios_step2': 'Selectează „Adaugă pe ecranul de pornire".',
+        'pwa_install_ios_step3': 'Confirmă cu „Adaugă". Aplicația apare ca pictogramă pe ecran.',
+        'pwa_install_android_title': 'Instalare pe Android',
+        'pwa_install_android_step1': 'Apasă butonul „Instalează aplicația" de mai sus.',
+        'pwa_install_android_step2': 'Confirmă instalarea în fereastra apărută.',
+        'pwa_install_android_step3': 'Aplicația apare pe ecranul de pornire — deschide-o ca pe orice altă aplicație.',
+        'pwa_install_close': 'Am înțeles',
+
         # AUTH
         'login_title': 'Intră în cont',
         'login_username': 'Nume utilizator',
@@ -794,6 +809,21 @@ TRANSLATIONS = {
         'lib_add_to_playlist': 'Add to playlist',
         'lib_remove_from_playlist': 'Remove from playlist',
         'lib_browse_songs': 'Browse songs',
+
+        # PWA — INSTALL APP
+        'pwa_install_title': 'Install the SoundFree app',
+        'pwa_install_desc': 'Add SoundFree to your device and listen without interruption — works on any phone or tablet.',
+        'pwa_install_btn': 'Install app',
+        'pwa_installed_label': 'App installed ✓',
+        'pwa_install_ios_title': 'Install on iPhone / iPad',
+        'pwa_install_ios_step1': 'Tap the "Share" button in Safari.',
+        'pwa_install_ios_step2': 'Choose "Add to Home Screen".',
+        'pwa_install_ios_step3': 'Confirm with "Add". The app will appear on your home screen.',
+        'pwa_install_android_title': 'Install on Android',
+        'pwa_install_android_step1': 'Tap the "Install app" button above.',
+        'pwa_install_android_step2': 'Confirm in the dialog that appears.',
+        'pwa_install_android_step3': 'The app will appear on your home screen — open it like any other app.',
+        'pwa_install_close': 'Got it',
 
         # AUTH
         'login_title': 'Sign in',

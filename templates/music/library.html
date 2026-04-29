@@ -9,6 +9,27 @@
   <h1 style="font-size:1.5rem;font-weight:800;">{{ t.lib_your_library }}</h1>
 </div>
 
+<!-- INSTALL APP CARD (hidden when already installed) -->
+<div id="pwa-install-card" style="display:none;padding:0 1rem 0.85rem;">
+  <div style="background:linear-gradient(135deg,#1db95422,#7c3aed22);border:1px solid #1db95455;border-radius:14px;padding:1rem 1.1rem;display:flex;align-items:center;gap:0.85rem;">
+    <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,#1db954,#0d8838);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="#fff"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+    </div>
+    <div style="flex:1;min-width:0;">
+      <div style="font-weight:700;font-size:0.95rem;line-height:1.2;">{{ t.pwa_install_title }}</div>
+      <div style="font-size:0.8rem;color:var(--text2);margin-top:0.2rem;line-height:1.35;">{{ t.pwa_install_desc }}</div>
+    </div>
+    <button id="pwa-install-btn" class="btn-primary" style="flex-shrink:0;padding:0.55rem 1rem;font-size:0.82rem;">{{ t.pwa_install_btn }}</button>
+  </div>
+</div>
+
+<!-- INSTALLED INDICATOR (shown when running as standalone) -->
+<div id="pwa-installed-indicator" style="display:none;padding:0 1rem 0.85rem;">
+  <div style="background:#1db95422;border:1px solid #1db95455;border-radius:10px;padding:0.55rem 0.9rem;font-size:0.82rem;color:#1db954;text-align:center;">
+    {{ t.pwa_installed_label }}
+  </div>
+</div>
+
 <!-- LIKED SONGS CARD -->
 <div style="padding:0 1rem 0.75rem;">
   <a href="{% url 'music:favorites' %}" class="fav-card" id="lib-fav-card">
@@ -46,6 +67,24 @@
   </div>
 </div>
 
+<!-- iOS / FALLBACK INSTALL INSTRUCTIONS MODAL -->
+<div id="pwa-ios-modal" style="display:none;position:fixed;inset:0;z-index:600;background:rgba(0,0,0,0.8);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:1rem;">
+  <div style="background:var(--bg2);border-radius:16px;padding:1.5rem;width:100%;max-width:380px;max-height:90vh;overflow-y:auto;">
+    <h3 id="pwa-ios-modal-title" style="font-size:1.05rem;font-weight:700;margin:0 0 0.85rem;">{{ t.pwa_install_ios_title }}</h3>
+    <ol id="pwa-ios-steps" style="margin:0 0 1rem;padding-left:1.25rem;color:var(--text2);font-size:0.9rem;line-height:1.55;">
+      <li data-step="ios-1">{{ t.pwa_install_ios_step1 }}</li>
+      <li data-step="ios-2">{{ t.pwa_install_ios_step2 }}</li>
+      <li data-step="ios-3">{{ t.pwa_install_ios_step3 }}</li>
+    </ol>
+    <ol id="pwa-android-steps" style="display:none;margin:0 0 1rem;padding-left:1.25rem;color:var(--text2);font-size:0.9rem;line-height:1.55;">
+      <li>{{ t.pwa_install_android_step1 }}</li>
+      <li>{{ t.pwa_install_android_step2 }}</li>
+      <li>{{ t.pwa_install_android_step3 }}</li>
+    </ol>
+    <button id="pwa-ios-close" class="btn-primary" style="width:100%;padding:0.65rem;font-size:0.9rem;">{{ t.pwa_install_close }}</button>
+  </div>
+</div>
+
 <!-- CREATE PLAYLIST MODAL -->
 <div id="create-playlist-modal" style="display:none;position:fixed;inset:0;z-index:400;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);align-items:center;justify-content:center;">
   <div style="background:var(--bg2);border-radius:12px;padding:1.5rem;width:90%;max-width:340px;margin:auto;">
@@ -60,5 +99,68 @@
 </div>
 
 <div style="height:2rem;"></div>
+
+<script>
+(function(){
+  var card        = document.getElementById('pwa-install-card');
+  var btn         = document.getElementById('pwa-install-btn');
+  var installed   = document.getElementById('pwa-installed-indicator');
+  var modal       = document.getElementById('pwa-ios-modal');
+  var modalTitle  = document.getElementById('pwa-ios-modal-title');
+  var iosSteps    = document.getElementById('pwa-ios-steps');
+  var androidSteps= document.getElementById('pwa-android-steps');
+  var closeBtn    = document.getElementById('pwa-ios-close');
+  if (!card || !btn) return;
+
+  var isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  var ua = (navigator.userAgent || '').toLowerCase();
+  var isIOS = /iphone|ipad|ipod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+  function refreshUI() {
+    if (isStandalone) {
+      card.style.display = 'none';
+      if (installed) installed.style.display = 'block';
+      return;
+    }
+    // Show card if either: a deferred prompt is captured (Android/desktop Chrome)
+    // OR it's iOS (we can't detect installable on iOS, so we always offer manual instructions)
+    var canPrompt = !!window.deferredPWAInstall;
+    if (canPrompt || isIOS) {
+      card.style.display = 'block';
+      if (installed) installed.style.display = 'none';
+    } else {
+      // No prompt yet — show card anyway with fallback instructions
+      card.style.display = 'block';
+    }
+  }
+
+  function showInstructions(forIOS) {
+    modalTitle.textContent = forIOS
+      ? '{{ t.pwa_install_ios_title|escapejs }}'
+      : '{{ t.pwa_install_android_title|escapejs }}';
+    iosSteps.style.display     = forIOS ? '' : 'none';
+    androidSteps.style.display = forIOS ? 'none' : '';
+    modal.style.display = 'flex';
+  }
+
+  btn.addEventListener('click', function(){
+    if (window.deferredPWAInstall) {
+      window.triggerPWAInstall();
+    } else if (isIOS) {
+      showInstructions(true);
+    } else {
+      // Browser doesn't support beforeinstallprompt yet (or already dismissed)
+      showInstructions(false);
+    }
+  });
+
+  if (closeBtn) closeBtn.addEventListener('click', function(){ modal.style.display = 'none'; });
+  if (modal) modal.addEventListener('click', function(e){ if (e.target === modal) modal.style.display = 'none'; });
+
+  document.addEventListener('pwa-installable', refreshUI);
+  window.addEventListener('appinstalled', refreshUI);
+  refreshUI();
+})();
+</script>
 
 {% endblock %}
