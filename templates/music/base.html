@@ -1096,6 +1096,7 @@ function playSong(idx) {
   loadSong(idx);
   audio.play().catch(() => {});
   isPlaying = true;
+  userPaused = false;
   if (!isAuthenticated) guestSongsPlayed++;
   updatePlayBtn();
   highlightActiveCard();
@@ -1111,10 +1112,37 @@ function updatePlayBtn() {
 function togglePlay() {
   if (!playlist.length) return;
   if (!hasSong) { playSong(0); return; }
-  if (isPlaying) { audio.pause(); isPlaying = false; }
-  else { audio.play(); isPlaying = true; }
+  if (isPlaying) { audio.pause(); isPlaying = false; userPaused = true; }
+  else { audio.play(); isPlaying = true; userPaused = false; }
   updatePlayBtn();
 }
+
+// ── Auto-resume after external interruption (phone call, alarm, etc.) ──
+// userPaused = true only when the user explicitly hits pause. System-level
+// pauses (call coming in, OS muting audio) leave it false, so the moment the
+// page regains visibility/focus we can attempt to resume playback silently.
+let userPaused = false;
+let resumeRetryTimer = null;
+function tryResumePlayback() {
+  if (userPaused) return;
+  if (!hasSong) return;
+  if (!audio.paused) return;
+  audio.play().then(() => {
+    isPlaying = true;
+    updatePlayBtn();
+    if (resumeRetryTimer) { clearTimeout(resumeRetryTimer); resumeRetryTimer = null; }
+  }).catch(() => {
+    // Browser may need a tiny grace period after an interruption — retry shortly
+    if (!resumeRetryTimer) {
+      resumeRetryTimer = setTimeout(() => { resumeRetryTimer = null; tryResumePlayback(); }, 700);
+    }
+  });
+}
+document.addEventListener('visibilitychange', () => { if (!document.hidden) tryResumePlayback(); });
+window.addEventListener('focus',   tryResumePlayback);
+window.addEventListener('pageshow', tryResumePlayback);
+// Audio's own canplay fires when the source is ready again after a stall — also a resume opportunity
+audio.addEventListener('canplay',  tryResumePlayback);
 
 function highlightActiveCard() {
   document.querySelectorAll('.song-card[data-id], .song-row[data-id]').forEach(c => {
@@ -1900,14 +1928,14 @@ document.addEventListener('click', (e) => {
 
     // Wire transport actions to the existing player API
     var actions = {
-      play:           function() { if (audio.paused) { audio.play(); isPlaying = true; updatePlayBtn(); } },
-      pause:          function() { if (!audio.paused) { audio.pause(); isPlaying = false; updatePlayBtn(); } },
+      play:           function() { if (audio.paused) { audio.play(); isPlaying = true; userPaused = false; updatePlayBtn(); } },
+      pause:          function() { if (!audio.paused) { audio.pause(); isPlaying = false; userPaused = true; updatePlayBtn(); } },
       previoustrack:  function() { if (playlist.length) playSong(getPrevIdx()); },
       nexttrack:      function() { if (playlist.length) playSong(getNextIdx()); },
       seekbackward:   function(d) { audio.currentTime = Math.max(0, audio.currentTime - (d.seekOffset || 10)); },
       seekforward:    function(d) { audio.currentTime = Math.min(audio.duration || 0, audio.currentTime + (d.seekOffset || 10)); },
       seekto:         function(d) { if (d.fastSeek && 'fastSeek' in audio) audio.fastSeek(d.seekTime); else audio.currentTime = d.seekTime; },
-      stop:           function() { audio.pause(); audio.currentTime = 0; isPlaying = false; updatePlayBtn(); }
+      stop:           function() { audio.pause(); audio.currentTime = 0; isPlaying = false; userPaused = true; updatePlayBtn(); }
     };
     Object.keys(actions).forEach(function(k) {
       try { navigator.mediaSession.setActionHandler(k, actions[k]); } catch (_) {}
